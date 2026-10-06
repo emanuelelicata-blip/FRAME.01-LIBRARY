@@ -348,7 +348,7 @@ S.page = 'home'; S.area = ''; S.strum = ''; S.favOnly = false;
 const HTTP = location.protocol === 'http:' && !window.__ONLINE;
 async function api(fn, body){
   try { const r = await fetch('/api/' + fn, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-F01': '1' }, body: JSON.stringify(body || {}) }); return await r.json(); }
-  catch (e) { return { ok: false, errore: 'Server non raggiungibile: avvia Apri-Libreria.command' }; }
+  catch (e) { return { ok: false, errore: 'Server non raggiungibile: avvia Apri-FRAME01-LIBRARY.command' }; }
 }
 function toast(m){ const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); }
 async function copy(txt){ try { await navigator.clipboard.writeText(txt); } catch { const a = document.createElement('textarea'); a.value = txt; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); } catch {} a.remove(); } toast('Copiato'); }
@@ -394,7 +394,7 @@ function media(i){
   if (i.preview?.tipo === 'img') return window.__ONLINE ? `<img class="img" data-pv="${esc(i.preview.file)}" alt="">` : `<img class="img" loading="lazy" src="${esc(url(i.preview.file))}" alt="">`;
   const G = { componente: '</>', riferimento: '◧', documento: '¶', risorsa: '↗' };
   const ph = `<div class="ph t-${esc(i.tipo)}"><span>${esc(G[i.tipo] || (i.titolo || '?').slice(0, 1).toUpperCase())}</span></div>`;
-  if (i.cover && /^https:/.test(i.cover)) return `<div class="covw">${ph}<img class="img cov" loading="lazy" referrerpolicy="no-referrer" src="${esc(i.cover)}" alt="" onerror="this.remove()"></div>`;
+  if (i.cover && /^https:/.test(i.cover)) return `<div class="covw">${ph}<img class="img cov" loading="lazy" referrerpolicy="no-referrer" src="${esc(i.cover)}" ${hasShot(i) ? `data-fb="${esc(shot(i.link))}"` : ''} alt="" onerror="if(this.dataset.fb){this.src=this.dataset.fb;delete this.dataset.fb}else{this.remove()}"></div>`;
   if (hasShot(i)) return `<div class="covw">${ph}<img class="img cov" loading="lazy" referrerpolicy="no-referrer" src="${esc(shot(i.link))}" alt="" onerror="this.remove()"></div>`;
   return ph;
 }
@@ -497,7 +497,7 @@ function render(){
   $('[data-acc="area"]').hidden = !(S.page === 'tutto' || S.page === 'preferiti');
   const all = list(), shown = all.slice(0, S.limit);
   const g = $('#grid');
-  if (!items.length) { g.innerHTML = '<div class="empty"><h2>La libreria è vuota</h2><p>Metti una cartella in <code>inbox/</code> e premi <b>Aggiorna</b> (o fai doppio clic su <code>Apri-Libreria.command</code>).</p></div>'; return; }
+  if (!items.length) { g.innerHTML = '<div class="empty"><h2>La libreria è vuota</h2><p>Metti una cartella in <code>inbox/</code> e premi <b>Aggiorna</b> (o fai doppio clic su <code>Apri-FRAME01-LIBRARY.command</code>).</p></div>'; return; }
   const vuoto = ARE[S.page] && !items.some(i => i.area === S.page) ? `<div class="empty"><h2>Quest'area è vuota</h2><p>${canAdd() ? 'Aggiungi link o cartelle con «+ Aggiungi link o cartelle» qui sopra (anche da Raindrop).' : 'Aggiungi materiale dalla pagina Importa quando apri la libreria dal Mac.'}</p></div>` : '';
   g.innerHTML = shown.length ? shown.map(card).join('') : (vuoto || (S.page === 'preferiti' ? '<div class="empty"><h2>Nessun preferito</h2><p>Premi ☆ su una scheda per metterla qui.</p></div>' : '<div class="empty"><h2>Nessun risultato</h2><p>Prova a togliere qualche filtro o a cercare una parola diversa.</p></div>'));
   observe(g);
@@ -574,12 +574,22 @@ function pOver(i){
   : `<h4>Le tue note</h4>
   <label class="opt">Stato <select id="nStato"><option value="">—</option>${['Da usare', 'Da valutare', 'Scartato'].map(s => `<option ${n.stato === s ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
   <textarea id="nNota" placeholder="Per quale progetto? Cosa tenere, cosa cambiare…">${esc(n.nota || '')}</textarea>
-  <p class="mini">Le note restano in questo browser. Apri il catalogo da <code>Apri-Libreria.command</code> per salvarle nei file.</p>`}
+  <p class="mini">Le note restano in questo browser. Apri il catalogo da <code>Apri-FRAME01-LIBRARY.command</code> per salvarle nei file.</p>`}
   <p><button class="pill ${S.kit.has(i.id) ? 'on' : 'black'}" data-kit="${esc(i.id)}">${S.kit.has(i.id) ? 'Nel kit ✓ (togli)' : 'Aggiungi al kit'}</button></p>`;
 }
 function pPrev(i){
   if (i.preview?.tipo === 'img') return window.__ONLINE ? `<img class="img" style="border-radius:12px;height:auto" data-pvf="${esc(i.preview.file)}" alt="Anteprima">` : `<img class="img" style="border-radius:12px" src="${esc(url(i.preview.file))}" alt="Anteprima">`;
-  if (i.preview?.tipo !== 'html') return hasShot(i) ? `<div class="shot"><img referrerpolicy="no-referrer" src="${esc(shot(i.link))}" alt="Anteprima del sito" onerror="this.closest('.shot').outerHTML='<div class=box>Anteprima del sito non disponibile.</div>'"></div><p><a class="pill black" target="_blank" rel="noopener noreferrer" href="${esc(i.link)}">Apri il sito ↗</a></p><p class="mini">Immagine generata da un servizio esterno (WordPress mShots) a partire dal link: si può disattivare da Fonti → Impostazioni.</p>` : `<div class="box">Nessuna anteprima per questo elemento. Guarda <b>Contenuti</b> e <b>Come usarlo</b>.</div>`;
+  if (i.preview?.tipo !== 'html') {
+    const none = '<div class="box">Nessuna anteprima per questo elemento. Guarda <b>Contenuti</b> e <b>Come usarlo</b>.</div>';
+    if (!i.link || !/^https:/.test(i.link)) return none;
+    const cov = i.cover && /^https:/.test(i.cover) ? i.cover : null, fb = hasShot(i) ? shot(i.link) : null;
+    if (!cov && !fb) return `<p><a class="pill black" target="_blank" rel="noopener noreferrer" href="${esc(i.link)}">Apri il sito ↗</a></p><p class="mini">Anteprime dei siti disattivate: riattivale da Fonti → Impostazioni.</p>`;
+    const miss = `this.closest('.shot').outerHTML='<div class=box>Anteprima non disponibile: apri direttamente il sito.</div>'`;
+    const img1 = `<div class="shot"><img referrerpolicy="no-referrer" src="${esc(cov || fb)}" ${cov && fb ? `data-fb="${esc(fb)}"` : ''} alt="Anteprima del sito" onerror="if(this.dataset.fb){this.src=this.dataset.fb;delete this.dataset.fb}else{${miss}}"></div>`;
+    const img2 = cov && fb ? `<p class="mini" style="margin:12px 0 6px">Screenshot della pagina</p><div class="shot"><img loading="lazy" referrerpolicy="no-referrer" src="${esc(fb)}" alt="Screenshot del sito" onerror="this.closest('.shot').remove()"></div>` : '';
+    let host = ''; try { host = new URL(i.link).hostname.replace(/^www\./, ''); } catch {}
+    return `${img1}${img2}<p style="margin-top:12px"><a class="pill black" target="_blank" rel="noopener noreferrer" href="${esc(i.link)}">Apri ${esc(host || 'il sito')} ↗</a></p><p class="mini">${cov ? 'Copertina letta dalla pagina' : 'Immagine generata'}${fb ? '; gli screenshot li genera il servizio esterno WordPress mShots (disattivabile da Fonti → Impostazioni)' : ''}.</p>`;
+  }
   const pages = [{ nome: 'Principale', file: i.preview.file }, ...(i.anteprime || []).filter(a => a.file !== i.preview.file)];
   const p = pages[cur.page] || pages[0];
   return `<div class="dev">${[['Desktop', 1440], ['Tablet', 820], ['Mobile', 390]].map(([l, w]) => `<button class="pill ${cur.w === w ? 'on' : ''}" data-w="${w}">${l} <span class="n">${w}</span></button>`).join('')}
@@ -638,7 +648,7 @@ function kitRender(){
   ${ids.length ? `<p class="mini">${ids.length} elementi · ${Object.entries(perArea).map(([a, n]) => esc(a) + ' ' + n).join(' · ')}</p><div class="box" style="max-height:34vh;overflow:auto">${ids.map(id => { const x = byId[id]; return `<div class="row" style="justify-content:space-between;padding:4px 0"><span><span class="badge t-${esc(x.tipo)}">${esc(tl(x.tipo))}</span> ${esc(x.titolo)}</span><button class="link" data-kit="${esc(id)}">togli</button></div>`; }).join('')}</div>
   <p><button class="link" data-kitclear="1">Svuota il kit</button></p>
   <h4 style="${H}">KIT PER LA DASHBOARD (FRAME.01 OS)</h4><input id="kitProj" placeholder="Nome del progetto (facoltativo)" style="width:100%;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:9px 12px;font-size:16px" value="${esc(store.get('kitProj', ''))}">
-  ${nComp && HTTP && SRV ? `<label class="opt" style="margin-top:10px"><input type="checkbox" id="kitCode" ${store.get('kitCode', false) ? 'checked' : ''}> Includi il codice dei ${nComp} componenti (file ≤ 250 KB)</label>` : nComp ? '<p class="mini">Il codice dei componenti si include solo aprendo la libreria dal Mac (Apri-Libreria.command).</p>' : ''}
+  ${nComp && HTTP && SRV ? `<label class="opt" style="margin-top:10px"><input type="checkbox" id="kitCode" ${store.get('kitCode', false) ? 'checked' : ''}> Includi il codice dei ${nComp} componenti (file ≤ 250 KB)</label>` : nComp ? '<p class="mini">Il codice dei componenti si include solo aprendo la libreria dal Mac (Apri-FRAME01-LIBRARY.command).</p>' : ''}
   <div class="kitrow" style="margin:10px 0"><button class="pill black" data-kitact="scarica">Scarica kit .json</button><button class="pill" data-kitact="condividi">Condividi (iPhone/iPad)</button><button class="pill" data-kitact="copia">Copia JSON</button></div><p class="mini">Nella dashboard: importa il file (o incolla il JSON). Formato <code>frame01-kit/2</code>: voci con area e strumenti, design (palette e font), componenti (link, licenza e, se vuoi, il codice), prompt (testo completo). Nessun file di terzi se non lo scegli.</p>
   <h4 style="${H}">CARTELLA DEL PROGETTO (copia dei file sul Mac)</h4><input id="kitDest" style="width:100%;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:9px 12px" value="${esc(dest)}">
   <div class="cmd"><pre id="kitCmd">${esc(cmd)}</pre><button class="pill" data-copy="${esc(cmd)}" id="kitCopy">Copia</button></div>
@@ -753,7 +763,7 @@ $('#bReset').onclick = () => { S.area = ''; S.strum = ''; S.favOnly = false; $('
 $('#bKit').onclick = () => { kitRender(); $('#dlgKit').showModal(); };
 $('#bGuida').onclick = () => { guidaRender(); $('#dlgGuida').showModal(); };
 document.addEventListener('click', e => { const b = e.target.closest('[data-fonte]'); if (b) { S.fonte = b.dataset.fonte; S.limit = 96; render(); } });
-if (location.protocol === 'file:') { const b = $('#fileBanner'); b.hidden = false; b.innerHTML = '<b>Anteprime limitate:</b> stai aprendo il file direttamente. Per vedere le anteprime animate fai doppio clic su <code>Apri-Libreria.command</code> (oppure <code>node scripts/serve.mjs --open</code>) e usa l\'indirizzo <code>http://127.0.0.1:4173</code>.'; }
+if (location.protocol === 'file:') { const b = $('#fileBanner'); b.hidden = false; b.innerHTML = '<b>Anteprime limitate:</b> stai aprendo il file direttamente. Per vedere le anteprime animate fai doppio clic su <code>Apri-FRAME01-LIBRARY.command</code> (oppure <code>node scripts/serve.mjs --open</code>) e usa l\'indirizzo <code>http://127.0.0.1:4173</code>.'; }
 $('#bFonti').onclick = () => { fontiRender(); $('#dlgFonti').showModal(); };
 $('#bTheme').onclick = () => { const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme:dark)').matches; r.dataset.theme = dark ? 'light' : 'dark'; store.set('theme', r.dataset.theme); };
 window.addEventListener('resize', () => { if (cur?.tab === 'anteprima') fitPv(); });
