@@ -348,7 +348,7 @@ S.page = 'home'; S.area = ''; S.strum = ''; S.favOnly = false;
 const HTTP = location.protocol === 'http:' && !window.__ONLINE;
 async function api(fn, body){
   try { const r = await fetch('/api/' + fn, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-F01': '1' }, body: JSON.stringify(body || {}) }); return await r.json(); }
-  catch (e) { return { ok: false, errore: 'Server non raggiungibile: avvia Apri-FRAME01-LIBRARY.command' }; }
+  catch (e) { return { ok: false, errore: 'Server non raggiungibile: avvia Apri-Libreria.command' }; }
 }
 function toast(m){ const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); }
 async function copy(txt){ try { await navigator.clipboard.writeText(txt); } catch { const a = document.createElement('textarea'); a.value = txt; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); } catch {} a.remove(); } toast('Copiato'); }
@@ -497,7 +497,7 @@ function render(){
   $('[data-acc="area"]').hidden = !(S.page === 'tutto' || S.page === 'preferiti');
   const all = list(), shown = all.slice(0, S.limit);
   const g = $('#grid');
-  if (!items.length) { g.innerHTML = '<div class="empty"><h2>La libreria è vuota</h2><p>Metti una cartella in <code>inbox/</code> e premi <b>Aggiorna</b> (o fai doppio clic su <code>Apri-FRAME01-LIBRARY.command</code>).</p></div>'; return; }
+  if (!items.length) { g.innerHTML = '<div class="empty"><h2>La libreria è vuota</h2><p>Metti una cartella in <code>inbox/</code> e premi <b>Aggiorna</b> (o fai doppio clic su <code>Apri-Libreria.command</code>).</p></div>'; return; }
   const vuoto = ARE[S.page] && !items.some(i => i.area === S.page) ? `<div class="empty"><h2>Quest'area è vuota</h2><p>${canAdd() ? 'Aggiungi link o cartelle con «+ Aggiungi link o cartelle» qui sopra (anche da Raindrop).' : 'Aggiungi materiale dalla pagina Importa quando apri la libreria dal Mac.'}</p></div>` : '';
   g.innerHTML = shown.length ? shown.map(card).join('') : (vuoto || (S.page === 'preferiti' ? '<div class="empty"><h2>Nessun preferito</h2><p>Premi ☆ su una scheda per metterla qui.</p></div>' : '<div class="empty"><h2>Nessun risultato</h2><p>Prova a togliere qualche filtro o a cercare una parola diversa.</p></div>'));
   observe(g);
@@ -558,7 +558,7 @@ function pOver(i){
   <dt>Dimensione</dt><dd>${i.contenuti.file} file · ${kb(i.contenuti.byte)}</dd>
   <dt>Licenza</dt><dd>${lic ? `${esc(lic.tipo)} <span class="mini">(${lic.origine === 'fonte' ? 'dalla fonte' : 'nella cartella'})</span>` : '<b>non trovata</b>'}</dd>
   ${i.categoria ? `<dt>Categoria</dt><dd>${esc(i.categoria)}</dd>` : ''}${i.triggers?.length ? `<dt>Si attiva con</dt><dd>${i.triggers.slice(0, 8).map(esc).join(', ')}</dd>` : ''}
-  <dt>Scheda .md</dt><dd>${i.scheda ? `<a class="lnk" target="_blank" rel="noopener" href="${esc(i.scheda)}">${esc(i.scheda)}</a>` : '—'}</dd></dl>
+  <dt>Scheda .md</dt><dd>${i.scheda ? (window.__ONLINE ? `<span class="mini">${esc(i.scheda)}</span>` : `<a class="lnk" target="_blank" rel="noopener" href="${esc(i.scheda)}">${esc(i.scheda)}</a>`) : '—'}</dd></dl>
   <h4>Tag</h4><div class="tags">${i.tag.map(t => `<span class="chip">${esc(TAGL[t] || t)}</span>`).join('') || '<span class="mini">nessuno</span>'}</div>
   ${i.duplicatoDi ? `<h4>È una copia di</h4><div>${link(i.duplicatoDi)}</div>` : ''}${i.copie?.length ? `<h4>Altre copie / versioni</h4>${i.copie.slice(0, 8).map(c => `<div>${link(c, byId[c]?.fonte + ' · ' + byId[c]?.percorso.split('/').slice(2).join('/'))}</div>`).join('')}` : ''}
   ${i.correlati?.length ? `<h4>Correlati</h4>${i.correlati.map(c => `<div>${link(c)}</div>`).join('')}` : ''}
@@ -574,7 +574,7 @@ function pOver(i){
   : `<h4>Le tue note</h4>
   <label class="opt">Stato <select id="nStato"><option value="">—</option>${['Da usare', 'Da valutare', 'Scartato'].map(s => `<option ${n.stato === s ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
   <textarea id="nNota" placeholder="Per quale progetto? Cosa tenere, cosa cambiare…">${esc(n.nota || '')}</textarea>
-  <p class="mini">Le note restano in questo browser. Apri il catalogo da <code>Apri-FRAME01-LIBRARY.command</code> per salvarle nei file.</p>`}
+  <p class="mini">Le note restano in questo browser. Apri il catalogo da <code>Apri-Libreria.command</code> per salvarle nei file.</p>`}
   <p><button class="pill ${S.kit.has(i.id) ? 'on' : 'black'}" data-kit="${esc(i.id)}">${S.kit.has(i.id) ? 'Nel kit ✓ (togli)' : 'Aggiungi al kit'}</button></p>`;
 }
 function pPrev(i){
@@ -595,7 +595,7 @@ function pCont(i){
   return `${i.palette?.length ? `<h4>Palette</h4><div class="palette">${i.palette.map(p => `<button class="sw2" data-copy="${esc(p.hex)}" title="Copia ${esc(p.hex)}"><i style="background:${esc(p.hex)}"></i><span>${esc(p.nome)}<br>${esc(p.hex)}</span></button>`).join('')}</div>` : ''}
   ${i.fonts?.length ? `<h4>Font</h4><div class="tags">${i.fonts.map(f => `<span class="chip">${esc(f)}</span>`).join('')}</div><p class="mini">Controlla la licenza di ogni font prima di usarlo in un sito.</p>` : ''}
   <h4>Cartelle e file (${i.contenuti.file} · ${kb(i.contenuti.byte)})</h4>
-  <div class="box"><table><thead><tr><th>Nome</th><th class="r">File</th><th class="r">Peso</th></tr></thead><tbody>${i.contenuti.top.map(t => `<tr><td>${t.tipo === 'file' ? `<a class="lnk" target="_blank" rel="noopener" href="${esc(url(i.percorso + '/' + t.nome))}">${esc(t.nome)}</a>` : esc(t.nome) + '/'}</td><td class="r">${t.tipo === 'cartella' ? t.file : ''}</td><td class="r">${kb(t.byte)}</td></tr>`).join('')}</tbody></table></div>
+  <div class="box"><table><thead><tr><th>Nome</th><th class="r">File</th><th class="r">Peso</th></tr></thead><tbody>${i.contenuti.top.map(t => `<tr><td>${t.tipo === 'file' ? (window.__ONLINE ? esc(t.nome) : `<a class="lnk" target="_blank" rel="noopener" href="${esc(url(i.percorso + '/' + t.nome))}">${esc(t.nome)}</a>`) : esc(t.nome) + '/'}</td><td class="r">${t.tipo === 'cartella' ? t.file : ''}</td><td class="r">${kb(t.byte)}</td></tr>`).join('')}</tbody></table></div>
   <h4>Tipi di file</h4><div class="tags">${ext.map(([x, n]) => `<span class="chip">${esc(x)} ${n}</span>`).join('')}</div>
   ${i.estratto ? `<h4>Estratto di ${i.tipo === 'design-system' ? 'DESIGN.md' : 'SKILL.md / README'}</h4><pre>${esc(i.estratto)}</pre>` : ''}`;
 }
@@ -638,7 +638,7 @@ function kitRender(){
   ${ids.length ? `<p class="mini">${ids.length} elementi · ${Object.entries(perArea).map(([a, n]) => esc(a) + ' ' + n).join(' · ')}</p><div class="box" style="max-height:34vh;overflow:auto">${ids.map(id => { const x = byId[id]; return `<div class="row" style="justify-content:space-between;padding:4px 0"><span><span class="badge t-${esc(x.tipo)}">${esc(tl(x.tipo))}</span> ${esc(x.titolo)}</span><button class="link" data-kit="${esc(id)}">togli</button></div>`; }).join('')}</div>
   <p><button class="link" data-kitclear="1">Svuota il kit</button></p>
   <h4 style="${H}">KIT PER LA DASHBOARD (FRAME.01 OS)</h4><input id="kitProj" placeholder="Nome del progetto (facoltativo)" style="width:100%;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:9px 12px;font-size:16px" value="${esc(store.get('kitProj', ''))}">
-  ${nComp && HTTP && SRV ? `<label class="opt" style="margin-top:10px"><input type="checkbox" id="kitCode" ${store.get('kitCode', false) ? 'checked' : ''}> Includi il codice dei ${nComp} componenti (file ≤ 250 KB)</label>` : nComp ? '<p class="mini">Il codice dei componenti si include solo aprendo la libreria dal Mac (Apri-FRAME01-LIBRARY.command).</p>' : ''}
+  ${nComp && HTTP && SRV ? `<label class="opt" style="margin-top:10px"><input type="checkbox" id="kitCode" ${store.get('kitCode', false) ? 'checked' : ''}> Includi il codice dei ${nComp} componenti (file ≤ 250 KB)</label>` : nComp ? '<p class="mini">Il codice dei componenti si include solo aprendo la libreria dal Mac (Apri-Libreria.command).</p>' : ''}
   <div class="kitrow" style="margin:10px 0"><button class="pill black" data-kitact="scarica">Scarica kit .json</button><button class="pill" data-kitact="condividi">Condividi (iPhone/iPad)</button><button class="pill" data-kitact="copia">Copia JSON</button></div><p class="mini">Nella dashboard: importa il file (o incolla il JSON). Formato <code>frame01-kit/2</code>: voci con area e strumenti, design (palette e font), componenti (link, licenza e, se vuoi, il codice), prompt (testo completo). Nessun file di terzi se non lo scegli.</p>
   <h4 style="${H}">CARTELLA DEL PROGETTO (copia dei file sul Mac)</h4><input id="kitDest" style="width:100%;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:9px 12px" value="${esc(dest)}">
   <div class="cmd"><pre id="kitCmd">${esc(cmd)}</pre><button class="pill" data-copy="${esc(cmd)}" id="kitCopy">Copia</button></div>
@@ -753,7 +753,7 @@ $('#bReset').onclick = () => { S.area = ''; S.strum = ''; S.favOnly = false; $('
 $('#bKit').onclick = () => { kitRender(); $('#dlgKit').showModal(); };
 $('#bGuida').onclick = () => { guidaRender(); $('#dlgGuida').showModal(); };
 document.addEventListener('click', e => { const b = e.target.closest('[data-fonte]'); if (b) { S.fonte = b.dataset.fonte; S.limit = 96; render(); } });
-if (location.protocol === 'file:') { const b = $('#fileBanner'); b.hidden = false; b.innerHTML = '<b>Anteprime limitate:</b> stai aprendo il file direttamente. Per vedere le anteprime animate fai doppio clic su <code>Apri-FRAME01-LIBRARY.command</code> (oppure <code>node scripts/serve.mjs --open</code>) e usa l\'indirizzo <code>http://127.0.0.1:4173</code>.'; }
+if (location.protocol === 'file:') { const b = $('#fileBanner'); b.hidden = false; b.innerHTML = '<b>Anteprime limitate:</b> stai aprendo il file direttamente. Per vedere le anteprime animate fai doppio clic su <code>Apri-Libreria.command</code> (oppure <code>node scripts/serve.mjs --open</code>) e usa l\'indirizzo <code>http://127.0.0.1:4173</code>.'; }
 $('#bFonti').onclick = () => { fontiRender(); $('#dlgFonti').showModal(); };
 $('#bTheme').onclick = () => { const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme:dark)').matches; r.dataset.theme = dark ? 'light' : 'dark'; store.set('theme', r.dataset.theme); };
 window.addEventListener('resize', () => { if (cur?.tab === 'anteprima') fitPv(); });
