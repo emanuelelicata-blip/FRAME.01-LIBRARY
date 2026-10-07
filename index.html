@@ -542,8 +542,9 @@ function renderTags(){
 
 /* ---------- dettaglio ---------- */
 const TABS = [['panoramica', 'Panoramica'], ['anteprima', 'Anteprima'], ['contenuti', 'Contenuti'], ['uso', 'Come usarlo'], ['ai', "Chiedi all'AI"]];
+const tabsFor = i => i && i.schema ? [['schema', 'Schema'], ...TABS] : TABS;
 function openItem(id, tab){
-  if (!byId[id]) return; const prev = cur; cur = { id, tab: tab || 'panoramica', page: 0, w: 1440, z: 'fit', seq: (prev && prev.seq && prev.seq.includes(id)) ? prev.seq : list().map(x => x.id) };
+  if (!byId[id]) return; const prev = cur; cur = { id, tab: tab || (byId[id].schema ? 'schema' : 'panoramica'), page: 0, w: 1440, z: 'fit', seq: (prev && prev.seq && prev.seq.includes(id)) ? prev.seq : list().map(x => x.id) };
   S.recent = [id, ...S.recent.filter(x => x !== id)].slice(0, 8); store.set('recent', S.recent);
   try { history.replaceState(null, '', '#' + encodeURIComponent(id)); } catch {}
   drawRender(); $('#drawer').classList.add('open'); $('#drawer').setAttribute('aria-hidden', 'false'); $('#backdrop').hidden = false; document.body.classList.add('lock');
@@ -555,11 +556,13 @@ function drawRender(){
   const canShare = !!navigator.share && (i.link || i.testo);
   d.innerHTML = `<div class="dh"><button class="pill close" id="dClose" aria-label="Chiudi">Chiudi ✕</button><div class="crumb" style="padding-right:96px"><button data-closeitem="1">${esc(pgName)}</button> › <span>${esc(PSHORT[i.area] || tl(i.tipo))}</span></div><span class="badge t-${esc(i.tipo)}">${esc(tl(i.tipo))}</span> <button class="pill ${S.fav.has(i.id) ? 'on' : ''}" data-fav="${esc(i.id)}" style="margin-left:6px;min-height:28px;padding:2px 12px">${S.fav.has(i.id) ? '★ Preferito' : '☆ Preferito'}</button><h2>${esc(i.titolo)}</h2><div class="sub">${esc(i.percorso)}</div>
   <div class="dtools">${(cur.seq || []).length > 1 ? `<span class="dnav" style="margin:0"><button data-nav="-1" aria-label="Precedente" ${si <= 0 ? 'disabled' : ''}>‹</button><span class="mini">${si + 1} / ${cur.seq.length}</span><button data-nav="1" aria-label="Successivo" ${si >= cur.seq.length - 1 ? 'disabled' : ''}>›</button></span>` : ''}${canShare ? '<button class="pill" data-share="1">Condividi</button>' : ''}</div>
-  <div class="tabs" role="tablist">${TABS.map(([k, l]) => `<button class="tab ${cur.tab === k ? 'on' : ''}" role="tab" aria-selected="${cur.tab === k}" data-tab="${k}">${l}</button>`).join('')}</div></div><div class="panel" id="panel">${panel(i)}</div>`;
+  <div class="tabs" role="tablist">${tabsFor(i).map(([k, l]) => `<button class="tab ${cur.tab === k ? 'on' : ''}" role="tab" aria-selected="${cur.tab === k}" data-tab="${k}">${l}</button>`).join('')}</div></div><div class="panel" id="panel">${panel(i)}</div>`;
   if (cur.tab === 'ai') aiRefresh();
+  if (cur.tab === 'schema') { const im = $('#panel img[data-pvf]'); if (im) getPv(im.dataset.pvf).then(pv => { if (pv && pv.url) im.src = pv.url; }); }
   if (cur.tab === 'anteprima') { fitPv(); const f = $('#pvf'); if (f && f.dataset.pv) fillFrame(f); const im = $('#panel img[data-pvf]'); if (im) getPv(im.dataset.pvf).then(pv => { if (pv && pv.url) im.src = pv.url; }); }
 }
 function panel(i){
+  if (cur.tab === 'schema' && i.schema) return pSchema(i);
   if (cur.tab === 'anteprima') return pPrev(i);
   if (cur.tab === 'contenuti') return pCont(i);
   if (cur.tab === 'uso') return pUso(i);
@@ -596,6 +599,23 @@ function pOver(i){
   <textarea id="nNota" ${canAdd() ? '' : 'readonly'} placeholder="Per quale progetto? Cosa tenere, cosa cambiare…">${esc(n.nota || '')}</textarea>
   <p class="mini">Le note restano in questo browser. Apri il catalogo da <code>Apri-FRAME01-LIBRARY.command</code> per salvarle nei file.</p>`}
   <p><button class="pill ${S.kit.has(i.id) ? 'on' : 'black'}" data-kit="${esc(i.id)}">${S.kit.has(i.id) ? 'Nel kit ✓ (togli)' : 'Aggiungi al kit'}</button></p>`;
+}
+function pSchema(i){
+  const m = i.schema, L = a => (a || []).filter(Boolean), li = a => `<ul class="gl">${L(a).map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
+  const img = m.img ? (window.__ONLINE ? `<img class="img sch" data-pvf="${esc(m.img)}" alt="Schema di ${esc(i.titolo)}" onerror="this.remove()">` : `<img class="img sch" src="${esc(m.img)}" alt="Schema di ${esc(i.titolo)}" loading="lazy" onerror="this.remove()">`) : '';
+  const ex = m.esempi || {}, exl = [['sito', 'Sito web'], ['dashboard', 'Dashboard'], ['brand', 'Brand']].filter(([k]) => ex[k]);
+  const ric = m.ricrea ? `Ricrea lo schema "${i.titolo}" (template Milanote) dentro FRAME.01 OS.\nStruttura: ${m.disposizione || ''}\nBlocchi: ${L(m.blocchi).map(b => b.nome).join(', ')}.\nIstruzioni: ${m.ricrea}` : '';
+  return `${img ? `<div class="schw">${img}</div>` : ''}
+  ${m.sintesi ? `<p class="schl">${esc(m.sintesi)}</p>` : ''}
+  ${m.disposizione ? `<h4>Come è disposto</h4><p>${esc(m.disposizione)}</p>` : ''}
+  ${L(m.blocchi).length ? `<h4>Blocchi dello schema</h4><div class="schb">${m.blocchi.map((b, n) => `<div class="schc"><span class="schn">${n + 1}</span><b>${esc(b.nome)}</b>${b.contenuto ? `<p>${esc(b.contenuto)}</p>` : ''}${b.funzione ? `<p class="mini">A cosa serve: ${esc(b.funzione)}</p>` : ''}</div>`).join('')}</div>` : ''}
+  ${L(m.uso).length ? `<h4>Come si usa, passo per passo</h4><ol class="steps">${m.uso.map(u => `<li>${esc(u)}</li>`).join('')}</ol>` : ''}
+  ${L(m.quando).length ? `<h4>Quando usarlo</h4>${li(m.quando)}` : ''}
+  ${exl.length ? `<h4>Esempi per i tuoi progetti</h4><div class="sche">${exl.map(([k, l]) => `<div class="box"><b>${l}</b><p>${esc(ex[k])}</p></div>`).join('')}</div>` : ''}
+  ${m.ricrea ? `<h4>Come ricrearlo in FRAME.01 OS</h4><p>${esc(m.ricrea)}</p><p><button class="pill black" data-copy="${esc(ric)}">Copia come prompt per l'AI</button></p>` : ''}
+  ${L(m.correlati).length ? `<h4>Template correlati</h4><p>${m.correlati.map(c => `<span class="badge">${esc(c)}</span>`).join(' ')}</p>` : ''}
+  ${m.url && /^https:\/\/www\.milanote\.com\//.test(m.url) ? `<p><a class="pill black" target="_blank" rel="noopener noreferrer" href="${esc(m.url)}">Apri il template su Milanote ↗</a></p>` : ''}
+  <p class="mini">Schema analizzato dall'immagine pubblica del template: i testi più piccoli possono essere approssimati.</p>`;
 }
 function pPrev(i){
   if (i.thumb && i.preview?.tipo !== 'html' && i.preview?.tipo !== 'img') return `<div>${thumbImg(i, true)}</div>${i.link && /^https:/.test(i.link) ? `<p><a class="pill black" target="_blank" rel="noopener noreferrer" href="${esc(i.link)}">Apri la pagina ↗</a></p>` : ''}`;

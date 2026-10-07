@@ -198,3 +198,15 @@ button.chip[aria-pressed=true]{background:var(--pill-active);color:var(--pill-ac
   .side .si.on small,.side .si.on .n{color:inherit;opacity:.8}
   .side .si:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
 }
+
+/* ---------- scheda Schema (Milanote) ---------- */
+.schw{border:1px solid var(--glass-border);border-radius:var(--radius-card,16px);overflow:hidden;background:var(--glass)}
+.schw .sch{display:block;width:100%;height:auto;position:static;border-radius:0}
+.schl{font-size:var(--fs-lg,17px);line-height:1.45;margin:var(--space-3) 0}
+.schb{display:grid;gap:var(--space-2)}
+.schc{position:relative;padding:var(--space-3) var(--space-3) var(--space-3) 52px;border:1px solid var(--glass-border);border-radius:var(--radius-card,16px);background:var(--glass)}
+.schc p{margin:var(--space-1) 0 0}
+.schc .schn{position:absolute;left:var(--space-3);top:var(--space-3);width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--pill-active);color:var(--pill-active-fg);font:12px var(--mono)}
+.sche{display:grid;gap:var(--space-2)}
+.sche .box p{margin:var(--space-1) 0 0}
+@media(min-width:900px){.sche{grid-template-columns:repeat(3,1fr)}}
