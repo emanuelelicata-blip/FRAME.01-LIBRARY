@@ -11,7 +11,42 @@
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="F01 LIBRARY"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>FRAME.01-LIBRARY</title><meta name="robots" content="noindex,nofollow"><link rel="manifest" href="manifest.webmanifest">
-<style>#gate{position:fixed;inset:0;z-index:99;display:grid;place-items:center;background:#0b0c0e;color:#f2f2ee;padding:20px}#gate form{width:min(380px,100%);background:#15171b;border:1px solid #2a2d33;border-radius:22px;padding:26px;display:grid;gap:12px}#gate h1{margin:0;font:600 16px/1.2 ui-monospace,Menlo,monospace;letter-spacing:.08em}#gate p{margin:0;color:#9a9da3;font-size:13px}#gate input[type=password],#gate input[type=text]{width:100%;border:1px solid #2a2d33;background:#0b0c0e;color:#f2f2ee;border-radius:12px;padding:12px;font:16px system-ui}#gate button{border:0;border-radius:999px;padding:12px 16px;background:#f2f2ee;color:#0b0c0e;font:600 14px system-ui;cursor:pointer}#gate label{font-size:12px;color:#9a9da3;display:flex;gap:8px;align-items:center}#gerr{color:#ff7b6b;font-size:13px;min-height:18px}</style>
+<style>
+#gate{position:fixed;inset:0;z-index:99;display:grid;place-items:center;padding:20px;color:#f8fafc;font:14px/1.45 system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;background:radial-gradient(900px 500px at 50% -10%,rgba(0,119,255,.16),transparent 60%),radial-gradient(700px 420px at 90% 110%,rgba(120,80,255,.10),transparent 60%),#0a0c10;opacity:1;transition:opacity .25s ease}
+#gate.out{opacity:0;pointer-events:none}
+#gate form{width:min(400px,100%);display:grid;gap:14px;padding:28px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);box-shadow:0 30px 80px -20px rgba(0,0,0,.75),0 8px 24px rgba(0,0,0,.4),inset 1px 1px 0 rgba(255,255,255,.05)}
+#gate form.shake{animation:gshake .38s cubic-bezier(.36,.07,.19,.97)}
+@keyframes gshake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
+.gmono{display:flex;align-items:center;gap:12px}
+.gbadge{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);flex:none}
+.gbadge svg{width:26px;height:auto;color:#f8fafc}
+#gate h1{margin:0;font:600 15px/1.2 ui-monospace,"Geist Mono",Menlo,monospace;letter-spacing:.08em}
+#gate .gsub{margin:2px 0 0;font:400 11px/1.2 ui-monospace,"Geist Mono",Menlo,monospace;letter-spacing:.14em;color:#94a3b8;text-transform:uppercase}
+#gate .gp{margin:0;color:#a8b3c4;font-size:13.5px}
+.gfield{position:relative}
+.gfield .gi{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:#8b97a8;pointer-events:none}
+#gate input[type=password],#gate input[type=text]#gpw{width:100%;box-sizing:border-box;height:46px;padding:0 46px 0 42px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.35);color:#f8fafc;font:16px system-ui;outline:none;transition:border-color .15s,box-shadow .15s}
+#gate #gpw::placeholder{color:#6b7686}
+#gate #gpw:focus{border-color:hsl(212 100% 50%);box-shadow:0 0 0 3px hsl(212 100% 50%/.25)}
+#gate #gpw:disabled{opacity:.6}
+#geye{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:8px;background:none;color:#8b97a8;cursor:pointer;display:grid;place-items:center;padding:0}
+#geye:hover{color:#f8fafc;background:rgba(255,255,255,.06)}#geye:focus-visible{outline:2px solid hsl(212 100% 50%)}
+#geye svg{width:18px;height:18px}#geye .off{display:none}#geye[aria-pressed=true] .on{display:none}#geye[aria-pressed=true] .off{display:block}
+#gate label.grem{display:flex;gap:10px;align-items:center;font-size:13px;color:#a8b3c4;cursor:pointer;user-select:none}
+#gate .gck{appearance:none;-webkit-appearance:none;width:18px;height:18px;margin:0;border-radius:5px;border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.35);display:grid;place-items:center;cursor:pointer;flex:none;transition:background .15s,border-color .15s}
+#gate .gck:checked{background:hsl(212 100% 50%);border-color:hsl(212 100% 50%)}
+#gate .gck:checked::after{content:"";width:9px;height:5px;border:2px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+#gate .gck:focus-visible{outline:2px solid hsl(212 100% 50%);outline-offset:2px}
+#gbtn{display:flex;align-items:center;justify-content:center;gap:10px;height:46px;border:0;border-radius:9999px;background:#f8fafc;color:#0a0c10;font:600 14px system-ui;cursor:pointer;transition:transform .15s,background .15s,box-shadow .15s}
+#gbtn:hover:not(:disabled){background:#fff;transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,255,255,.12)}
+#gbtn:focus-visible{outline:2px solid hsl(212 100% 50%);outline-offset:3px}
+#gbtn:disabled{cursor:progress;opacity:.85}
+.gspin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(10,12,16,.25);border-top-color:#0a0c10;animation:gspin .7s linear infinite}
+@keyframes gspin{to{transform:rotate(360deg)}}
+#gerr{display:none;padding:10px 12px;border-radius:10px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#fca5a5;font-size:13px}
+#gerr.on{display:block}
+@media(prefers-reduced-motion:reduce){#gate{transition:none}#gate form.shake{animation:none}.gspin{animation-duration:1.6s}#gbtn{transition:none}}
+</style>
 <style>
 /* Token: sorgente unica in assets/frame-os.css (tema chiaro/scuro, scale, alias). Qui nessun colore. */
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
@@ -300,7 +335,16 @@ button,a,.card,.acard,.pg{touch-action:manipulation}
 <dialog id="dlgFonti"><div class="dlg" id="dlgFontiBody"></div></dialog>
 <dialog id="dlgKit"><div class="dlg" id="dlgKitBody"></div></dialog>
 <dialog id="dlgAI" aria-label="Chiedi all'AI"><div class="dlg" id="dlgAIBody"></div></dialog>
-<div id="gate"><form id="gform" autocomplete="on"><svg viewBox="0 0 720 111" style="width:150px;color:#f2f2ee" role="img" aria-label="FRAME.01"><use href="#f01"/></svg><h1>FRAME.01-LIBRARY</h1><p>Accesso riservato. Il catalogo è cifrato: serve la password.</p><input type="text" name="username" value="library" autocomplete="username" hidden><input id="gpw" type="password" autocomplete="current-password" placeholder="Password" autofocus required><label><input id="grem" type="checkbox"> Ricordami su questo dispositivo</label><button id="gbtn">Entra</button><div id="gerr" role="alert"></div></form></div>
+<div id="gate"><form id="gform" autocomplete="on" aria-labelledby="gt">
+<div class="gmono"><span class="gbadge" aria-hidden="true"><svg viewBox="0 0 720 111"><use href="#f01"/></svg></span><div><h1 id="gt">FRAME.01</h1><p class="gsub">Library · Secure Vault</p></div></div>
+<p class="gp">Inserisci la chiave d'accesso per decrittare il catalogo locale.</p>
+<input type="text" name="username" value="library" autocomplete="username" hidden>
+<div class="gfield"><svg class="gi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+<input id="gpw" type="password" autocomplete="current-password" placeholder="Chiave d'accesso" aria-label="Password" autofocus required>
+<button type="button" id="geye" aria-pressed="false" aria-label="Mostra password"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.5 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.7 9.7 0 0 0 4-.9M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
+<label class="grem"><input id="grem" class="gck" type="checkbox"> Ricorda su questo dispositivo</label>
+<button id="gbtn" type="submit">Sblocca</button>
+<div id="gerr" role="alert" aria-live="assertive"></div></form></div>
 <script>
 (function(){
 const $=s=>document.querySelector(s), b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
@@ -311,14 +355,20 @@ async function open(pw){
   const gz=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(d.iv)},k,b64(d.ct));
   const txt=await new Response(new Blob([gz]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
   window.__ONLINE=true; window.__F01KEY=k; window.__CATALOG__=JSON.parse(txt);
-  $('#gate').remove(); const s=document.createElement('script'); s.textContent=document.getElementById('app').textContent; document.body.append(s);
+  const s=document.createElement('script'); s.textContent=document.getElementById('app').textContent; document.body.append(s);
+  const g=$('#gate'); g.classList.add('out'); setTimeout(()=>g.remove(),260);
   if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
-async function go(pw,rem){ $('#gbtn').disabled=true; $('#gerr').textContent='';
+function busy(on){ const b=$('#gbtn'); b.disabled=on; $('#gpw').disabled=on; $('#grem').disabled=on; $('#geye').disabled=on; $('#gform').setAttribute('aria-busy',on);
+  b.innerHTML=on?'<span class="gspin" aria-hidden="true"></span><span>Decrittazione catalogo…</span>':'Sblocca'; }
+function fail(msg){ const e=$('#gerr'); e.textContent=msg; e.classList.add('on'); const f=$('#gform'); f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); }
+async function go(pw,rem){ busy(true); $('#gerr').classList.remove('on');
   try{ await open(pw); if(rem){try{localStorage.setItem('f01pw',pw)}catch{}} }
-  catch(e){ $('#gbtn').disabled=false; try{localStorage.removeItem('f01pw')}catch{} $('#gerr').textContent=(e&&e.name==='OperationError')?'Password errata.':'Errore: '+(e&&e.message||e); } }
+  catch(e){ busy(false); try{localStorage.removeItem('f01pw')}catch{} fail((e&&e.name==='OperationError')?'Password errata. Riprova.':'Errore: '+(e&&e.message||e)); const i=$('#gpw'); i.focus(); i.select(); } }
 $('#gform').addEventListener('submit',e=>{e.preventDefault();go($('#gpw').value,$('#grem').checked)});
-try{const p=localStorage.getItem('f01pw'); if(p) go(p,true);}catch{}
+$('#geye').addEventListener('click',()=>{ const i=$('#gpw'), b=$('#geye'), show=i.type==='password'; i.type=show?'text':'password'; b.setAttribute('aria-pressed',show); b.setAttribute('aria-label',show?'Nascondi password':'Mostra password'); i.focus(); });
+$('#gpw').focus();
+try{const p=localStorage.getItem('f01pw'); if(p){ $('#grem').checked=true; go(p,true); }}catch{}
 })();
 </script>
 <noscript><p class="empty">Serve JavaScript per il catalogo.</p></noscript>
@@ -748,9 +798,18 @@ function pUso(i){
 }
 
 
-/* ---------- kit JSON per la dashboard FRAME.01 OS (formato frame01-kit/2) ---------- */
+/* ---------- Kit Builder (step 4): Claude · Lovable · JSON frame01.kit.v1 · CLI ---------- */
+const FOS_URL = 'https://frame-zero-one.lovable.app/libreria?tab=documenti';
+const KTABS = [['claude', 'Claude'], ['lovable', 'Lovable'], ['json', 'JSON Frame OS'], ['cli', 'MCP / CLI']];
+const kitTab = () => { const t = store.get('kitTab', 'claude'); return KTABS.some(x => x[0] === t) ? t : 'claude'; };
+const kitItems = () => [...S.kit].map(id => byId[id]).filter(Boolean);
+const palOf = i => (i.palette || []).filter(p => HEXOK(p.hex)).map(p => ({ nome: String(p.nome || 'colore'), hex: hexN(p.hex), tailwind: 'bg-[' + hexN(p.hex) + ']' }));
+const fontsOf = i => (i.fonts || []).map(f => String((f && f.nome) || f));
+const usoOf = i => [...((i.schema && i.schema.uso) || []), ...(i.uso || []).map(u => (u.t ? u.t + ': ' : '') + (u.d || ''))].filter(Boolean);
+const avvOf = i => (i.avvisi || []).map(a => typeof a === 'string' ? a : (a.t || a.testo || '')).filter(Boolean);
+const blocchiOf = i => ((i.schema && i.schema.blocchi) || []).filter(b => b && b.nome);
 function kitJson(codice){
-  const its = [...S.kit].map(id => byId[id]).filter(Boolean);
+  const its = kitItems();
   const hex = p => typeof p === 'string' ? p : (p && (p.hex || p.valore || p.colore)) || '';
   const voci = its.map(x => ({ id: x.id, tipo: x.tipo, area: x.area || null, strumenti: x.strumenti || [], titolo: x.titolo, descrizione: x.descrizione || '', fonte: x.fonte, licenza: x.licenza ? x.licenza.tipo : null, link: x.link || null, tag: x.tag || [], uso: x.uso || [], avvisi: x.avvisi || [], nota: (getNote(x).nota || '') }));
   const design = its.filter(x => x.palette && x.palette.length).map(x => ({ id: 'lib-' + String(x.nome).toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40), title: x.titolo, category: 'Interfaccia', origin: 'reference', source: x.fonte, summary: (x.descrizione || '').slice(0, 200), tags: (x.tag || []).slice(0, 6), pattern: '', style: { name: x.titolo, keywords: (x.tag || []).join(', '), bestFor: '', accessibility: '' }, colors: x.palette.slice(0, 8).filter(p => hex(p)).map((p, n) => ({ role: (p && (p.ruolo || p.nome)) || 'Colore ' + (n + 1), name: hex(p), hex: hex(p) })), type: { heading: String((x.fonts || [])[0]?.nome || (x.fonts || [])[0] || ''), body: String((x.fonts || [])[1]?.nome || (x.fonts || [])[1] || ''), mood: '' }, effects: [], avoid: [], checklist: [] }));
@@ -758,35 +817,127 @@ function kitJson(codice){
   const prompt = its.filter(x => x.tipo === 'prompt').map(x => ({ id: x.id, titolo: x.titolo, strumenti: x.strumenti || [], categoria: x.categoria || '', testo: x.testo || '', variabili: x.variabili || [] }));
   return { formato: 'frame01-kit/2', creato: new Date().toISOString(), progetto: store.get('kitProj', ''), voci, design, componenti, prompt };
 }
+// manifest frame01.kit.v1: contiene anche le chiavi del vecchio formato frame01-kit/2 (voci, design, componenti, prompt), così l'importatore della dashboard legge l'uno o l'altro
+function kitManifest(codice){
+  const k = kitJson(codice), m = (C.meta && C.meta.build) || '';
+  const elementi = kitItems().map(x => ({ id: x.id, tipo: x.tipo, titolo: x.titolo, descrizione: x.descrizione || '', area: x.area || null, strumenti: x.strumenti || [], tag: x.tag || [], fonte: x.fonte, licenza: x.licenza ? x.licenza.tipo : null, link: x.link || null, stato: getNote(x).stato || '', nota: getNote(x).nota || '',
+    schema: x.schema ? { sintesi: x.schema.sintesi || '', disposizione: x.schema.disposizione || '', blocchi: blocchiOf(x), uso: x.schema.uso || [], esempi: x.schema.esempi || {} } : null, palette: palOf(x), font: fontsOf(x), regole: usoOf(x), avvisi: avvOf(x), prompt: x.tipo === 'prompt' ? (x.testo || '') : null }));
+  return { schema: 'frame01.kit.v1', build: Date.now(), elementi, creatoIl: k.creato, progetto: k.progetto, libreriaBuild: m, ...k };
+}
+const kitProjName = () => (store.get('kitProj', '') || '').trim();
+function kitClaude(){
+  const its = kitItems(), pj = kitProjName();
+  const out = [`Agisci come Senior UI/UX Architect su stack Frame OS. Utilizza i seguenti blocchi e linee guida come riferimento architetturale e stilistico per il progetto:`, pj ? `\nProgetto: ${pj}` : ''];
+  its.forEach((x, n) => {
+    const L = [`\n## ${n + 1}. ${x.titolo}`, `Tipo: ${tl(x.tipo)}${x.area ? ' · ' + (PSHORT[x.area] || x.area) : ''}${(x.strumenti || []).length ? ' · ' + x.strumenti.map(s => STR[s] || s).join(', ') : ''}`];
+    if (x.descrizione) L.push(x.descrizione);
+    if (x.schema && x.schema.sintesi) L.push(`Sintesi: ${x.schema.sintesi}`);
+    if (x.schema && x.schema.disposizione) L.push(`Disposizione: ${x.schema.disposizione}`);
+    const bl = blocchiOf(x); if (bl.length) L.push('Schema dei blocchi:', ...bl.map((b, k) => `${k + 1}. ${b.nome}${b.contenuto ? ' — ' + b.contenuto : ''}${b.funzione ? ' (serve a: ' + b.funzione + ')' : ''}`));
+    const pal = palOf(x); if (pal.length) L.push('Palette token:', ...pal.map(p => `- ${p.nome}: ${p.hex} (${p.tailwind})`));
+    const fo = fontsOf(x); if (fo.length) L.push('Font: ' + fo.map(f => `${f} (fallback ${FB[fontCat(f)]})`).join('; '));
+    const us = usoOf(x); if (us.length) L.push('Regole di implementazione:', ...us.map(u => '- ' + u));
+    const av = avvOf(x); if (av.length) L.push('Attenzione: ' + av.join(' '));
+    if (x.tipo === 'prompt' && x.testo) L.push('Prompt associato:', '```', x.testo.trim(), '```');
+    if (x.link) L.push(`Fonte: ${x.link}${x.licenza ? ' · licenza ' + x.licenza.tipo : ''}`);
+    out.push(L.join('\n'));
+  });
+  out.push('\n---\n' + FOS_CTX);
+  return out.join('\n');
+}
+function kitLovable(){
+  const its = kitItems(), pj = kitProjName();
+  const out = [`Costruisci${pj ? ' «' + pj + '»' : ' il progetto'} con TanStack Start, Tailwind CSS e shadcn/ui, seguendo questi riferimenti. Usa componenti shadcn/ui riutilizzabili, token come CSS variables e classi Tailwind; nessun colore o font fuori da questi token.`, '', 'BASE FRAME OS: sfondo #0a0c10, accento hsl(212 100% 50%), superfici glass (bg-white/[0.035], border-white/[0.08]), raggi card rounded-xl, controlli rounded-[10px], badge rounded-full.'];
+  its.forEach((x, n) => {
+    const L = [`\n### ${n + 1}. ${x.titolo} (${tl(x.tipo)})`];
+    const pal = palOf(x); if (pal.length) L.push('Token colore: ' + pal.slice(0, 8).map(p => `${p.nome} ${p.hex} → ${p.tailwind}, text-[${p.hex}]`).join(' | '));
+    const fo = fontsOf(x); if (fo.length) L.push('Font: ' + fo.map(f => `font-['${f.replace(/ /g, '_')}']`).join(', '));
+    const bl = blocchiOf(x); if (bl.length) L.push('Struttura dei componenti: ' + bl.map(b => `<${String(b.nome).replace(/[^A-Za-z0-9]+/g, ' ').trim().replace(/(^|\s)(\w)/g, (_, __, c) => c.toUpperCase()).replace(/\s/g, '') || 'Blocco'}/>`).join(' › '));
+    const pat = (x.schema && (x.schema.sintesi || x.schema.disposizione)) || x.descrizione; if (pat) L.push('Pattern visivo: ' + String(pat).replace(/\s+/g, ' ').slice(0, 220));
+    if (x.tipo === 'prompt' && x.testo) L.push('Prompt: ' + x.testo.replace(/\s+/g, ' ').trim().slice(0, 400));
+    out.push(L.join('\n'));
+  });
+  out.push('\nAccessibilità: contrasto AA, focus visibile, target da 44px, rispetta prefers-reduced-motion.');
+  return out.join('\n');
+}
+function kitCli(){
+  const ids = [...S.kit].filter(id => byId[id]), dest = store.get('dest', '~/Progetti/frame01-site');
+  if (!ids.length) return '';
+  const q = ids.map(id => `"${id}"`).join(' ');
+  return `# 1 · copia i file del kit nel progetto (dalla cartella 1-AGGIORNATA della libreria)
+node scripts/kit.mjs --dest "${dest}" ${q}
+
+# 2 · se hai aggiunto materiali nuovi, aggiorna prima il catalogo
+node scripts/scan.mjs --no-git
+
+# 3 · ID del kit in un file, per script e agenti (Claude Code legge kit-ids.json)
+printf '%s' '${JSON.stringify(ids).replace(/'/g, "'\\''")}' > "${dest}/kit-ids.json"`;
+}
+function kitText(tab){
+  if (tab === 'claude') return kitClaude(); if (tab === 'lovable') return kitLovable(); if (tab === 'cli') return kitCli();
+  const t = JSON.stringify(kitManifest(null), null, 2); return t.length > 7000 ? t.slice(0, 7000) + '\n…\n(anteprima troncata: la copia e il download contengono tutto)' : t;
+}
+async function kitCode(){
+  if (store.get('kitCode', false) && HTTP && SRV) { const ids = [...S.kit].filter(id => byId[id]?.tipo === 'componente'); if (ids.length) { const r = await api('codice', { ids }); if (r.ok) return r.codice; toast(r.errore || 'Codice non letto'); } }
+  return null;
+}
+const kitFile = () => 'kit-frame01-' + (kitProjName() || 'progetto').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.json';
 async function kitAct(act){
-  let cod = null;
-  if (store.get('kitCode', false) && HTTP && SRV) { const ids = [...S.kit].filter(id => byId[id]?.tipo === 'componente'); if (ids.length) { const r = await api('codice', { ids }); if (r.ok) cod = r.codice; else toast(r.errore || 'Codice non letto'); } }
-  const txt = JSON.stringify(kitJson(cod), null, 2), name = 'kit-frame01-' + (store.get('kitProj', '') || 'progetto').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.json';
-  if (act === 'copia') { try { await navigator.clipboard.writeText(txt); toast('Kit copiato: incollalo nella dashboard'); } catch { toast('Copia non riuscita: usa Scarica'); } return; }
+  if (!S.kit.size) { toast('Il kit è vuoto'); return; }
+  if (act === 'claude') return copy(kitClaude(), 'Copiato per Claude: incollalo in Claude Code o Desktop');
+  if (act === 'lovable') return copy(kitLovable(), 'Copiato per Lovable');
+  if (act === 'cli') return copy(kitCli(), 'Comando copiato');
+  const txt = JSON.stringify(kitManifest(await kitCode()), null, 2), name = kitFile();
+  if (act === 'copia') return copy(txt, 'JSON copiato: incollalo in Libreria › Importa kit di Frame OS');
+  if (act === 'fos') { await copy(txt, 'JSON copiato: incollalo in Importa kit'); window.open(FOS_URL, '_blank', 'noopener'); return; }
   const file = new File([txt], name, { type: 'application/json' });
   if (act === 'condividi' && navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: name }); return; } catch { return; } }
   const u = URL.createObjectURL(file); const el = Object.assign(document.createElement('a'), { href: u, download: name }); document.body.append(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000); toast('Kit scaricato');
 }
-document.addEventListener('click', e => { const b = e.target.closest('[data-kitact]'); if (b) kitAct(b.dataset.kitact); });
-document.addEventListener('input', e => { if (e.target.id === 'kitProj') store.set('kitProj', e.target.value); });
+const KACT = { claude: 'claude', lovable: 'lovable', json: 'copia', cli: 'cli' };
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-kitact]'); if (b) { kitAct(b.dataset.kitact); return; }
+  const t = e.target.closest('[data-ktab]'); if (t) { store.set('kitTab', t.dataset.ktab); kitRender(); const n = document.getElementById('ktab-' + t.dataset.ktab); if (n) n.focus(); }
+});
+document.addEventListener('keydown', e => {
+  const dlg = document.getElementById('dlgKit'); if (!dlg || !dlg.open) return;
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); kitAct(KACT[kitTab()]); return; }
+  const tb = e.target.closest && e.target.closest('.ktabs'); if (!tb) return;
+  const ks = KTABS.map(x => x[0]); let n = ks.indexOf(kitTab());
+  if (e.key === 'ArrowRight') n = (n + 1) % ks.length; else if (e.key === 'ArrowLeft') n = (n - 1 + ks.length) % ks.length; else return;
+  e.preventDefault(); store.set('kitTab', ks[n]); kitRender(); const nb = document.getElementById('ktab-' + ks[n]); if (nb) nb.focus();
+});
+document.addEventListener('input', e => { if (e.target.id === 'kitProj') { store.set('kitProj', e.target.value); const p = document.getElementById('kitPrev'); if (p) p.value = kitText(kitTab()); } });
 
 /* ---------- kit / fonti ---------- */
+function kitThumb(x){
+  const f = x.thumb || (x.preview && x.preview.tipo === 'img' ? x.preview.file : '');
+  if (f) return window.__ONLINE ? `<img class="kth" data-pvk="${esc(f)}" alt="">` : `<img class="kth" loading="lazy" src="${esc(url(f))}" alt="">`;
+  return `<span class="kth kph t-${esc(x.tipo)}" aria-hidden="true">${esc((x.titolo || '?').trim().charAt(0).toUpperCase())}</span>`;
+}
 function kitRender(){
-  const ids = [...S.kit], dest = store.get('dest', '~/Progetti/frame01-site');
-  const cmd = ids.length ? `node scripts/kit.mjs --dest "${dest}" ${ids.map(id => `"${id}"`).join(' ')}` : '';
-  const nComp = ids.filter(id => byId[id].tipo === 'componente').length;
-  const perArea = {}; ids.forEach(id => { const a = PSHORT[byId[id].area] || 'Altro'; perArea[a] = (perArea[a] || 0) + 1; });
-  const H = 'margin:16px 0 6px;font:600 12px var(--mono);color:var(--muted)';
-  $('#dlgKitBody').innerHTML = `<h2>Kit per un progetto</h2><p class="mini">Metti nel kit ciò che serve (pulsante «+ Kit» sulle card, oppure «Aggiungi i mostrati al kit» in cima a ogni pagina). Poi esportalo per la dashboard FRAME.01 OS, o copialo in una cartella di progetto.</p>
-  ${ids.length ? `<p class="mini">${ids.length} elementi · ${Object.entries(perArea).map(([a, n]) => esc(a) + ' ' + n).join(' · ')}</p><div class="box" style="max-height:34vh;overflow:auto">${ids.map(id => { const x = byId[id]; return `<div class="row" style="justify-content:space-between;padding:4px 0"><span><span class="badge t-${esc(x.tipo)}">${esc(tl(x.tipo))}</span> ${esc(x.titolo)}</span><button class="link" data-kit="${esc(id)}">togli</button></div>`; }).join('')}</div>
-  <p><button class="link" data-kitclear="1">Svuota il kit</button></p>
-  <h4 style="${H}">KIT PER LA DASHBOARD (FRAME.01 OS)</h4><input id="kitProj" placeholder="Nome del progetto (facoltativo)" style="width:100%;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:9px 12px;font-size:16px" value="${esc(store.get('kitProj', ''))}">
-  ${nComp && HTTP && SRV ? `<label class="opt" style="margin-top:10px"><input type="checkbox" id="kitCode" ${store.get('kitCode', false) ? 'checked' : ''}> Includi il codice dei ${nComp} componenti (file ≤ 250 KB)</label>` : nComp ? '<p class="mini">Il codice dei componenti si include solo aprendo la libreria dal Mac (Apri-FRAME01-LIBRARY.command).</p>' : ''}
-  <div class="kitrow" style="margin:10px 0"><button class="pill black" data-kitact="scarica">Scarica kit .json</button><button class="pill" data-kitact="condividi">Condividi (iPhone/iPad)</button><button class="pill" data-kitact="copia">Copia JSON</button></div><p class="mini">Nella dashboard: importa il file (o incolla il JSON). Formato <code>frame01-kit/2</code>: voci con area e strumenti, design (palette e font), componenti (link, licenza e, se vuoi, il codice), prompt (testo completo). Nessun file di terzi se non lo scegli.</p>
-  <h4 style="${H}">CARTELLA DEL PROGETTO (copia dei file sul Mac)</h4><input id="kitDest" style="width:100%;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:9px 12px" value="${esc(dest)}">
-  <div class="cmd"><pre id="kitCmd">${esc(cmd)}</pre><button class="pill" data-copy="${esc(cmd)}" id="kitCopy">Copia</button></div>
-  <p class="mini">Le skill vanno in <code>.claude/skills/</code>, i componenti in <code>reference/componenti-framer/</code>, i prompt in <code>reference/prompt/</code>. Il comando aggiunge <code>reference/KIT-LIBRERIA.md</code> con fonte e licenza di ogni elemento.</p>` : '<div class="box">Il kit è vuoto.</div>'}
-  <p style="text-align:right"><button class="pill" data-close="dlgKit">Chiudi</button></p>`;
+  const its = kitItems(), tab = kitTab(), nComp = its.filter(x => x.tipo === 'componente').length;
+  const tipi = {}, tags = new Set(); its.forEach(x => { tipi[x.tipo] = (tipi[x.tipo] || 0) + 1; (x.tag || []).forEach(t => tags.add(t)); });
+  const tk = its.length ? KTABS.map(([k, l]) => `<button class="subtab" role="tab" id="ktab-${k}" data-ktab="${k}" aria-selected="${tab === k}" aria-controls="kpanel" tabindex="${tab === k ? 0 : -1}">${l}</button>`).join('') : '';
+  let panel = '';
+  if (its.length) {
+    const txt = kitText(tab), ta = (ro = true) => `<textarea id="kitPrev" class="kprev" ${ro ? 'readonly' : ''} spellcheck="false" aria-label="Anteprima del testo da copiare" rows="8">${esc(txt)}</textarea>`;
+    if (tab === 'claude') panel = `<p class="mini">Prompt in Markdown per Claude Code o Desktop: istruzioni, poi per ogni elemento schema dei blocchi, palette, font, regole e prompt associato; in fondo il contesto Frame OS.</p>${ta()}<div class="kitrow"><button class="pill black" data-kitact="claude">Copia per Claude</button></div>`;
+    else if (tab === 'lovable') panel = `<p class="mini">Direttiva concisa per Lovable (TanStack Start, Tailwind, shadcn/ui): token HEX con classi Tailwind, struttura dei componenti e pattern visivi.</p>${ta()}<div class="kitrow"><button class="pill black" data-kitact="lovable">Copia per Lovable</button></div>`;
+    else if (tab === 'json') panel = `<p class="mini">Manifest <code>frame01.kit.v1</code> (include anche le sezioni del vecchio formato <code>frame01-kit/2</code>). In Frame OS: Libreria › Importa kit, poi incolla il JSON o carica il file.</p>
+      ${nComp && HTTP && SRV ? `<label class="opt"><input type="checkbox" id="kitCode" ${store.get('kitCode', false) ? 'checked' : ''}> Includi il codice dei ${nComp} componenti (file ≤ 250 KB)</label>` : nComp ? '<p class="mini">Il codice dei componenti si include solo aprendo la libreria dal Mac (Apri-FRAME01-LIBRARY.command).</p>' : ''}
+      ${ta()}<div class="kitrow"><button class="pill black" data-kitact="copia">Copia JSON</button><button class="pill" data-kitact="scarica">Scarica .json</button><button class="pill" data-kitact="condividi">Condividi (iPhone/iPad)</button></div>`;
+    else panel = `<p class="mini">Comandi da eseguire sul Mac. La libreria non ha un server MCP: gli agenti (Claude Code) leggono <code>kit-ids.json</code> o usano il comando di copia.</p>
+      <label class="opt" style="margin-bottom:8px">Cartella del progetto <input id="kitDest" value="${esc(store.get('dest', '~/Progetti/frame01-site'))}" style="flex:1"></label>${ta()}<div class="kitrow"><button class="pill black" data-kitact="cli">Copia comandi</button></div>
+      <p class="mini">Le skill vanno in <code>.claude/skills/</code>, i componenti in <code>reference/componenti-framer/</code>, i prompt in <code>reference/prompt/</code>; il comando aggiunge <code>reference/KIT-LIBRERIA.md</code> con fonte e licenza.</p>`;
+  }
+  $('#dlgKitBody').innerHTML = `<div class="kh"><div><h2>Kit attivo: ${its.length} ${its.length === 1 ? 'elemento' : 'elementi'}</h2>${its.length ? `<div class="kbadges">${Object.entries(tipi).map(([t, n]) => `<span class="badge t-${esc(t)}">${esc(tl(t))} ${n}</span>`).join('')}<span class="chip">${tags.size} tag</span><span class="chip">${new Set(its.map(x => PSHORT[x.area] || 'Altro')).size} categorie</span></div>` : ''}</div>${its.length ? '<button class="pill sm" data-kitclear="1">Svuota kit</button>' : ''}</div>
+  ${its.length ? `<ul class="klist" aria-label="Elementi nel kit">${its.map(x => `<li>${kitThumb(x)}<span class="kt"><b>${esc(x.titolo)}</b><span class="badge t-${esc(x.tipo)}">${esc(tl(x.tipo))}</span></span><button class="kx" data-kit="${esc(x.id)}" aria-label="Rimuovi ${esc(x.titolo)} dal kit" title="Rimuovi dal kit">✕</button></li>`).join('')}</ul>
+  <input id="kitProj" class="kproj" placeholder="Nome del progetto (facoltativo)" value="${esc(store.get('kitProj', ''))}" aria-label="Nome del progetto">
+  <div class="subtabs ktabs" role="tablist" aria-label="Formato di esportazione">${tk}</div><div id="kpanel" role="tabpanel" aria-labelledby="ktab-${tab}">${panel}</div>`
+  : '<div class="box">Il kit è vuoto. Usa «+ Kit» sulle card, oppure «Aggiungi i mostrati al kit» in cima a ogni pagina.</div>'}
+  <div class="kfoot"><span class="mini">${its.length ? '<kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>Invio</kbd> copia il testo della scheda attiva' : ''}</span><span class="kfa">${its.length ? '<button class="pill" data-kitact="fos" title="Copia il JSON e apre Libreria › Importa kit in Frame OS">Apri in Frame OS ↗</button>' : ''}<button class="pill" data-close="dlgKit">Chiudi</button></span></div>`;
+  document.querySelectorAll('#dlgKitBody img[data-pvk]').forEach(im => getPv(im.dataset.pvk).then(pv => { if (pv && pv.url) im.src = pv.url; }));
 }
 
 function guidaRender(){
@@ -1180,7 +1331,7 @@ document.addEventListener('input', e => {
   if (e.target.id === 'q') { S.q = e.target.value; S.limit = 96; if (S.page === 'home' && S.q.trim()) setPage('tutto'); else render(); }
   else if (e.target.id === 'nNota' && cur) { persistNote(cur.id, { nota: e.target.value }); }
   else if (e.target.dataset && e.target.dataset.pvar && cur) { const v = store.get('pvars', {}) || {}; v[e.target.dataset.pvar] = e.target.value; store.set('pvars', v); const pt = $('#pText'); if (pt) pt.textContent = promptResolved(byId[cur.id]); }
-  else if (e.target.id === 'kitDest') { store.set('dest', e.target.value); kitRender(); }
+  else if (e.target.id === 'kitDest') { store.set('dest', e.target.value); const pv = document.getElementById('kitPrev'); if (pv) pv.value = kitCli(); }
 });
 document.addEventListener('change', e => {
   const id = e.target.id;
