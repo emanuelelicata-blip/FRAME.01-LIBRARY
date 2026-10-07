@@ -241,7 +241,7 @@ button,a,.card,.acard,.pg{touch-action:manipulation}
       <button class="navi" id="bFonti"><i>03</i>Fonti</button>
       <button class="navi" id="bGuida"><i>04</i>Guida</button>
     </nav>
-    <label class="search"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="q" type="search" placeholder="Cerca: gsap, luxury, landing…  ( / )" aria-label="Cerca nella libreria" autocomplete="off"></label>
+    <label class="search"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="q" type="search" placeholder="Cerca: gsap, luxury, landing…" aria-label="Cerca nella libreria" autocomplete="off"><kbd class="kbd" id="qk" aria-hidden="true">/</kbd></label>
     <button class="pill" id="bScan" hidden>Aggiorna</button>
     <button class="icon" id="bTheme" aria-label="Cambia tema" title="Cambia tema"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
     <button class="pill black" id="bKit">Kit <span class="n" id="kitN">0</span></button>
@@ -1072,6 +1072,7 @@ document.addEventListener('click', e => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { if (cur) closeItem(); }
   else if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); $('#q').focus(); }
+  else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('#q').focus(); $('#q').select(); }
   else if ((e.key === 'Enter' || e.key === ' ') && document.activeElement?.classList.contains('card')) { e.preventDefault(); openItem(document.activeElement.dataset.id); }
 });
 document.addEventListener('input', e => {
@@ -1214,6 +1215,7 @@ if (HTTP) { api('stato').then(r => { if (r && r.ok) {
   updScan(); render(); if (cur) drawRender(); syncBadge(); } }); }
 { const h0 = decodeURIComponent(location.hash.slice(1)); if (h0 && !h0.startsWith('/') && byId[h0]) openItem(h0); }
 })();
+try { document.getElementById('qk').textContent = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? '⌘K' : 'Ctrl K'; } catch {}
 </script>
 </body>
 </html>
