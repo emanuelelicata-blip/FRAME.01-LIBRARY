@@ -248,6 +248,7 @@ button,a,.card,.acard,.pg{touch-action:manipulation}
   </div>
   <div id="fileBanner" class="banner" hidden></div>
 </header>
+<aside class="side" id="side" aria-label="Navigazione della libreria"></aside>
 <nav class="pages" id="pages" aria-label="Aree d'uso"></nav>
 <section class="phead" id="phead" hidden></section>
 <section class="home" id="home" hidden></section>
@@ -276,6 +277,8 @@ button,a,.card,.acard,.pg{touch-action:manipulation}
     <label class="opt"><input type="checkbox" id="fDup"> Mostra copie e doppioni</label></div></div></div>
   <div class="fp-foot"><button class="pill" id="bReset">Azzera filtri</button><button class="pill black" id="bChiudiF">Fatto</button></div>
 </section>
+<div class="quick" id="quick" aria-label="Filtri rapidi"></div>
+<div id="tbanner" class="tbanner" hidden></div>
 <div class="count" id="countRow"><span id="count" aria-live="polite"></span> <span class="mini" id="meta"></span><span class="mini" id="sync"></span></div>
 <main id="main"><div class="grid" id="grid"></div><div id="moreWrap"></div></main>
 <nav class="tabbar" aria-label="Navigazione">
@@ -292,6 +295,7 @@ button,a,.card,.acard,.pg{touch-action:manipulation}
 <dialog id="dlgGuida"><div class="dlg" id="dlgGuidaBody"></div></dialog>
 <dialog id="dlgFonti"><div class="dlg" id="dlgFontiBody"></div></dialog>
 <dialog id="dlgKit"><div class="dlg" id="dlgKitBody"></div></dialog>
+<dialog id="dlgAI" aria-label="Chiedi all'AI"><div class="dlg" id="dlgAIBody"></div></dialog>
 <div id="gate"><form id="gform" autocomplete="on"><svg viewBox="0 0 720 111" style="width:150px;color:#f2f2ee" role="img" aria-label="FRAME.01"><use href="#f01"/></svg><h1>FRAME.01-LIBRARY</h1><p>Accesso riservato. Il catalogo è cifrato: serve la password.</p><input type="text" name="username" value="library" autocomplete="username" hidden><input id="gpw" type="password" autocomplete="current-password" placeholder="Password" autofocus required><label><input id="grem" type="checkbox"> Ricordami su questo dispositivo</label><button id="gbtn">Entra</button><div id="gerr" role="alert"></div></form></div>
 <script>
 (function(){
@@ -352,11 +356,12 @@ async function copy(txt){ try { await navigator.clipboard.writeText(txt); } catc
 const getNote = i => S.note[i.id] || i.annotazione || {};
 
 /* ---------- filtri ---------- */
-function inPage(i){ const p = S.page; return p === 'home' || p === 'tutto' || (p === 'preferiti' ? S.fav.has(i.id) : i.area === p); }
+function inPage(i){ const p = S.page; return p === 'home' || p === 'tutto' || p === 'obiettivi' || p === 'tipi' || p === 'sviluppo' || (p === 'preferiti' ? S.fav.has(i.id) : i.area === p); }
 function match(i, skip){
   const terms = S.q.toLowerCase().split(/\s+/).filter(Boolean);
   if (!S.dup && i.duplicatoDi) return false;
   if (!inPage(i)) return false;
+  if (S.ids && !S.ids.has(i.id)) return false;
   if (skip !== 'area' && S.area && i.area !== S.area) return false;
   if (skip !== 'strum' && S.strum && !i.strumenti.includes(S.strum)) return false;
   if (S.favOnly && !S.fav.has(i.id)) return false;
@@ -378,6 +383,21 @@ function list(){
 
 /* ---------- cards ---------- */
 function lum(hex){ const m = /^#([0-9a-f]{6})/i.exec(hex || ''); if (!m) return .5; const n = parseInt(m[1], 16); return (.299 * (n >> 16) + .587 * ((n >> 8) & 255) + .114 * (n & 255)) / 255; }
+const strip = t => (t || '').replace(/```[\s\S]*?```/g, ' ').replace(/^#+\s*/gm, '').replace(/^>\s*/gm, '').replace(/^[-*]\s+/gm, '· ').replace(/[*_`]/g, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/<[^>]+>/g, '');
+const isMN = i => /milanote/.test(i.fonte || '');
+function gen(i){ // scheda generata dai dati: serve quando non esiste un'immagine
+  const cls = `gc t-${esc(i.tipo)}`;
+  if (isMN(i)) {
+    const m = /Struttura:\s*([^\n]+)/.exec(i.estratto || ''); const parts = (m ? m[1] : '').split(/\s*(?:,| e )\s*/).map(x => x.trim()).filter(Boolean).slice(0, 6);
+    return `<div class="${cls} gb"><div class="gh">Milanote · ${esc(i.categoria || 'template')}</div><div class="gbrd">${parts.map((x, k) => `<span style="min-height:${34 + (k * 17) % 34}px">${esc(x)}</span>`).join('') || `<span>${esc(i.titolo)}</span>`}</div></div>`;
+  }
+  const head = i.tipo === 'skill' || i.tipo === 'plugin' ? '/' + (i.nome || i.titolo) : i.tipo === 'componente' ? '</> ' + (i.nome || i.titolo) : (i.categoria || tl(i.tipo));
+  let host = ''; try { host = new URL(i.link).hostname.replace(/^www\./, ''); } catch {}
+  const body = strip(i.estratto || i.descrizione || '').split('\n').map(x => x.trim()).filter((x, k, a) => x && !/^(Se vedi|If you see|> )/.test(x) && x.toLowerCase().replace(/^\//, '') !== (i.nome || '').toLowerCase()).slice(0, 8).join('\n');
+  const tr = (i.triggers || []).slice(0, 3).map(x => `<span>${esc(x)}</span>`).join('');
+  return `<div class="${cls}"><div class="gh">${esc(head)}</div><pre>${esc(body || i.descrizione || i.titolo)}</pre>${host ? `<div class="gf">${esc(host)}</div>` : ''}${tr ? `<div class="gt">${tr}</div>` : ''}</div>`;
+}
+const thumbImg = (i, big) => i.thumb ? (window.__ONLINE ? `<img class="img cov" ${big ? 'style="position:static;border-radius:12px;height:auto"' : ''} data-pv${big ? 'f' : ''}="${esc(i.thumb)}" alt="" onerror="this.remove()">` : `<img class="img cov" ${big ? 'style="position:static;border-radius:12px;height:auto"' : ''} loading="lazy" src="${esc(i.thumb)}" alt="" onerror="this.remove()">`) : '';
 function media(i){
   if (i.tipo === 'design-system' && i.palette?.length) {
     const f = re => (i.palette.find(p => re.test(p.nome)) || {}).hex;
@@ -387,10 +407,11 @@ function media(i){
     return `<div class="ds" style="background:${esc(bg)};color:${esc(fg)}"><div class="aa" style="font-family:${font ? `'${esc(font)}',` : ''}Georgia,serif">Aa</div><div class="sw">${i.palette.slice(0, 8).map(p => `<i style="background:${esc(p.hex)}" title="${esc(p.nome)} ${esc(p.hex)}"></i>`).join('')}</div></div>`;
   }
   if (i.tipo === 'prompt') return `<div class="ph pr t-prompt"><span>${esc((i.testo || i.descrizione || '').slice(0, 170))}</span></div>`;
+  if (i.thumb) return `<div class="covw">${gen(i)}${thumbImg(i)}</div>`;
   if (i.preview?.tipo === 'html') return `<div class="thumb"><iframe data-pv="${esc(i.preview.file)}" sandbox="allow-scripts" tabindex="-1" title="Anteprima di ${esc(i.titolo)}"></iframe></div>`;
   if (i.preview?.tipo === 'img') return window.__ONLINE ? `<img class="img" data-pv="${esc(i.preview.file)}" alt="">` : `<img class="img" loading="lazy" src="${esc(url(i.preview.file))}" alt="">`;
   const G = { componente: '</>', riferimento: '◧', documento: '¶', risorsa: '↗' };
-  const ph = `<div class="ph t-${esc(i.tipo)}"><span>${esc(G[i.tipo] || (i.titolo || '?').slice(0, 1).toUpperCase())}</span></div>`;
+  const ph = gen(i);
   if (i.cover && /^https:/.test(i.cover)) return `<div class="covw">${ph}<img class="img cov" loading="lazy" referrerpolicy="no-referrer" src="${esc(i.cover)}" ${hasShot(i) ? `data-fb="${esc(shot(i.link))}"` : ''} alt="" onerror="if(this.dataset.fb){this.src=this.dataset.fb;delete this.dataset.fb}else{this.remove()}"></div>`;
   if (hasShot(i)) return `<div class="covw">${ph}<img class="img cov" loading="lazy" referrerpolicy="no-referrer" src="${esc(shot(i.link))}" alt="" onerror="this.remove()"></div>`;
   return ph;
@@ -446,12 +467,12 @@ function observe(root){ root.querySelectorAll('.thumb, .media:has(img[data-pv])'
 
 const canAdd = () => HTTP && !!SRV && !!(typeof SRV === 'object');
 function aCount(){ const c = {}; items.forEach(i => { if (!i.duplicatoDi) c[i.area] = (c[i.area] || 0) + 1; }); return c; }
-function pageList(){ const c = aCount(); return [['home', 'Panoramica', null], ['tutto', 'Tutto', items.filter(i => !i.duplicatoDi).length], ...AREE.map(a => [a.id, PSHORT[a.id] || a.nome, c[a.id] || 0]), ['preferiti', '★ Preferiti', S.fav.size]]; }
+function pageList(){ const c = aCount(); return [['home', 'Panoramica', null], ['obiettivi', 'Per obiettivo', null], ['tipi', 'Che cosa c\'è', null], ['tutto', 'Tutto', items.filter(i => !i.duplicatoDi).length], ...AREE.map(a => [a.id, PSHORT[a.id] || a.nome, c[a.id] || 0]), ['preferiti', '★ Preferiti', S.fav.size], ['sviluppo', 'Skill e plugin', null]]; }
 const validPage = p => pageList().some(x => x[0] === p);
 function pageHash(){ return S.page === 'home' ? location.pathname + location.search : '#/' + S.page; }
 function setPage(p, fromHash){
   if (!validPage(p)) p = 'home';
-  S.page = p; S.limit = 96; S.area = '';
+  S.page = p; S.limit = 96; S.area = ''; S.ids = null; if (p !== 'obiettivi') S.goalId = '';
   if (!fromHash) { try { history.pushState(null, '', pageHash()); } catch {} }
   renderTags(); render();
   const on = $('#pages .on'); if (on) on.scrollIntoView({ inline: 'center', block: 'nearest' });
@@ -467,7 +488,7 @@ function renderHead(){
   const a = ARE[S.page];
   const t = S.page === 'tutto' ? ['Tutto il catalogo', 'Ogni elemento, filtrabile per area d\'uso, strumento, tipo e tag.'] : S.page === 'preferiti' ? ['Preferiti', 'Gli elementi segnati con ★, di tutte le aree.'] : [a ? a.nome : S.page, a ? a.desc : ''];
   h.hidden = false;
-  h.innerHTML = `<div class="crumb"><button data-page="home">Panoramica</button> › <span>${esc(S.page === 'tutto' || S.page === 'preferiti' ? t[0] : (PSHORT[S.page] || t[0]))}</span></div><div><h1>${esc(t[0])}</h1><p>${esc(t[1])}</p></div><div class="acts">${canAdd() && a ? `` : ''}<button class="pill" data-kitpage="1" title="Aggiunge al kit tutti gli elementi che vedi (massimo 200)">Aggiungi i mostrati al kit</button></div>`;
+  h.innerHTML = `<div class="crumb"><button data-page="home">Panoramica</button> › <span>${esc(S.page === 'tutto' || S.page === 'preferiti' ? t[0] : (PSHORT[S.page] || t[0]))}</span></div><div><h1>${esc(t[0])}</h1><p>${esc(t[1])}</p></div><div class="acts">${canAdd() && a ? `` : ''}<button class="pill" data-aidlg="1" title="Prepara una richiesta per Claude o ChatGPT con gli elementi che vedi">✦ Chiedi all'AI</button><button class="pill" data-kitpage="1" title="Aggiunge al kit tutti gli elementi che vedi (massimo 200)">Aggiungi i mostrati al kit</button></div>`;
 }
 function renderHome(){
   const h = $('#home'); h.hidden = false;
@@ -484,7 +505,7 @@ function renderHome(){
   ${Object.keys(ts).length ? `<div class="hsec">Per strumento</div><div class="filters" style="padding:0 12px">${Object.entries(ts).sort((a, b) => b[1] - a[1]).map(([s, n]) => `<button class="pill" data-strumpage="${esc(s)}">${esc(STR[s] || s)}<span class="n">${n}</span></button>`).join('')}</div>` : ''}`;
   observe(h);
 }
-function render(){
+function render0(){
   const home = S.page === 'home';
   ['#tools', '#countRow', '#main'].forEach(s => $(s).hidden = home);
   $('#kitN').textContent = S.kit.size; $('#kitN2').textContent = S.kit.size;
@@ -499,7 +520,7 @@ function render(){
   g.innerHTML = shown.length ? shown.map(card).join('') : (vuoto || (S.page === 'preferiti' ? '<div class="empty"><h2>Nessun preferito</h2><p>Premi ☆ su una scheda per metterla qui.</p></div>' : '<div class="empty"><h2>Nessun risultato</h2><p>Prova a togliere qualche filtro o a cercare una parola diversa.</p></div>'));
   observe(g);
   $('#moreWrap').innerHTML = all.length > shown.length ? `<button class="pill more" id="more">Mostra altri ${Math.min(96, all.length - shown.length)} (${all.length - shown.length} restanti)</button>` : '';
-  $('#count').textContent = `${all.length} elementi${S.q || S.tipo || S.tag.size || S.fonte || S.prev || S.area || S.strum || S.favOnly ? ' (filtrati)' : ''}`;
+  $('#count').textContent = `${all.length} elementi${S.q || S.tipo || S.tag.size || S.fonte || S.prev || S.area || S.strum || S.favOnly || S.ids ? ' (filtrati)' : ''}`;
   const ft = $('#fTipo'); const counts = {};
   items.forEach(i => { if (match(i, 'tipo')) counts[i.tipo] = (counts[i.tipo] || 0) + 1; });
   const tot = Object.values(counts).reduce((a, b) => a + b, 0);
@@ -520,7 +541,7 @@ function renderTags(){
 }
 
 /* ---------- dettaglio ---------- */
-const TABS = [['panoramica', 'Panoramica'], ['anteprima', 'Anteprima'], ['contenuti', 'Contenuti'], ['uso', 'Come usarlo']];
+const TABS = [['panoramica', 'Panoramica'], ['anteprima', 'Anteprima'], ['contenuti', 'Contenuti'], ['uso', 'Come usarlo'], ['ai', "Chiedi all'AI"]];
 function openItem(id, tab){
   if (!byId[id]) return; const prev = cur; cur = { id, tab: tab || 'panoramica', page: 0, w: 1440, z: 'fit', seq: (prev && prev.seq && prev.seq.includes(id)) ? prev.seq : list().map(x => x.id) };
   S.recent = [id, ...S.recent.filter(x => x !== id)].slice(0, 8); store.set('recent', S.recent);
@@ -535,12 +556,14 @@ function drawRender(){
   d.innerHTML = `<div class="dh"><button class="pill close" id="dClose" aria-label="Chiudi">Chiudi ✕</button><div class="crumb" style="padding-right:96px"><button data-closeitem="1">${esc(pgName)}</button> › <span>${esc(PSHORT[i.area] || tl(i.tipo))}</span></div><span class="badge t-${esc(i.tipo)}">${esc(tl(i.tipo))}</span> <button class="pill ${S.fav.has(i.id) ? 'on' : ''}" data-fav="${esc(i.id)}" style="margin-left:6px;min-height:28px;padding:2px 12px">${S.fav.has(i.id) ? '★ Preferito' : '☆ Preferito'}</button><h2>${esc(i.titolo)}</h2><div class="sub">${esc(i.percorso)}</div>
   <div class="dtools">${(cur.seq || []).length > 1 ? `<span class="dnav" style="margin:0"><button data-nav="-1" aria-label="Precedente" ${si <= 0 ? 'disabled' : ''}>‹</button><span class="mini">${si + 1} / ${cur.seq.length}</span><button data-nav="1" aria-label="Successivo" ${si >= cur.seq.length - 1 ? 'disabled' : ''}>›</button></span>` : ''}${canShare ? '<button class="pill" data-share="1">Condividi</button>' : ''}</div>
   <div class="tabs" role="tablist">${TABS.map(([k, l]) => `<button class="tab ${cur.tab === k ? 'on' : ''}" role="tab" aria-selected="${cur.tab === k}" data-tab="${k}">${l}</button>`).join('')}</div></div><div class="panel" id="panel">${panel(i)}</div>`;
+  if (cur.tab === 'ai') aiRefresh();
   if (cur.tab === 'anteprima') { fitPv(); const f = $('#pvf'); if (f && f.dataset.pv) fillFrame(f); const im = $('#panel img[data-pvf]'); if (im) getPv(im.dataset.pvf).then(pv => { if (pv && pv.url) im.src = pv.url; }); }
 }
 function panel(i){
   if (cur.tab === 'anteprima') return pPrev(i);
   if (cur.tab === 'contenuti') return pCont(i);
   if (cur.tab === 'uso') return pUso(i);
+  if (cur.tab === 'ai') return aiPanel({ item: i });
   return pOver(i);
 }
 function link(id, label){ const x = byId[id]; return x ? `<button class="link" data-open="${esc(id)}">${esc(label || x.titolo)}</button> <span class="mini">${esc(tl(x.tipo))} · ${esc(x.fonte)}</span>` : ''; }
@@ -575,9 +598,10 @@ function pOver(i){
   <p><button class="pill ${S.kit.has(i.id) ? 'on' : 'black'}" data-kit="${esc(i.id)}">${S.kit.has(i.id) ? 'Nel kit ✓ (togli)' : 'Aggiungi al kit'}</button></p>`;
 }
 function pPrev(i){
+  if (i.thumb && i.preview?.tipo !== 'html' && i.preview?.tipo !== 'img') return `<div>${thumbImg(i, true)}</div>${i.link && /^https:/.test(i.link) ? `<p><a class="pill black" target="_blank" rel="noopener noreferrer" href="${esc(i.link)}">Apri la pagina ↗</a></p>` : ''}`;
   if (i.preview?.tipo === 'img') return window.__ONLINE ? `<img class="img" style="border-radius:12px;height:auto" data-pvf="${esc(i.preview.file)}" alt="Anteprima">` : `<img class="img" style="border-radius:12px" src="${esc(url(i.preview.file))}" alt="Anteprima">`;
   if (i.preview?.tipo !== 'html') {
-    const none = '<div class="box">Nessuna anteprima per questo elemento. Guarda <b>Contenuti</b> e <b>Come usarlo</b>.</div>';
+    const none = `<div class="gcbig">${gen(i)}</div><p class="mini">Nessuna immagine per questo elemento: qui sopra un riassunto del contenuto. Guarda <b>Contenuti</b> e <b>Come usarlo</b>.</p>`;
     if (!i.link || !/^https:/.test(i.link)) return none;
     const cov = i.cover && /^https:/.test(i.cover) ? i.cover : null, fb = hasShot(i) ? shot(i.link) : null;
     if (!cov && !fb) return `<p><a class="pill black" target="_blank" rel="noopener noreferrer" href="${esc(i.link)}">Apri il sito ↗</a></p><p class="mini">Anteprime dei siti disattivate: riattivale da Fonti → Impostazioni.</p>`;
@@ -752,9 +776,259 @@ async function pubblica(opz){
   toast('Pubblicato: la pagina online si aggiorna entro 1–2 minuti'); syncN = 1; syncBadge(20000); return true;
 }
 
+/* ---------- guida ai tipi · «Chiedi all'AI» (prompt da copiare in Claude o ChatGPT) ---------- */
+const TIPO_INFO = {
+  skill: { cos: 'cartella con un file SKILL.md: istruzioni specializzate che Claude carica da solo quando il compito lo richiede', uso: 'Copiala in ~/.claude/skills/ (Claude Code) o caricala in Claude → Impostazioni → Capacità. Poi chiedi il compito con le parole del campo «Si attiva con».', esempio: '«Fai un audit di accessibilità di questa pagina»' },
+  plugin: { cos: 'pacchetto che raggruppa skill, comandi /nome, agenti e connettori', uso: 'Si installa da un marketplace (/plugin in Claude Code) o da cartella. Dopo l\'installazione i comandi compaiono scrivendo «/».', esempio: '«/design-critique» su uno screenshot' },
+  'design-system': { cos: 'regole visive di un brand o di uno stile: colori, font, spaziature, componenti', uso: 'Dallo a Claude, Lovable o Framer come riferimento: «costruisci la pagina con questo design system». Controlla palette e font nella scheda.', esempio: '«Landing page per un hotel con questo design system»' },
+  template: { cos: 'base già impostata (sito HTML, presentazione, video) da duplicare e adattare', uso: 'Apri l\'anteprima, copia la cartella nel progetto, sostituisci testi, immagini e colori. Per i template video/motion lancia la preview indicata nei file.', esempio: '«Adatta questo template al mio cliente e cambia palette e testi»' },
+  componente: { cos: 'componente Framer (codice React/override) da incollare nel tuo progetto', uso: 'In Framer: Assets → Code → New, incolla il file, trascina il componente in pagina e regola le proprietà nel pannello.', esempio: '«Aggiungi questo componente all\'hero e collega i colori ai token»' },
+  prompt: { cos: 'testo da incollare in una chat AI, con variabili tra [parentesi] da sostituire', uso: 'Premi «Copia», incolla in Claude o ChatGPT e riempi le variabili. Salva le versioni che funzionano con le note.', esempio: '«100 idee in stile divergente per [progetto]»' },
+  riferimento: { cos: 'modello da cui trarre struttura e idee (per esempio una board Milanote): non si esegue, si imita', uso: 'Guarda l\'anteprima e la struttura, poi ricrea lo schema nel tuo strumento (Milanote, Notion, Figma) o chiedi all\'AI di adattarlo al progetto.', esempio: '«Crea un brief creativo con questa struttura per il cliente X»' },
+  'modello-media': { cos: 'descrizione/prompt per generare immagini o video con modelli AI', uso: 'Copia il prompt nello strumento indicato (Midjourney, Runway, Kling…), cambia soggetto e stile, genera varianti.', esempio: '«Stessa scena in luce notturna e formato 9:16»' },
+  documento: { cos: 'analisi o guida da leggere o dare come contesto', uso: 'Leggila per capire il metodo, oppure incollane i punti chiave all\'inizio di una chat perché l\'AI lavori con quelle regole.', esempio: '«Usa questa guida come regole per il mio progetto»' },
+  risorsa: { cos: 'link o contenuto web salvato (articolo, tutorial, reel, board)', uso: 'Apri il link, prendi ciò che serve e aggiungi una nota alla scheda con cosa hai imparato.', esempio: '«Riassumi questa risorsa e dimmi come applicarla»' },
+  html: { cos: 'sito o pagina HTML completa', uso: 'Aprila e studia struttura, animazioni e CSS; copia le parti utili oppure chiedi all\'AI di rifarla con i tuoi contenuti.', esempio: '«Rifai questa pagina con i miei testi mantenendo il layout»' },
+  progetto: { cos: 'progetto completo in cartella', uso: 'Aprila in un editor, lancia il progetto come indicato nei file e usalo come base o riferimento.', esempio: '«Spiegami com\'è organizzato e cosa riuso»' },
+  font: { cos: 'famiglia di caratteri', uso: 'Controlla la licenza, installa il font e collegalo ai token tipografici del progetto.', esempio: '«Proponi abbinamenti per titoli e testo»' },
+  immagini: { cos: 'raccolta di immagini di riferimento', uso: 'Usale come moodboard o come immagini guida per i generatori.', esempio: '«Descrivi lo stile comune di queste immagini»' }
+};
+const AI = { kind: null, goal: store.get('goal', ''), ctx: null };
+const AIK_ITEM = { spiega: 'Spiegami come usarlo', progetto: 'Applicalo al mio obiettivo', confronta: 'Confrontalo con simili', crea: 'Crea la mia versione', rischi: 'Controlla qualità e rischi' };
+const AIK_LIST = { scegli: 'Scegli per il mio obiettivo', piano: 'Piano di lavoro', lacune: 'Cosa manca?' };
+const aiClean = t => (t || '').replace(/\/Users\/[^\/\s]+/g, '~').replace(/\s+\n/g, '\n').trim();
+const simili = i => { const tg = new Set(i.tag || []); return items.filter(x => x.id !== i.id && !x.duplicatoDi && x.tipo === i.tipo).map(x => [x, (x.area === i.area ? 2 : 0) + (x.tag || []).filter(t => tg.has(t)).length]).filter(a => a[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 8).map(a => a[0]); };
+function aiItem(i){
+  const ti = TIPO_INFO[i.tipo] || {};
+  const body = aiClean(strip(i.testo || i.estratto || '')).slice(0, 1800);
+  const files = (i.contenuti?.top || []).slice(0, 8).map(f => f.nome).join(', ');
+  return [`TIPO: ${tl(i.tipo)}${ti.cos ? ' — ' + ti.cos : ''}`, `NOME: ${i.titolo}${i.nome && i.nome !== i.titolo ? ' (' + i.nome + ')' : ''}`,
+    `AREA D'USO: ${(ARE[i.area] || {}).nome || '—'}${i.strumenti?.length ? ' · STRUMENTI: ' + i.strumenti.map(s => STR[s] || s).join(', ') : ''}${i.fonte ? ' · FONTE: ' + i.fonte : ''}`,
+    i.descrizione ? `DESCRIZIONE: ${aiClean(i.descrizione)}` : '', i.triggers?.length ? `SI ATTIVA CON: ${i.triggers.slice(0, 6).join(' | ')}` : '', i.tag?.length ? `TAG: ${i.tag.map(t => TAGL[t] || t).join(', ')}` : '',
+    body ? `CONTENUTO (estratto):\n${body}` : '', files ? `FILE: ${files}` : '', i.link ? `LINK: ${i.link}` : ''].filter(Boolean).join('\n');
+}
+const AI_CREA = {
+  skill: 'Scrivi la mia versione di questa skill: SKILL.md completo (frontmatter con name e description che dice QUANDO attivarla, passi, esempi di richieste, controlli finali), adattata al mio obiettivo. Tieni solo ciò che serve. Poi spiegami dove salvarla e come provarla in 3 test.',
+  plugin: 'Progetta la mia versione di questo plugin: struttura delle cartelle (plugin.json, skills/, commands/, agents/, hooks, connettori MCP), contenuto dei file principali, comandi /nome con esempi, e come installarlo e provarlo. Adattalo al mio obiettivo.',
+  prompt: 'Scrivi 3 varianti migliorate di questo prompt (breve, dettagliata, con esempi), con variabili [tra parentesi], adatte al mio obiettivo, e dimmi quando usare ciascuna.',
+  template: 'Dimmi come trasformare questo template in una mia versione: cosa cambiare (struttura, testi, immagini, palette, motion), cosa togliere, e scrivimi le istruzioni da dare a un\'AI per farlo passo per passo.',
+  'design-system': 'Ricava da questo design system i miei token (colori, tipografia, spaziature, raggi, ombre, motion) in CSS variables e le regole d\'uso per componenti e pagine, adattati al mio obiettivo. Indica contrasti e accessibilità.',
+  componente: 'Adatta questo componente Framer al mio obiettivo: proprietà da esporre, varianti, stati, accessibilità, e il codice modificato.'
+};
+function aiPrompt(kind, ctx, goal){
+  const g = (goal || '').trim(), G = g ? `Il mio obiettivo: ${g}.` : 'Il mio contesto: designer (siti web e brand di lusso, dashboard, presentazioni).';
+  const head = 'Sono un designer. Uso questa libreria personale di strumenti (skill, plugin, design system, template, prompt, componenti). ';
+  if (ctx.list) {
+    const rows = ctx.list.slice(0, 40).map(x => `- ${tl(x.tipo)} · ${x.titolo} · ${aiClean(x.descrizione || '').slice(0, 110)}${x.strumenti?.length ? ' · ' + x.strumenti.map(s => STR[s] || s).join('/') : ''}`).join('\n');
+    const base = `${head}${G}\n\nEcco ${Math.min(40, ctx.list.length)} elementi${ctx.list.length > 40 ? ` (i primi di ${ctx.list.length}, quelli che sto guardando: ${ctx.label})` : ` (${ctx.label})`}:\n${rows}\n\n`;
+    if (kind === 'piano') return base + 'Costruisci un piano di lavoro per il mio obiettivo usando questi elementi: fasi in ordine, quale elemento usare in ogni fase e perché, cosa chiedere all\'AI in ogni passo (una richiesta pronta da incollare per fase) e come controllare il risultato. Rispondi in italiano.';
+    if (kind === 'lacune') return base + 'Analizza cosa copre questa selezione per il mio obiettivo e cosa manca: duplicati o sovrapposizioni, lacune, tipi di strumento che dovrei aggiungere (skill, plugin, design system, template, prompt) con esempi di cosa cercare. Rispondi in italiano con una tabella e 5 azioni prioritarie.';
+    return base + 'Scegli i 5-8 elementi più adatti al mio obiettivo. Per ognuno: perché, come usarlo e in che ordine. Segnala sovrapposizioni e cosa evitare. Rispondi in italiano con una tabella seguita da un breve piano passo-passo.';
+  }
+  const i = ctx.item, blk = `${head}Ho questo elemento:\n\n${aiItem(i)}\n\n${G}\n\n`;
+  if (kind === 'progetto') return blk + 'Come lo uso per il mio obiettivo? Dammi: passi concreti, cosa adattare, una richiesta pronta da incollare in Claude o ChatGPT e i risultati attesi. Se non è adatto, dillo e indica cosa cercare al suo posto. Rispondi in italiano.';
+  if (kind === 'confronta') { const s = simili(i); return blk + `Confrontalo con questi elementi simili della mia libreria:\n${s.map(x => `- ${x.titolo}: ${aiClean(x.descrizione || '').slice(0, 110)}`).join('\n') || '(nessuno trovato)'}\n\nTabella: quando scegliere l'uno o l'altro, punti di forza, rischi e sovrapposizioni. Chiudi con una raccomandazione per il mio obiettivo. Rispondi in italiano.`; }
+  if (kind === 'crea') return blk + (AI_CREA[i.tipo] || 'Crea una mia versione di questo elemento, adattata al mio obiettivo: cosa mantenere, cosa cambiare e il risultato finale pronto da usare.') + ' Rispondi in italiano.';
+  if (kind === 'rischi') return blk + 'Fai una revisione di qualità e sicurezza: cosa fa davvero, quali permessi/strumenti/comandi o accessi di rete richiede, dati sensibili coinvolti, rischi (anche prompt injection), cosa verificare prima di installarlo o usarlo. Dai un voto da 1 a 5 con motivazioni. Rispondi in italiano.';
+  return blk + 'Spiegami in italiano, in modo pratico: 1) a cosa serve e in quali casi concreti lo userei (sito web, landing, dashboard, brand, presentazione, automazione); 2) come si usa passo passo (dove va installato o caricato, come si richiama) con una richiesta di esempio pronta da incollare; 3) limiti e cosa NON fa; 4) con quali altri tipi di elementi si combina.';
+}
+function aiKinds(ctx){ return ctx.list ? AIK_LIST : Object.fromEntries(Object.entries(AIK_ITEM).filter(([k]) => k !== 'rischi' || ['skill', 'plugin', 'componente', 'template', 'html', 'progetto'].includes(ctx.item.tipo))); }
+function aiPanel(ctx){
+  AI.ctx = ctx; const ks = aiKinds(ctx); if (!AI.kind || !ks[AI.kind]) AI.kind = Object.keys(ks)[0];
+  const ti = !ctx.list && TIPO_INFO[ctx.item.tipo];
+  return `<div class="aip">${ti ? `<div class="box tinfo"><b>${esc(tl(ctx.item.tipo))}</b>: ${esc(ti.cos)}.<br><span class="mini">Come si usa: ${esc(ti.uso)}</span></div>` : ''}
+  <p class="mini">1 · Scrivi l'obiettivo. 2 · Scegli la richiesta. 3 · Controlla il testo e copialo in Claude o ChatGPT: contiene già i dati ${ctx.list ? 'degli elementi scelti' : 'di questa scheda'}.</p>
+  <label class="aig" for="aiGoal">Il tuo obiettivo</label><input id="aiGoal" type="text" value="${esc(AI.goal)}" placeholder="es. sito per un hotel di lusso · dashboard clienti · landing con motion" autocomplete="off">
+  <div class="aik" role="group" aria-label="Tipo di richiesta">${Object.entries(ks).map(([k, l]) => `<button class="pill" data-aik="${k}" aria-pressed="${AI.kind === k}">${esc(l)}</button>`).join('')}</div>
+  <textarea id="aiText" readonly rows="11" aria-label="Testo da copiare"></textarea>
+  <div class="acts"><button class="pill black" data-aicopy="1">Copia il testo</button><a class="pill" id="aiClaude" target="_blank" rel="noopener noreferrer" href="#">Apri in Claude ↗</a><a class="pill" id="aiGpt" target="_blank" rel="noopener noreferrer" href="#">Apri in ChatGPT ↗</a></div>
+  <p class="mini" id="aiMeta"></p></div>`;
+}
+function aiRefresh(){
+  const ta = $('#aiText'); if (!ta || !AI.ctx) return;
+  const txt = aiPrompt(AI.kind, AI.ctx, AI.goal); ta.value = txt;
+  document.querySelectorAll('[data-aik]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.aik === AI.kind)));
+  const ok = encodeURIComponent(txt).length < 7000;
+  [['aiClaude', 'https://claude.ai/new?q='], ['aiGpt', 'https://chatgpt.com/?q=']].forEach(([id, u]) => { const a = $('#' + id); if (a) { a.hidden = !ok; a.href = ok ? u + encodeURIComponent(txt) : '#'; } });
+  $('#aiMeta').textContent = `${txt.length} caratteri${ok ? '' : ' · troppo lungo per aprirlo direttamente: usa «Copia il testo» e incolla'}. I testi non lasciano questa pagina finché non li copi o apri tu.`;
+}
+function openAI(ctx){
+  const all = ctx ? ctx.list : list(), lab = ctx ? ctx.label : [S.tipo && tl(S.tipo), S.area && (ARE[S.area] || {}).nome, S.page !== 'tutto' && S.page !== 'home' && PSHORT[S.page], S.q && `«${S.q}»`].filter(Boolean).join(', ') || 'tutto il catalogo';
+  $('#dlgAIBody').innerHTML = `<h2>Chiedi all'AI</h2><p class="mini">${all.length} elementi nella vista attuale (${esc(lab)}). Cambia filtri o pagina se vuoi restringere la scelta.</p>${aiPanel({ list: all, label: lab })}<p style="text-align:right"><button class="pill" data-close="dlgAI">Chiudi</button></p>`;
+  $('#dlgAI').showModal(); aiRefresh();
+}
+document.addEventListener('input', e => { if (e.target.id === 'aiGoal') { AI.goal = e.target.value; store.set('goal', AI.goal); aiRefresh(); } });
+
+/* ---------- pagine guida: obiettivi · tipi · sviluppo; barra laterale; filtri rapidi ---------- */
+const SPECIAL = new Set(['obiettivi', 'tipi', 'sviluppo']);
+S.ids = null; S.idsLabel = ''; S.goalId = '';
+const GOALS = [
+  { id: 'sito-lusso', t: 'Sito web per un brand di lusso', d: 'Hotel, auto, ristorazione: identità forte, motion misurato, tempi di caricamento bassi.', ob: 'sito web per un brand di lusso (hotel, automotive, ristorazione)', fasi: [
+    { t: '1 · Brief e direzione', d: 'Prima di disegnare chiarisci cliente, pubblico, tono e riferimenti. Usa i brief creativi e le board di strategia come traccia da compilare.', spec: { area: 'brief', q: 'brief|brand|strateg|moodboard|creative|campaign' } },
+    { t: '2 · Identità e design system', d: 'Scegli palette, tipografia e regole visive. Per il lusso cerca stile editoriale o minimal, contrasti morbidi, molto spazio.', spec: { tipo: ['design-system'], tag: ['lusso', 'editoriale', 'minimal', 'automotive'] } },
+    { t: '3 · Struttura e template', d: 'Parti da un layout già pensato (hero, storia del brand, galleria, prenotazione) e sostituisci contenuti e immagini.', spec: { tipo: ['template', 'html', 'progetto'], tag: ['landing', 'portfolio', 'editoriale', 'lusso', 'gallery'] } },
+    { t: '4 · Motion e 3D, solo dove aiuta', d: 'Un solo gesto di movimento forte (hero o transizione) vale più di dieci effetti. Controlla prestazioni e «riduci movimento».', spec: { tag: ['motion', '3d-webgl', 'animazioni', 'cinematico'] } },
+    { t: '5 · Costruzione', d: 'Framer, Webflow o codice: componenti pronti e skill per costruire e collegare i contenuti.', spec: { area: 'piattaforme' } },
+    { t: '6 · Qualità e consegna', d: 'Accessibilità, SEO e revisione del codice prima di mostrare il lavoro al cliente.', spec: { area: 'controllo' } }] },
+  { id: 'dashboard', t: 'Dashboard o pannello interno', d: 'Dati leggibili, componenti coerenti, stati vuoto/caricamento/errore.', ob: 'dashboard o pannello interno con dati, grafici e tabelle', fasi: [
+    { t: '1 · Dati e utenti', d: 'Decidi chi guarda cosa, quali numeri contano e ogni quanto si aggiornano, prima di disegnare schermate.', spec: { area: 'brief', q: 'dashboard|kpi|report|persona|journey|dati' } },
+    { t: '2 · Interfaccia e design system', d: 'Griglia, tipografia compatta, colori di stato (non solo colore). Cerca sistemi pensati per dashboard e wireframe.', spec: { tag: ['dashboard', 'wireframe', 'ui', 'token'] } },
+    { t: '3 · Componenti e grafici', d: 'Tabelle, filtri, grafici e card riusabili; skill e plugin che li generano o li controllano.', spec: { q: 'chart|grafic|table|tabell|data|component', tipo: ['componente', 'skill', 'template', 'plugin'] } },
+    { t: '4 · Controllo', d: 'Contrasti, tastiera, schermi piccoli e stati di errore.', spec: { area: 'controllo', tag: ['accessibilita', 'qualita-codice'] } }] },
+  { id: 'landing', t: 'Landing page che converte', d: 'Un’offerta chiara, un solo invito all’azione, pagina veloce.', ob: 'landing page che converte per un servizio', fasi: [
+    { t: '1 · Offerta e testi', d: 'Titolo, promessa, prove e invito all’azione: prompt e skill di copywriting da adattare.', spec: { tipo: ['prompt', 'skill'], q: 'copy|landing|headline|cta|offer|vendita' } },
+    { t: '2 · Layout', d: 'Struttura a sezioni, gerarchia, versione mobile prima.', spec: { tag: ['landing', 'one-page', 'wireframe'] } },
+    { t: '3 · Interazione e motion', d: 'Movimento che guida lo sguardo verso l’azione, non che distrae.', spec: { tag: ['motion', 'animazioni'] } },
+    { t: '4 · SEO e velocità', d: 'Titoli, meta, immagini leggere, punteggio di prestazioni.', spec: { tag: ['seo', 'ottimizzazione', 'analisi-sito'] } }] },
+  { id: 'deck', t: 'Presentazione o documento per il cliente', d: 'Slide, PDF, report: storia chiara e layout pulito.', ob: 'presentazione o documento da consegnare a un cliente', fasi: [
+    { t: '1 · Storia e contenuto', d: 'Scrivi prima la sequenza dei messaggi, poi le slide.', spec: { area: 'brief', q: 'storytelling|presentation|deck|pitch|report' } },
+    { t: '2 · Template', d: 'Basi già impaginate da adattare a colori e font del cliente.', spec: { area: 'presentazioni', tipo: ['template'] } },
+    { t: '3 · Skill e plugin', d: 'Automatizzano creazione e revisione di slide, PDF e documenti.', spec: { area: 'presentazioni', tipo: ['skill', 'plugin'] } }] },
+  { id: 'brand', t: 'Identità di marca', d: 'Strategia, colore, tipografia e regole d’uso.', ob: 'identità di marca (strategia, colore, tipografia, regole)', fasi: [
+    { t: '1 · Strategia', d: 'Posizionamento, valori, tono di voce: board e brief da compilare.', spec: { area: 'brief', q: 'brand|strateg|position' } },
+    { t: '2 · Colore e tipografia', d: 'Palette con contrasti verificati e abbinamenti di font.', spec: { tag: ['colore', 'tipografia'] } },
+    { t: '3 · Design system e riferimenti', d: 'Come trasformare l’identità in regole riusabili.', spec: { tipo: ['design-system'] } },
+    { t: '4 · Immagini e moodboard', d: 'Direzione visiva e generazione di immagini coerenti.', spec: { area: 'media' } }] },
+  { id: 'immagini-video', t: 'Immagini AI, video e motion', d: 'Dal prompt al risultato: modelli, stili e montaggio.', ob: 'immagini AI, video e motion per un progetto', fasi: [
+    { t: '1 · Idee e prompt', d: 'Prompt pronti da adattare a soggetto e stile.', spec: { tipo: ['prompt'], q: 'image|immagin|video|midjourney|scena' } },
+    { t: '2 · Modelli per immagini e video', d: 'Descrizioni e prompt dettagliati per generare scene e adattamenti.', spec: { tipo: ['modello-media'] } },
+    { t: '3 · Motion, video e 3D', d: 'Animazione, After Effects, Blender e 3D.', spec: { area: 'motion' } },
+    { t: '4 · Ritocco e montaggio', d: 'Cleanup, varianti, sottotitoli, esportazioni.', spec: { tag: ['video', 'immagini-ai', 'firefly'] } }] },
+  { id: 'automazione', t: 'Automatizzare il lavoro', d: 'Workflow, agenti e connettori che fanno le parti ripetitive.', ob: 'automatizzare parti ripetitive del mio lavoro con agenti e workflow', fasi: [
+    { t: '1 · Guide e idee', d: 'Che cosa conviene automatizzare e come impostarlo.', spec: { area: 'automazione', tipo: ['risorsa', 'documento'] } },
+    { t: '2 · Skill e agenti', d: 'Istruzioni specializzate che Claude applica da solo.', spec: { area: 'automazione', tipo: ['skill'] } },
+    { t: '3 · Plugin e connettori', d: 'Pacchetti con comandi, agenti e collegamenti a strumenti esterni (MCP).', spec: { area: 'automazione', tipo: ['plugin'] } }] },
+  { id: 'qualita', t: 'Controllare prima di consegnare', d: 'Accessibilità, SEO, codice e prestazioni.', ob: 'controllo qualità di un sito prima della consegna', fasi: [
+    { t: '1 · Accessibilità', d: 'Contrasti, tastiera, lettori di schermo, bersagli touch.', spec: { tag: ['accessibilita', 'accessibilità'] } },
+    { t: '2 · SEO', d: 'Struttura dei titoli, meta, dati strutturati, link.', spec: { tag: ['seo', 'analisi-sito'] } },
+    { t: '3 · Codice e test', d: 'Revisione, pulizia e verifiche automatiche.', spec: { tag: ['qualita-codice'] } },
+    { t: '4 · Altri controlli', d: 'Tutto il resto dell’area Controllo e qualità.', spec: { area: 'controllo' } }] },
+  { id: 'prompt', t: 'Scrivere prompt migliori', d: 'Testi pronti da incollare e metodi per riscriverli.', ob: 'scrivere prompt più efficaci per i miei lavori', fasi: [
+    { t: '1 · Prompt pronti', d: 'Copia, sostituisci le variabili tra [parentesi] e prova.', spec: { tipo: ['prompt'] } },
+    { t: '2 · Skill di scrittura', d: 'Strumenti che migliorano o strutturano le richieste.', spec: { tipo: ['skill'], q: 'prompt|writing|copy' } },
+    { t: '3 · Guide', d: 'Metodi e analisi da leggere.', spec: { tipo: ['documento', 'risorsa'], q: 'prompt' } }] }
+];
+const GSTATO = i => (getNote(i).stato || '');
+function resolve(spec){
+  const re = spec.q ? new RegExp(spec.q, 'i') : null;
+  const out = items.filter(i => {
+    if (i.duplicatoDi || GSTATO(i) === 'Scartato') return false;
+    if (spec.area && i.area !== spec.area) return false;
+    if (spec.tipo && !spec.tipo.includes(i.tipo)) return false;
+    if (spec.tag || re) { const a = spec.tag && (i.tag || []).some(t => spec.tag.includes(t)), b = re && re.test(`${i.titolo} ${i.nome} ${i.descrizione}`); if (!(a || b)) return false; }
+    return true;
+  });
+  const sc = i => (i.thumb ? 3 : i.preview ? 2 : 0) + (S.fav.has(i.id) ? 3 : 0) + (GSTATO(i) === 'Da usare' ? 2 : 0) + ((i.descrizione || '').length > 60 ? 1 : 0);
+  return out.sort((a, b) => sc(b) - sc(a) || a.titolo.localeCompare(b.titolo, 'it'));
+}
+const gridMini = ids => `<div class="grid v-var gmini" style="--cw:230px">${ids.map(i => card(i)).join('')}</div>`;
+function pObiettivi(){
+  if (S.goalId) {
+    const g = GOALS.find(x => x.id === S.goalId); if (!g) { S.goalId = ''; return pObiettivi(); }
+    return `<div class="hhead"><div class="crumb"><button data-goal="">Per obiettivo</button> › <span>${esc(g.t)}</span></div><h1>${esc(g.t)}</h1><p>${esc(g.d)}</p></div>
+    <div class="acts" style="padding:0 var(--space-4) var(--space-3)"><button class="pill black" data-goalai="${g.id}">✦ Chiedi all'AI un piano completo</button></div>
+    ${g.fasi.map((f, k) => { const r = resolve(f.spec); return `<section class="fase"><div class="fh"><h2>${esc(f.t)}</h2><span class="mini">${r.length} elementi</span></div><p class="fd">${esc(f.d)}</p>${r.length ? gridMini(r.slice(0, 4)) : '<p class="mini">Nessun elemento trovato in libreria per questa fase: puoi aggiungerne con Importa.</p>'}
+      <div class="acts"><button class="pill" data-phaseall="${g.id}:${k}" ${r.length ? '' : 'disabled'}>Vedi tutti (${r.length})</button><button class="pill" data-phaseai="${g.id}:${k}" ${r.length ? '' : 'disabled'}>✦ Chiedi all'AI</button></div></section>`; }).join('')}`;
+  }
+  return `<div class="hhead"><h1>Per obiettivo</h1><p>Dimmi che cosa devi fare: ti mostro in che ordine usare gli strumenti della libreria, fase per fase.</p></div>
+  <div class="agrid">${GOALS.map(g => `<button class="acard" data-goal="${g.id}"><span class="mini">${g.fasi.length} fasi</span><b>${esc(g.t)}</b><span class="d">${esc(g.d)}</span></button>`).join('')}
+  <button class="acard" data-page="sviluppo"><span class="mini">guida</span><b>Creare le mie skill e plugin</b><span class="d">Come trasformare un metodo di lavoro in una skill o in un plugin, partendo dai modelli della libreria.</span></button></div>`;
+}
+function pTipi(){
+  const cnt = {}; items.forEach(i => { if (!i.duplicatoDi) cnt[i.tipo] = (cnt[i.tipo] || 0) + 1; });
+  return `<div class="hhead"><h1>Che cosa c'è in libreria</h1><p>Ogni tipo di elemento si usa in modo diverso. Qui trovi che cos'è, dove si mette e un esempio di richiesta.</p></div>
+  <div class="agrid tgrid">${Object.keys(C.meta.tipi).filter(t => cnt[t]).map(t => { const ti = TIPO_INFO[t] || {}; return `<article class="acard tcard t-${esc(t)}"><span class="badge t-${esc(t)}">${esc(tl(t))}</span><span class="mini">${cnt[t]} elementi</span><b>${esc(ti.cos ? ti.cos.charAt(0).toUpperCase() + ti.cos.slice(1) : tl(t))}</b><span class="d" style="display:block;flex:none">${esc(ti.uso || '')}</span><span class="mini">Esempio: ${esc(ti.esempio || '')}</span><span class="acts"><button class="pill black" data-tipopage="${esc(t)}">Vedi i ${cnt[t]}</button></span></article>`; }).join('')}</div>`;
+}
+const SK_MD = '---\nname: nome-della-skill\ndescription: Quando attivarla, in una frase concreta (cosa chiede l\'utente, con quali parole).\n---\n\n# Titolo\n\n## Quando usarla\n- ...\n\n## Passi\n1. ...\n2. ...\n\n## Esempi di richieste\n- «...»\n\n## Controlli finali\n- [ ] ...';
+const PL_TREE = 'mio-plugin/\n├─ .claude-plugin/\n│  └─ plugin.json        ← nome, descrizione, versione\n├─ skills/\n│  └─ mia-skill/SKILL.md\n├─ commands/\n│  └─ mio-comando.md     ← diventa /mio-comando\n├─ agents/\n│  └─ revisore.md        ← sotto-agente specializzato\n├─ hooks/hooks.json      ← azioni automatiche (facoltativo)\n└─ .mcp.json             ← connettori a servizi esterni (facoltativo)';
+const SV_PROMPTS = [
+  ['Crea una skill da zero', 'Aiutami a creare una skill per Claude. Lavoro come designer di siti web e brand di lusso. Il compito che voglio automatizzare è: [descrivi il compito]. Fammi 5 domande per capire casi d\'uso, input, output e controlli di qualità. Poi scrivi SKILL.md completo (frontmatter con name e description che dice QUANDO attivarla, passi, esempi di richieste, controlli finali) e 3 test da provare.'],
+  ['Migliora una skill esistente', 'Questa è una skill che uso: [incolla SKILL.md]. Analizzala: la description dice chiaramente quando attivarla? Ci sono passi ambigui, istruzioni troppo lunghe o contraddittorie, controlli mancanti? Riscrivila più breve e precisa, tieni solo ciò che cambia il risultato, e proponi 3 richieste di prova.'],
+  ['Trasforma un metodo in plugin', 'Ho questo metodo di lavoro: [descrivilo a passi]. Progetta un plugin per Claude Code: quali parti diventano skill, quali comandi /nome, quali agenti, serve un connettore MCP? Dammi la struttura delle cartelle, plugin.json e il contenuto dei file principali.'],
+  ['Controlla una skill scaricata', 'Prima di installare questa skill/plugin: [incolla il contenuto o i file]. Dimmi cosa fa davvero, quali comandi esegue, a quali file o servizi accede, quali dati potrebbe inviare all\'esterno, rischi di prompt injection e cosa verificare. Voto da 1 a 5 con motivazioni.']
+];
+function pSviluppo(){
+  const mod = resolve({ tipo: ['skill', 'plugin'], q: 'skill-creator|create-cowork-plugin|plugin-dev|mcp-builder|writing-skills|plugin-authoring' }).slice(0, 4);
+  return `<div class="hhead"><h1>Creare le mie skill e plugin</h1><p>Una skill è un metodo di lavoro scritto in modo che Claude lo applichi da solo. Un plugin ne raccoglie diverse con comandi e connettori.</p></div>
+  <div class="sv">
+  <section><h2>Che differenza c'è</h2><table class="tb"><tr><th>Cosa</th><th>Che cos'è</th><th>Quando usarlo</th></tr>
+  <tr><td><b>Skill</b></td><td>Cartella con SKILL.md: istruzioni caricate quando il compito lo richiede</td><td>Un metodo che ripeti (audit, brief, impaginazione)</td></tr>
+  <tr><td><b>Comando</b></td><td>File .md che diventa /nome</td><td>Una azione che vuoi lanciare tu, a richiesta</td></tr>
+  <tr><td><b>Agente</b></td><td>Assistente con ruolo e strumenti propri</td><td>Compiti lunghi o da fare in parallelo (revisione, ricerca)</td></tr>
+  <tr><td><b>Connettore (MCP)</b></td><td>Collegamento a un servizio (Figma, Notion, database…)</td><td>Quando serve leggere o scrivere dati fuori dalla chat</td></tr>
+  <tr><td><b>Plugin</b></td><td>Pacchetto che contiene tutto quanto sopra</td><td>Per condividere o installare un set coerente</td></tr></table></section>
+  <section><h2>Struttura minima di una skill</h2><div class="cmd"><pre>${esc(SK_MD)}</pre><button class="pill" data-copy="${esc(SK_MD)}">Copia</button></div>
+  <ul class="gl"><li>La <b>description</b> decide quando la skill parte: scrivi le parole che userai davvero.</li><li>Poche istruzioni, in ordine, con esempi. Ciò che non cambia il risultato si toglie.</li><li>Metti dati lunghi o modelli in file a parte e nominali nella skill.</li><li>Prova con 3 richieste diverse, una deve essere «sbagliata» per vedere se si attiva a torto.</li></ul></section>
+  <section><h2>Struttura di un plugin</h2><div class="cmd"><pre>${esc(PL_TREE)}</pre><button class="pill" data-copy="${esc(PL_TREE)}">Copia</button></div></section>
+  <section><h2>Percorso consigliato</h2><ol class="steps"><li><b>Scegli 2–3 modelli</b>qui sotto o in «Per obiettivo»: leggi la scheda e «Contenuti».</li><li><b>Chiedi all'AI «Crea la mia versione»</b>nella scheda di una skill o di un plugin: il prompt include già il contenuto.</li><li><b>Salva in cartella</b>~/.claude/skills/nome/SKILL.md per una skill personale; un plugin va in una cartella a parte.</li><li><b>Prova e correggi</b>con 3 richieste reali, poi accorcia.</li><li><b>Mettila in libreria</b>copia la cartella in inbox/ e premi «Aggiorna»: comparirà tra i risultati.</li></ol></section>
+  <section><h2>Prompt pronti</h2>${SV_PROMPTS.map(([t, p]) => `<details class="box pr"><summary><b>${esc(t)}</b></summary><pre>${esc(p)}</pre><button class="pill black" data-copy="${esc(p)}">Copia</button></details>`).join('')}</section>
+  <section><h2>Modelli in libreria</h2>${mod.length ? gridMini(mod) : '<p class="mini">Cerca «skill» o «plugin» nel catalogo.</p>'}<div class="acts"><button class="pill" data-tipopage="skill">Tutte le skill</button><button class="pill" data-tipopage="plugin">Tutti i plugin</button></div></section>
+  </div>`;
+}
+function renderSpecial(){ const h = $('#home'); h.hidden = false; h.innerHTML = S.page === 'obiettivi' ? pObiettivi() : S.page === 'tipi' ? pTipi() : pSviluppo(); observe(h); }
+function applyIds(ids, label){ S.ids = new Set(ids); S.idsLabel = label; S.area = ''; S.tipo = ''; S.strum = ''; S.fonte = ''; S.q = ''; $('#q').value = ''; S.tag.clear(); S.limit = 96; setPage('tutto'); }
+function phaseOf(v){ const [gid, k] = v.split(':'); const g = GOALS.find(x => x.id === gid); return { g, f: g.fasi[+k] }; }
+
+/* barra laterale (desktop) */
+function renderSide(){
+  const el = $('#side'); if (!el) return;
+  const c = aCount(), tot = items.filter(i => !i.duplicatoDi).length, ct = {}; items.forEach(i => { if (!i.duplicatoDi) ct[i.tipo] = (ct[i.tipo] || 0) + 1; });
+  const on = (k) => S.page === k && !S.tipo ? ' on" aria-current="page' : '';
+  const it = (k, l, n, sub) => `<button class="si${S.page === k ? ' on" aria-current="page' : ''}" data-page="${k}"><span>${esc(l)}${sub ? `<small>${esc(sub)}</small>` : ''}</span>${n == null ? '' : `<span class="n">${n}</span>`}</button>`;
+  el.innerHTML = `<div class="sg"><h2>Esplora</h2>${it('home', 'Panoramica', null)}${it('obiettivi', 'Per obiettivo', null, 'Cosa devi fare?')}${it('tipi', 'Che cosa c\'è', null, 'Cos\'è ogni tipo e come si usa')}${it('tutto', 'Tutto', tot)}${it('preferiti', '★ Preferiti', S.fav.size)}</div>
+  <div class="sg"><h2>Per area d'uso</h2>${AREE.filter(a => c[a.id] || a.id !== 'risorse').map(a => `<button class="si${S.page === a.id ? ' on" aria-current="page' : ''}" data-page="${a.id}" title="${esc(a.desc)}"><span>${esc(PSHORT[a.id] || a.nome)}</span><span class="n">${c[a.id] || 0}</span></button>`).join('')}</div>
+  <div class="sg"><h2>Per tipo</h2>${Object.keys(C.meta.tipi).filter(t => ct[t]).map(t => `<button class="si${S.tipo === t && !SPECIAL.has(S.page) ? ' on" aria-current="true' : ''}" data-tipopage="${esc(t)}" title="${esc((TIPO_INFO[t] || {}).cos || '')}"><span>${esc(tl(t))}</span><span class="n">${ct[t]}</span></button>`).join('')}</div>
+  <div class="sg"><h2>Strumenti</h2>${it('sviluppo', 'Creare skill e plugin', null)}<button class="si" data-sidego="#bFonti"><span>Fonti</span></button><button class="si" data-sidego="#bGuida"><span>Guida</span></button><button class="si" data-sidego="#bKit"><span>Kit</span><span class="n">${S.kit.size}</span></button></div>`;
+}
+/* filtri rapidi sempre visibili (desktop) e spiegazione del tipo */
+function renderQuick(){
+  const q = $('#quick'); if (!q) return; const ct = {}, cs = {};
+  items.forEach(i => { if (match(i, 'tipo')) ct[i.tipo] = (ct[i.tipo] || 0) + 1; if (match(i, 'strum')) i.strumenti.forEach(s => cs[s] = (cs[s] || 0) + 1); });
+  const row = (lab, html) => html ? `<div class="qrow"><span class="ql">${lab}</span><div class="qc">${html}</div></div>` : '';
+  const tipi = Object.keys(C.meta.tipi).filter(t => ct[t] || S.tipo === t).map(t => `<button class="chip${S.tipo === t ? ' on' : ''}" data-tipo="${S.tipo === t ? '' : esc(t)}" aria-pressed="${S.tipo === t}">${esc(tl(t))} <span class="n">${ct[t] || 0}</span></button>`).join('');
+  const str = Object.entries(cs).sort((a, b) => b[1] - a[1]).slice(0, 14).map(([s, n]) => `<button class="chip${S.strum === s ? ' on' : ''}" data-strum="${S.strum === s ? '' : esc(s)}" aria-pressed="${S.strum === s}">${esc(STR[s] || s)} <span class="n">${n}</span></button>`).join('');
+  q.innerHTML = row('Tipo', tipi) + row('Strumento', str) + `<div class="qrow"><span class="ql">Altro</span><div class="qc"><button class="chip${S.favOnly ? ' on' : ''}" data-quick="fav" aria-pressed="${!!S.favOnly}">★ Preferiti</button><button class="chip${S.prev ? ' on' : ''}" data-quick="prev" aria-pressed="${!!S.prev}">Con anteprima</button><button class="chip" data-quick="more">Tutti i filtri…</button><button class="chip" data-quick="reset">Azzera</button></div></div>`;
+}
+function renderTBanner(){
+  const b = $('#tbanner'); if (!b) return; const ti = S.tipo && TIPO_INFO[S.tipo];
+  b.hidden = !ti; if (!ti) { b.innerHTML = ''; return; }
+  b.innerHTML = `<div class="box tinfo"><b>${esc(tl(S.tipo))}</b>: ${esc(ti.cos)}.<br><span class="mini">Come si usa: ${esc(ti.uso)} Esempio: ${esc(ti.esempio)}</span></div>`;
+}
+
+function clearFilters(){ S.ids = null; S.area = ''; S.strum = ''; S.favOnly = false; $('#fFav').checked = false; S.q = ''; $('#q').value = ''; S.tipo = ''; S.tag.clear(); S.fonte = ''; S.stato = ''; $('#fStato').value = ''; S.prev = false; S.dup = false; $('#fPrev').checked = false; $('#fDup').checked = false; }
+function render(){
+  const home = S.page === 'home', sp = SPECIAL.has(S.page);
+  const q = $('#quick'), tb = $('#tbanner');
+  if (sp) {
+    ['#tools', '#countRow', '#main'].forEach(s => $(s).hidden = true); $('#fpanel').hidden = true; $('#tbFiltri').classList.remove('on');
+    $('#kitN').textContent = S.kit.size; $('#kitN2').textContent = S.kit.size; renderPages(); $('#phead').hidden = true;
+    q.hidden = true; tb.hidden = true; renderSpecial(); renderSide(); return;
+  }
+  render0(); q.hidden = home; if (!home) renderQuick(); renderTBanner(); renderSide();
+  if (home) tb.hidden = true;
+}
+document.addEventListener('click', e => {
+  const t = e.target; let x;
+  if ((x = t.closest('[data-goal]'))) { S.goalId = x.dataset.goal; render(); scrollTo({ top: 0 }); return; }
+  if ((x = t.closest('[data-goalai]'))) { const g = GOALS.find(v => v.id === x.dataset.goalai), seen = new Set(), l = [];
+    g.fasi.forEach(f => resolve(f.spec).slice(0, 6).forEach(i => { if (!seen.has(i.id)) { seen.add(i.id); l.push(i); } }));
+    AI.goal = g.ob; store.set('goal', AI.goal); openAI({ list: l, label: g.t }); return; }
+  if ((x = t.closest('[data-phaseall]'))) { const { g, f } = phaseOf(x.dataset.phaseall); applyIds(resolve(f.spec).map(i => i.id), g.t + ' · ' + f.t); return; }
+  if ((x = t.closest('[data-phaseai]'))) { const { g, f } = phaseOf(x.dataset.phaseai); AI.goal = g.ob + ' — fase: ' + f.t; store.set('goal', AI.goal); openAI({ list: resolve(f.spec).slice(0, 20), label: g.t + ' · ' + f.t }); return; }
+  if ((x = t.closest('[data-tipopage]'))) { const tp = x.dataset.tipopage; clearFilters(); setPage('tutto'); S.tipo = tp; renderTags(); render(); return; }
+  if ((x = t.closest('[data-sidego]'))) { const el = $(x.dataset.sidego); if (el) el.click(); return; }
+  if ((x = t.closest('[data-quick]'))) { const k = x.dataset.quick;
+    if (k === 'fav') { S.favOnly = !S.favOnly; $('#fFav').checked = S.favOnly; } else if (k === 'prev') { S.prev = !S.prev; $('#fPrev').checked = S.prev; }
+    else if (k === 'reset') { clearFilters(); renderTags(); } else if (k === 'more') { setPanel(true); $('#fpanel').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    S.limit = 96; render(); return; }
+});
+
 /* ---------- eventi ---------- */
 document.addEventListener('click', e => {
   const t = e.target;
+  const ak = t.closest('[data-aik]'); if (ak) { AI.kind = ak.dataset.aik; aiRefresh(); return; }
+  const ac = t.closest('[data-aicopy]'); if (ac) { copy($('#aiText').value); toast('Copiato: incollalo in Claude o ChatGPT'); return; }
+  const ad = t.closest('[data-aidlg]'); if (ad) { openAI(); return; }
   const fv = t.closest('[data-fav]'); if (fv) { e.stopPropagation(); toggleFav(fv.dataset.fav); render(); if (cur) drawRender(); return; }
   const cpr = t.closest('[data-cprompt]'); if (cpr) { e.stopPropagation(); copy(byId[cpr.dataset.cprompt].testo || ''); return; }
   const kit = t.closest('[data-kit]'); if (kit) { e.stopPropagation(); toggleKit(kit.dataset.kit); render(); if (cur) drawRender(); if ($('#dlgKit').open) kitRender(); return; }
@@ -796,7 +1070,7 @@ document.addEventListener('change', e => {
   else if (id === 'fDup') { S.dup = e.target.checked; render(); }
   else if (id === 'pgSel' && cur) { cur.page = +e.target.value; drawRender(); }
 });
-$('#bReset').onclick = () => { S.area = ''; S.strum = ''; S.favOnly = false; $('#fFav').checked = false; S.q = ''; S.tipo = ''; S.tag.clear(); S.fonte = ''; S.stato = ''; $('#fStato').value = ''; S.prev = false; S.dup = false; $('#q').value = ''; $('#fPrev').checked = false; $('#fDup').checked = false; renderTags(); render(); };
+$('#bReset').onclick = () => { S.ids = null; S.area = ''; S.strum = ''; S.favOnly = false; $('#fFav').checked = false; S.q = ''; S.tipo = ''; S.tag.clear(); S.fonte = ''; S.stato = ''; $('#fStato').value = ''; S.prev = false; S.dup = false; $('#q').value = ''; $('#fPrev').checked = false; $('#fDup').checked = false; renderTags(); render(); };
 $('#bKit').onclick = () => { kitRender(); $('#dlgKit').showModal(); };
 $('#bGuida').onclick = () => { guidaRender(); $('#dlgGuida').showModal(); };
 document.addEventListener('click', e => { const b = e.target.closest('[data-fonte]'); if (b) { S.fonte = b.dataset.fonte; S.limit = 96; render(); } });
@@ -815,6 +1089,7 @@ function activeList(){
   if (S.fonte) a.push(['fonte', S.fonte]); if (S.tipo) a.push(['tipo', tl(S.tipo)]);
   S.tag.forEach(t => a.push(['tag:' + t, TAGL[t] || t]));
   if (S.stato) a.push(['stato', 'Stato: ' + (S.stato === '*' ? 'tutti' : S.stato === '-' ? 'senza stato' : S.stato)]);
+  if (S.ids) a.push(['ids', S.idsLabel || 'Selezione']);
   if (S.prev) a.push(['prev', 'Con anteprima']); if (S.dup) a.push(['dup', 'Con copie']);
   return a;
 }
@@ -847,7 +1122,7 @@ document.addEventListener('click', e => {
   const cl = t.closest('[data-clear]'); if (cl) { const k = cl.dataset.clear;
     if (k === 'q') { S.q = ''; $('#q').value = ''; } else if (k === 'area') S.area = ''; else if (k === 'strum') S.strum = ''; else if (k === 'fav') { S.favOnly = false; $('#fFav').checked = false; } else if (k === 'fonte') S.fonte = ''; else if (k === 'tipo') S.tipo = '';
     else if (k.startsWith('tag:')) { S.tag.delete(k.slice(4)); renderTags(); } else if (k === 'stato') { S.stato = ''; $('#fStato').value = ''; }
-    else if (k === 'prev') { S.prev = false; $('#fPrev').checked = false; } else if (k === 'dup') { S.dup = false; $('#fDup').checked = false; }
+    else if (k === 'ids') S.ids = null; else if (k === 'prev') { S.prev = false; $('#fPrev').checked = false; } else if (k === 'dup') { S.dup = false; $('#fDup').checked = false; }
     S.limit = 96; render(); return; }
   const vw = t.closest('[data-view]'); if (vw) { S.view = vw.dataset.view; store.set('view', S.view); applyView(); return; }
   if (t.closest('#zIn')) { zoomBy(10); return; } if (t.closest('#zOut')) { zoomBy(-10); return; }
