@@ -253,16 +253,20 @@ button,a,.card,.acard,.pg{touch-action:manipulation}
 <section class="phead" id="phead" hidden></section>
 <section class="home" id="home" hidden></section>
 <div class="tools" id="tools">
-  <button class="pill" id="bFiltri" aria-expanded="false" aria-controls="fpanel"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M7 12h10M10 17h4"/></svg>Filtri <span class="n" id="fN">0</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
-  <div class="achips" id="active" role="group" aria-label="Filtri attivi"></div>
-  <span class="tspace"></span>
-  <label class="opt">Ordina <select id="fSort"><option value="nome">Nome</option><option value="tipo">Tipo</option><option value="peso">Peso (grandi prima)</option></select></label>
-  <div class="seg" role="group" aria-label="Vista">
-    <button data-view="var" aria-pressed="false" aria-label="Griglia variabile" title="Griglia variabile"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="10" rx="1.5"/><rect x="13" y="4" width="7" height="5" rx="1.5"/><rect x="4" y="16" width="7" height="4" rx="1.5"/><rect x="13" y="11" width="7" height="9" rx="1.5"/></svg></button>
-    <button data-view="fix" aria-pressed="false" aria-label="Griglia fissa" title="Griglia fissa"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button>
-    <button data-view="list" aria-pressed="false" aria-label="Lista" title="Lista"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <div class="trow"><span class="tcount" id="tcount" aria-live="polite"></span><span class="qhint" aria-hidden="true"><kbd>Spazio</kbd> anteprima</span><span class="tspace"></span>
+    <label class="opt">Ordina <select id="fSort"><option value="nome">Nome</option><option value="recenti">Più recenti</option><option value="fonte">Fonte</option><option value="preferiti">Preferiti in cima</option></select></label>
+    <div class="seg" role="group" aria-label="Modalità di vista">
+      <button data-view="visuale" aria-pressed="false" aria-label="Griglia visuale" title="Griglia visuale: anteprime grandi"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="10" rx="1.5"/><rect x="13" y="4" width="7" height="5" rx="1.5"/><rect x="4" y="16" width="7" height="4" rx="1.5"/><rect x="13" y="11" width="7" height="9" rx="1.5"/></svg><span class="vl">Visuale</span></button>
+      <button data-view="densa" aria-pressed="false" aria-label="Griglia densa" title="Griglia densa: più schede compatte"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="5" height="5" rx="1"/><rect x="9.5" y="3.5" width="5" height="5" rx="1"/><rect x="15.5" y="3.5" width="5" height="5" rx="1"/><rect x="3.5" y="9.5" width="5" height="5" rx="1"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><rect x="15.5" y="9.5" width="5" height="5" rx="1"/><rect x="3.5" y="15.5" width="5" height="5" rx="1"/><rect x="9.5" y="15.5" width="5" height="5" rx="1"/><rect x="15.5" y="15.5" width="5" height="5" rx="1"/></svg><span class="vl">Densa</span></button>
+      <button data-view="lista" aria-pressed="false" aria-label="Lista e tabella" title="Lista a righe con colonne"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="vl">Lista</span></button>
+    </div>
   </div>
-  <div class="zoom" role="group" aria-label="Zoom delle schede"><button id="zOut" aria-label="Riduci" title="Riduci (−)">−</button><input type="range" id="zoom" min="0" max="100" step="1" aria-label="Zoom delle schede"><button id="zIn" aria-label="Ingrandisci" title="Ingrandisci (+)">+</button></div>
+  <div class="trow">
+  <button class="pill" id="bFiltri" aria-expanded="false" aria-controls="fpanel"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M7 12h10M10 17h4"/></svg>Filtri <span class="n" id="fN">0</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+    <div class="macro" id="macro" role="group" aria-label="Filtri per categoria di tag"></div>
+    <div class="achips" id="active" role="group" aria-label="Filtri attivi"></div>
+    <button class="pill sm" id="bAzzera" hidden>Azzera filtri</button>
+  </div>
 </div>
 <section class="fpanel" id="fpanel" hidden aria-label="Filtri">
   <div class="acc" data-acc="area"><button class="acc-h" aria-expanded="false"><span>Area d'uso</span><em id="sArea">Tutte</em><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-b"><div class="filters" id="fArea" role="group" aria-label="Area d'uso"></div></div></div>
@@ -279,8 +283,8 @@ button,a,.card,.acard,.pg{touch-action:manipulation}
 </section>
 <div class="quick" id="quick" aria-label="Filtri rapidi"></div>
 <div id="tbanner" class="tbanner" hidden></div>
-<div class="count" id="countRow"><span id="count" aria-live="polite"></span> <span class="mini" id="meta"></span><span class="mini" id="sync"></span></div>
-<main id="main"><div class="grid" id="grid"></div><div id="moreWrap"></div></main>
+<div class="count" id="countRow"><span class="mini" id="meta"></span><span class="mini" id="sync"></span></div>
+<main id="main"><div class="lhead" id="lhead" hidden aria-hidden="true"><span></span><span>Nome</span><span>Tipo</span><span>Tag principali</span><span>Fonte</span><span>Azioni · Kit</span></div><div class="grid" id="grid"></div><div id="moreWrap"></div></main>
 <nav class="tabbar" aria-label="Navigazione">
   <button data-go="home" class="on" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Home</button>
   <button data-go="filtri" id="tbFiltri"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M7 12h10M10 17h4"/></svg>Filtri <b id="tbFN">0</b></button>
@@ -325,7 +329,17 @@ const C = window.__CATALOG__;
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 if (!C) { document.body.insertAdjacentHTML('beforeend', '<div class="empty"><h2>Catalogo non trovato</h2><p>Esegui <code>node scripts/scan.mjs</code> dalla cartella della libreria, poi ricarica.</p></div>'); return; }
-const TAGL = {motion:'Motion','3d-webgl':'3D / WebGL',landing:'Landing',dashboard:'Dashboard',presentazioni:'Presentazioni',editoriale:'Editoriale',brutalista:'Brutalista',minimal:'Minimal',lusso:'Lusso',automotive:'Automotive',brand:'Brand',tipografia:'Tipografia',colore:'Colore',figma:'Figma','framer-webflow':'Framer / Webflow',video:'Video','immagini-ai':'Immagini AI',documenti:'Documenti',seo:'SEO',ecommerce:'E-commerce',mobile:'Mobile',wireframe:'Wireframe',portfolio:'Portfolio',gallery:'Gallery',accessibilita:'Accessibilità','analisi-sito':'Analisi sito','qualita-codice':'Qualità codice'};
+const TAGL = {'prompt-ai':'Prompt AI',motion:'Motion','3d-webgl':'3D / WebGL',landing:'Landing',dashboard:'Dashboard',presentazioni:'Presentazioni',editoriale:'Editoriale',brutalista:'Brutalista',minimal:'Minimal',lusso:'Lusso',automotive:'Automotive',brand:'Brand',tipografia:'Tipografia',colore:'Colore',figma:'Figma','framer-webflow':'Framer / Webflow',video:'Video','immagini-ai':'Immagini AI',documenti:'Documenti',seo:'SEO',ecommerce:'E-commerce',mobile:'Mobile',wireframe:'Wireframe',portfolio:'Portfolio',gallery:'Gallery',accessibilita:'Accessibilità','analisi-sito':'Analisi sito','qualita-codice':'Qualità codice'};
+
+// macro-categorie di tag (step 3)
+const MACRO = [
+  { id: 'tip', nome: 'Tipologia', long: 'Tipologia / Deliverable', tags: ['landing', 'dashboard', 'presentazioni', 'editoriale', 'mobile', 'portfolio', 'ecommerce', 'wireframe'] },
+  { id: 'stile', nome: 'Stile', long: 'Stile visivo', tags: ['minimal', 'brutalista', 'lusso', '3d-webgl', 'motion', 'automotive', 'brand'] },
+  { id: 'fond', nome: 'Fondamentali', long: 'Fondamentali & Design', tags: ['tipografia', 'colore', 'prompt-ai', 'immagini-ai', 'video', 'figma', 'framer-webflow'] },
+  { id: 'tec', nome: 'Tecnico & QA', long: 'Tecnico & QA', tags: ['accessibilita', 'analisi-sito', 'qualita-codice', 'documenti', 'seo'] }
+];
+const TALIAS = { accessibilita: ['accessibilita', 'accessibilità'], '3d-webgl': ['3d-webgl', '3d'] };
+const hasTag = (i, t) => t === 'prompt-ai' ? (i.tipo === 'prompt' || i.tag.includes('prompt')) : (TALIAS[t] || [t]).some(x => i.tag.includes(x));
 const store = { get(k, d){ try { const v = localStorage.getItem('f01lib.' + k); return v ? JSON.parse(v) : d; } catch { return d; } }, set(k, v){ try { localStorage.setItem('f01lib.' + k, JSON.stringify(v)); } catch {} } };
 const url = p => '../' + p.split('/').map(encodeURIComponent).join('/');
 const kb = b => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
@@ -336,8 +350,8 @@ const items = C.items.map(i => ({ ...i, tag: i.tag || [], strumenti: i.strumenti
 const byId = Object.fromEntries(items.map(i => [i.id, i]));
 const S = { stato: '', q: '', tipo: '', tag: new Set(), fonte: '', dup: false, prev: false, sort: 'nome', limit: 96, kit: new Set(store.get('kit', []).filter(id => byId[id])), note: {} };
 let cur = null;
-S.view = store.get('view', matchMedia('(max-width:640px)').matches ? 'fix' : 'var');
-S.z = Object.assign({ var: 40, fix: 45, list: 35 }, store.get('z', {}));
+const VMODES = ['visuale', 'densa', 'lista'];
+S.view = (() => { try { const v = localStorage.getItem('frame01.library.viewMode'); if (VMODES.includes(v)) return v; } catch {} const o = store.get('view', null); if (o === 'list') return 'lista'; if (o === 'fix') return 'densa'; return matchMedia('(max-width:640px)').matches ? 'densa' : 'visuale'; })();
 S.acc = new Set(store.get('acc', []));
 S.shots = store.get('shots', true); S.recent = store.get('recent', []).filter(id => byId[id]);
 S.page = 'home'; S.area = ''; S.strum = ''; S.favOnly = false;
@@ -351,8 +365,8 @@ async function api(fn, body){
   try { const r = await fetch('/api/' + fn, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-F01': '1' }, body: JSON.stringify(body || {}) }); return await r.json(); }
   catch (e) { return { ok: false, errore: 'Server non raggiungibile: avvia Apri-FRAME01-LIBRARY.command' }; }
 }
-function toast(m){ const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); }
-async function copy(txt){ try { await navigator.clipboard.writeText(txt); } catch { const a = document.createElement('textarea'); a.value = txt; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); } catch {} a.remove(); } toast('Copiato'); }
+function toast(m){ document.querySelectorAll('.toast').forEach(x => x.remove()); const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); }
+async function copy(txt, msg){ try { await navigator.clipboard.writeText(txt); } catch { const a = document.createElement('textarea'); a.value = txt; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); } catch {} a.remove(); } toast(msg || 'Copiato'); }
 const getNote = i => S.note[i.id] || i.annotazione || {};
 
 /* ---------- filtri ---------- */
@@ -369,16 +383,17 @@ function match(i, skip){
   if (skip !== 'fonte' && S.fonte && i.fonte !== S.fonte) return false;
   { const st = getNote(i).stato || ''; if (S.stato === '') { if (st === 'Scartato') return false; } else if (S.stato === '-') { if (st) return false; } else if (S.stato !== '*' && st !== S.stato) return false; }
   if (S.prev && !i.preview && !(i.tipo === 'design-system' && i.palette?.length)) return false;
-  for (const t of S.tag) if (!i.tag.includes(t)) return false;
+  for (const t of S.tag) if (!hasTag(i, t)) return false;
   return terms.every(t => i._hay.includes(t));
 }
 function list(){
   const r = items.filter(i => match(i));
   const o = Object.keys(C.meta.tipi);
-  const cmp = { nome: (a, b) => a.titolo.localeCompare(b.titolo, 'it'), tipo: (a, b) => o.indexOf(a.tipo) - o.indexOf(b.tipo) || a.titolo.localeCompare(b.titolo, 'it'), peso: (a, b) => b.contenuti.byte - a.contenuti.byte };
+  const cmp = { nome: (a, b) => a.titolo.localeCompare(b.titolo, 'it'), tipo: (a, b) => o.indexOf(a.tipo) - o.indexOf(b.tipo) || a.titolo.localeCompare(b.titolo, 'it'), peso: (a, b) => b.contenuti.byte - a.contenuti.byte,
+    recenti: (a, b) => ((b.contenuti.mod || 0) - (a.contenuti.mod || 0)) || a.titolo.localeCompare(b.titolo, 'it'), fonte: (a, b) => String(a.fonte).localeCompare(String(b.fonte), 'it') || a.titolo.localeCompare(b.titolo, 'it'), preferiti: (a, b) => (S.fav.has(b.id) - S.fav.has(a.id)) || a.titolo.localeCompare(b.titolo, 'it') };
   const q = S.q.trim().toLowerCase();
-  if (q) { const sc = i => { const t = (i.titolo + ' ' + i.nome).toLowerCase(); return (t === q ? 100 : 0) + (t.startsWith(q) ? 40 : 0) + (t.includes(q) ? 20 : 0) + (i.tag.some(g => (TAGL[g] || g).toLowerCase().includes(q)) ? 8 : 0) + (i.duplicatoDi ? -5 : 0); }; return r.sort((a, b) => sc(b) - sc(a) || cmp[S.sort](a, b)); }
-  return r.sort(cmp[S.sort]);
+  if (q) { const sc = i => { const t = (i.titolo + ' ' + i.nome).toLowerCase(); return (t === q ? 100 : 0) + (t.startsWith(q) ? 40 : 0) + (t.includes(q) ? 20 : 0) + (i.tag.some(g => (TAGL[g] || g).toLowerCase().includes(q)) ? 8 : 0) + (i.duplicatoDi ? -5 : 0); }; return r.sort((a, b) => sc(b) - sc(a) || (cmp[S.sort] || cmp.nome)(a, b)); }
+  return r.sort(cmp[S.sort] || cmp.nome);
 }
 
 /* ---------- cards ---------- */
@@ -520,7 +535,7 @@ function render0(){
   g.innerHTML = shown.length ? shown.map(card).join('') : (vuoto || (S.page === 'preferiti' ? '<div class="empty"><h2>Nessun preferito</h2><p>Premi ☆ su una scheda per metterla qui.</p></div>' : '<div class="empty"><h2>Nessun risultato</h2><p>Prova a togliere qualche filtro o a cercare una parola diversa.</p></div>'));
   observe(g);
   $('#moreWrap').innerHTML = all.length > shown.length ? `<button class="pill more" id="more">Mostra altri ${Math.min(96, all.length - shown.length)} (${all.length - shown.length} restanti)</button>` : '';
-  $('#count').textContent = `${all.length} elementi${S.q || S.tipo || S.tag.size || S.fonte || S.prev || S.area || S.strum || S.favOnly || S.ids ? ' (filtrati)' : ''}`;
+  $('#tcount').textContent = `${all.length} elementi${S.q || S.tipo || S.tag.size || S.fonte || S.prev || S.area || S.strum || S.favOnly || S.ids ? ' (filtrati)' : ''} · ${S.kit.size} ${S.kit.size === 1 ? 'selezionato' : 'selezionati'} nel kit`;
   const ft = $('#fTipo'); const counts = {};
   items.forEach(i => { if (match(i, 'tipo')) counts[i.tipo] = (counts[i.tipo] || 0) + 1; });
   const tot = Object.values(counts).reduce((a, b) => a + b, 0);
@@ -528,100 +543,186 @@ function render0(){
   const ca = {}, cs = {}; items.forEach(i => { if (match(i, 'area')) ca[i.area] = (ca[i.area] || 0) + 1; if (match(i, 'strum')) i.strumenti.forEach(s => cs[s] = (cs[s] || 0) + 1); });
   $('#fArea').innerHTML = `<button class="pill ${S.area ? '' : 'on'}" data-area="">Tutte</button>` + AREE.filter(a => ca[a.id] || S.area === a.id).map(a => `<button class="pill ${S.area === a.id ? 'on' : ''}" data-area="${a.id}">${esc(PSHORT[a.id] || a.nome)}<span class="n">${ca[a.id] || 0}</span></button>`).join('');
   $('#fStrum').innerHTML = `<button class="pill ${S.strum ? '' : 'on'}" data-strum="">Tutti</button>` + Object.entries(cs).sort((a, b) => b[1] - a[1]).map(([s, n]) => `<button class="pill ${S.strum === s ? 'on' : ''}" data-strum="${esc(s)}">${esc(STR[s] || s)}<span class="n">${n}</span></button>`).join('');
-  renderFonti(); renderActive(); applyView();
+  renderFonti(); renderActive(); renderTags(); applyView();
 }
 function renderFonti(){
   const c = {}; items.forEach(i => { if (match(i, 'fonte')) c[i.fonte] = (c[i.fonte] || 0) + 1; });
   const tot = Object.values(c).reduce((a, b) => a + b, 0);
   $('#fFonteRow').innerHTML = '<button class="pill ' + (S.fonte ? '' : 'on') + '" data-fonte="">Tutte<span class="n">' + tot + '</span></button>' + C.fonti.map((s, k) => '<button class="pill src ' + (S.fonte === s.nome ? 'on' : '') + '" data-fonte="' + esc(s.nome) + '" title="' + esc(s.percorso || '') + '"><i class="dot" style="background:hsl(' + (k * 47 % 360) + ' 65% 55%)"></i>' + esc(s.nome) + '<span class="n">' + (c[s.nome] || 0) + '</span></button>').join('');
 }
+S.macro = '';
 function renderTags(){
-  const c = {}; items.forEach(i => { if (!i.duplicatoDi && inPage(i)) i.tag.forEach(t => c[t] = (c[t] || 0) + 1); });
-  $('#fTag').innerHTML = Object.entries(c).sort((a, b) => b[1] - a[1]).map(([t, n]) => `<button class="chip ${S.tag.has(t) ? 'on' : ''}" data-tag="${esc(t)}" aria-pressed="${S.tag.has(t)}">${esc(TAGL[t] || t)} ${n}</button>`).join('');
+  const base = items.filter(i => match(i)), cnt = t => { let n = 0; for (const i of base) if (hasTag(i, t)) n++; return n; };
+  const chip = (t, n) => `<button class="chip ${S.tag.has(t) ? 'on' : ''}" data-tag="${esc(t)}" aria-pressed="${S.tag.has(t)}">${esc(TAGL[t] || t)} <span class="n">${n}</span></button>`;
+  const grp = MACRO.map(g => ({ g, act: g.tags.filter(t => S.tag.has(t)).length, list: g.tags.map(t => [t, cnt(t)]).filter(([t, n]) => n || S.tag.has(t)) }));
+  $('#macro').innerHTML = grp.map(({ g, act, list }) => `<div class="mpop"><button class="pill ${act ? 'on' : ''}" data-macro="${g.id}" aria-haspopup="true" aria-expanded="${S.macro === g.id}">${esc(g.nome)}${act ? ': ' + act : ''}<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="mmenu" role="group" aria-label="${esc(g.long)}" ${S.macro === g.id ? '' : 'hidden'}><div class="mh">${esc(g.long)}</div><div class="mc">${list.map(([t, n]) => chip(t, n)).join('') || '<span class="mini">Nessun tag con i filtri attuali</span>'}</div></div></div>`).join('');
+  const known = new Set(MACRO.flatMap(g => g.tags).concat(['accessibilità', '3d', 'prompt'])), oth = {};
+  base.forEach(i => i.tag.forEach(t => { if (!known.has(t)) oth[t] = (oth[t] || 0) + 1; }));
+  const ol = Object.entries(oth).sort((a, b) => b[1] - a[1]).slice(0, 40);
+  S.tag.forEach(t => { if (!known.has(t) && !oth[t]) ol.unshift([t, 0]); });
+  $('#fTag').innerHTML = grp.map(({ g, list }) => `<div class="tg"><div class="aig">${esc(g.long)}</div><div class="mc">${list.map(([t, n]) => chip(t, n)).join('') || '<span class="mini">—</span>'}</div></div>`).join('')
+    + (ol.length ? `<details class="tg"><summary class="aig">Altri tag (${Object.keys(oth).length})</summary><div class="mc">${ol.map(([t, n]) => chip(t, n)).join('')}</div></details>` : '');
 }
 
 /* ---------- dettaglio ---------- */
-const TABS = [['panoramica', 'Panoramica'], ['anteprima', 'Anteprima'], ['contenuti', 'Contenuti'], ['uso', 'Come usarlo'], ['ai', "Chiedi all'AI"]];
-const tabsFor = i => i && i.schema ? [['schema', 'Schema'], ...TABS] : TABS;
+/* ---------- dettaglio: 5 tab (step 2) ---------- */
+const TABS = [['pan', 'Panoramica'], ['design', 'Design & Token'], ['struttura', 'Struttura & Schema'], ['prompt', 'Prompt & AI'], ['note', 'Note & Gestione']];
+const TABK = new Set(TABS.map(t => t[0]));
+const TABOLD = { panoramica: 'pan', anteprima: 'pan', contenuti: 'struttura', uso: 'struttura', schema: 'struttura', ai: 'prompt' };
+const lastTab = () => { try { const t = sessionStorage.getItem('f01lib.dtab'); return TABK.has(t) ? t : 'pan'; } catch { return 'pan'; } };
+const setLastTab = t => { try { sessionStorage.setItem('f01lib.dtab', t); } catch {} };
+// note personali: nei dati se c'è il server locale; altrimenti (online, iPhone) restano in questo browser
+const LN = { get: id => (store.get('lnote', {}) || {})[id] || {}, set(id, patch){ const a = store.get('lnote', {}) || {}; a[id] = { ...(a[id] || {}), ...patch }; store.set('lnote', a); } };
+const noteOf = i => { const n = getNote(i), l = canAdd() ? {} : LN.get(i.id); return { stato: l.stato !== undefined ? l.stato : (n.stato || ''), nota: l.nota !== undefined ? l.nota : (n.nota || '') }; };
+const noteCount = i => { const n = noteOf(i); return (n.nota ? 1 : 0) + (n.stato ? 1 : 0); };
+const tabLabel = (k, l, i) => k === 'note' && noteCount(i) ? `${l}<span class="tbadge" aria-label="${noteCount(i)} note attive">${noteCount(i)}</span>` : l;
+function persistNote(id, patch, subito){ if (canAdd()) return saveNote(id, patch, subito); LN.set(id, patch); refreshNoteBadge(); return true; }
+function refreshNoteBadge(){ if (!cur) return; const b = document.getElementById('tab-note'); if (b) b.innerHTML = tabLabel('note', 'Note & Gestione', byId[cur.id]); }
 function openItem(id, tab){
-  if (!byId[id]) return; const prev = cur; cur = { id, tab: tab || (byId[id].schema ? 'schema' : 'panoramica'), page: 0, w: 1440, z: 'fit', seq: (prev && prev.seq && prev.seq.includes(id)) ? prev.seq : list().map(x => x.id) };
+  if (!byId[id]) return; const prev = cur; const t0 = TABOLD[tab] || tab; cur = { id, tab: TABK.has(t0) ? t0 : lastTab(), page: 0, w: 1440, z: 'fit', seq: (prev && prev.seq && prev.seq.includes(id)) ? prev.seq : list().map(x => x.id) };
   S.recent = [id, ...S.recent.filter(x => x !== id)].slice(0, 8); store.set('recent', S.recent);
   try { history.replaceState(null, '', '#' + encodeURIComponent(id)); } catch {}
   drawRender(); $('#drawer').classList.add('open'); $('#drawer').setAttribute('aria-hidden', 'false'); $('#backdrop').hidden = false; document.body.classList.add('lock');
 }
 function closeItem(keep){ cur = null; $('#drawer').classList.remove('open'); $('#drawer').setAttribute('aria-hidden', 'true'); $('#backdrop').hidden = true; document.body.classList.remove('lock'); if (!keep) { try { history.replaceState(null, '', pageHash()); } catch {} } }
+function taglineOf(i){ if (i.tagline) return String(i.tagline); const d = String(i.descrizione || '').replace(/\s+/g, ' ').trim(); const m = d.match(/^.{20,170}?[.!?](?=\s|$)/); return m ? m[0] : (d.length > 150 ? d.slice(0, 147) + '…' : d); }
+function hydrateImgs(){ document.querySelectorAll('#panel img[data-pvf]').forEach(im => getPv(im.dataset.pvf).then(pv => { if (pv && pv.url) im.src = pv.url; })); }
 function drawRender(){
   const i = byId[cur.id]; const d = $('#drawer');
   const si = (cur.seq || []).indexOf(cur.id), pgName = (S.page === 'home' || S.page === 'tutto') ? 'Tutto' : S.page === 'preferiti' ? 'Preferiti' : (PSHORT[S.page] || 'Libreria');
-  const canShare = !!navigator.share && (i.link || i.testo);
-  d.innerHTML = `<div class="dh"><button class="pill close" id="dClose" aria-label="Chiudi">Chiudi ✕</button><div class="crumb" style="padding-right:96px"><button data-closeitem="1">${esc(pgName)}</button> › <span>${esc(PSHORT[i.area] || tl(i.tipo))}</span></div><span class="badge t-${esc(i.tipo)}">${esc(tl(i.tipo))}</span> <button class="pill ${S.fav.has(i.id) ? 'on' : ''}" data-fav="${esc(i.id)}" style="margin-left:6px;min-height:28px;padding:2px 12px">${S.fav.has(i.id) ? '★ Preferito' : '☆ Preferito'}</button><h2>${esc(i.titolo)}</h2><div class="sub">${esc(i.percorso)}</div>
-  <div class="dtools">${(cur.seq || []).length > 1 ? `<span class="dnav" style="margin:0"><button data-nav="-1" aria-label="Precedente" ${si <= 0 ? 'disabled' : ''}>‹</button><span class="mini">${si + 1} / ${cur.seq.length}</span><button data-nav="1" aria-label="Successivo" ${si >= cur.seq.length - 1 ? 'disabled' : ''}>›</button></span>` : ''}${canShare ? '<button class="pill" data-share="1">Condividi</button>' : ''}</div>
-  <div class="tabs" role="tablist">${tabsFor(i).map(([k, l]) => `<button class="tab ${cur.tab === k ? 'on' : ''}" role="tab" aria-selected="${cur.tab === k}" data-tab="${k}">${l}</button>`).join('')}</div></div><div class="panel" id="panel">${panel(i)}</div>`;
-  if (cur.tab === 'ai') aiRefresh();
-  if (cur.tab === 'schema') { const im = $('#panel img[data-pvf]'); if (im) getPv(im.dataset.pvf).then(pv => { if (pv && pv.url) im.src = pv.url; }); }
-  if (cur.tab === 'anteprima') { fitPv(); const f = $('#pvf'); if (f && f.dataset.pv) fillFrame(f); const im = $('#panel img[data-pvf]'); if (im) getPv(im.dataset.pvf).then(pv => { if (pv && pv.url) im.src = pv.url; }); }
+  const canShare = !!navigator.share && (i.link || i.testo), tg = taglineOf(i), inKit = S.kit.has(i.id), fav = S.fav.has(i.id);
+  d.innerHTML = `<div class="dh"><button class="pill close" id="dClose" aria-label="Chiudi (Esc)">Chiudi ✕</button><div class="crumb" style="padding-right:96px"><button data-closeitem="1">${esc(pgName)}</button> › <span>${esc(PSHORT[i.area] || tl(i.tipo))}</span></div>
+  <div class="dtitle"><span class="badge t-${esc(i.tipo)}">${esc(tl(i.tipo))}</span><h2>${esc(i.titolo)}</h2>${tg ? `<p class="dtag">${esc(tg)}</p>` : ''}</div>
+  <div class="dtools"><button class="pill ${fav ? 'on' : ''}" data-fav="${esc(i.id)}" aria-pressed="${fav}">${fav ? '★ Preferito' : '☆ Preferito'}</button><button class="pill ${inKit ? 'on' : ''}" data-kit="${esc(i.id)}" aria-pressed="${inKit}">${inKit ? 'Nel kit ✓' : '+ Aggiungi al Kit'}</button>${canShare ? '<button class="pill" data-share="1">Condividi</button>' : ''}${(cur.seq || []).length > 1 ? `<span class="dnav" style="margin:0 0 0 auto"><button data-nav="-1" aria-label="Precedente" ${si <= 0 ? 'disabled' : ''}>‹</button><span class="mini">${si + 1} / ${cur.seq.length}</span><button data-nav="1" aria-label="Successivo" ${si >= cur.seq.length - 1 ? 'disabled' : ''}>›</button></span>` : ''}</div>
+  <div class="subtabs" role="tablist" aria-label="Sezioni della scheda">${TABS.map(([k, l]) => `<button class="subtab" id="tab-${k}" role="tab" aria-selected="${cur.tab === k}" aria-controls="panel" tabindex="${cur.tab === k ? 0 : -1}" data-tab="${k}">${tabLabel(k, l, i)}</button>`).join('')}</div></div><div class="panel" id="panel" role="tabpanel" aria-labelledby="tab-${cur.tab}">${panel(i)}</div>`;
+  if (cur.tab === 'prompt') aiRefresh();
+  if (cur.tab === 'pan') { fitPv(); const f = $('#pvf'); if (f && f.dataset.pv) fillFrame(f); }
+  hydrateImgs();
 }
 function panel(i){
-  if (cur.tab === 'schema' && i.schema) return pSchema(i);
-  if (cur.tab === 'anteprima') return pPrev(i);
-  if (cur.tab === 'contenuti') return pCont(i);
-  if (cur.tab === 'uso') return pUso(i);
-  if (cur.tab === 'ai') return aiPanel({ item: i });
-  return pOver(i);
+  if (cur.tab === 'design') return pDesign(i);
+  if (cur.tab === 'struttura') return pStruct(i);
+  if (cur.tab === 'prompt') return pPrompt(i);
+  if (cur.tab === 'note') return pNote(i);
+  return pPan(i);
 }
 function link(id, label){ const x = byId[id]; return x ? `<button class="link" data-open="${esc(id)}">${esc(label || x.titolo)}</button> <span class="mini">${esc(tl(x.tipo))} · ${esc(x.fonte)}</span>` : ''; }
-function pOver(i){
-  const n = getNote(i), lic = i.licenza;
-  return `<h4>Cos'è</h4><p style="margin:0">${esc(i.descrizione) || '<i>Nessuna descrizione.</i>'}</p>
-  ${i.tagline && i.tagline !== i.descrizione ? `<p class="mini">${esc(i.tagline)}</p>` : ''}
+const EXTI = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
+function pMedia(i){
+  if (i.schema && i.schema.img) return `<div class="schw">${window.__ONLINE ? `<img class="img sch" data-pvf="${esc(i.schema.img)}" alt="Schema di ${esc(i.titolo)}" onerror="this.remove()">` : `<img class="img sch" src="${esc(i.schema.img)}" alt="Schema di ${esc(i.titolo)}" loading="lazy" onerror="this.remove()">`}</div>`;
+  return pPrev(i);
+}
+function pPan(i){
+  const lic = i.licenza, q = (i.schema && i.schema.quando) || [], ti = TIPO_INFO[i.tipo] || {};
+  let host = ''; try { host = new URL(i.link).hostname.replace(/^www\./, ''); } catch {}
+  return `<div class="pmedia">${pMedia(i)}</div>
   ${i.avvisi.map(a => `<div class="warn">⚠ ${esc(a)}</div>`).join('')}
-  ${i.tipo === 'prompt' && i.testo ? `<h4>Prompt</h4><pre>${esc(i.testo)}</pre><p><button class="pill black" data-copy="${esc(i.testo)}">Copia prompt</button></p>${i.variabili?.length ? `<p class="mini">Da sostituire: ${i.variabili.map(esc).join(' · ')}</p>` : ''}` : ''}
-  ${i.link ? `<p><a class="pill" target="_blank" rel="noopener noreferrer" href="${esc(i.link)}">Apri la sorgente ↗</a></p>` : ''}
+  <h4>Cos'è</h4><p class="ptxt">${esc(i.descrizione) || '<i>Nessuna descrizione.</i>'}</p>
+  ${i.tagline && i.tagline !== i.descrizione ? `<p class="mini">${esc(i.tagline)}</p>` : ''}
+  <h4>Quando usarlo</h4>${q.length ? `<ul class="gl">${q.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : `<p class="ptxt">${esc(ti.uso || 'Quando il suo contenuto risponde al tuo obiettivo: guarda «Struttura & Schema» per i passi d\'uso.')}</p>`}${i.triggers?.length ? `<p class="mini">Si attiva con: ${i.triggers.slice(0, 8).map(esc).join(' · ')}</p>` : ''}
+  <h4>Tag e fonte</h4><div class="tags">${i.tag.map(t => `<span class="chip">${esc(TAGL[t] || t)}</span>`).join('') || '<span class="mini">nessun tag</span>'}</div>
+  <p class="psrc">${i.link ? `<a class="pill" target="_blank" rel="noopener noreferrer" href="${esc(i.link)}">Fonte originale: ${esc(host || i.fonte)} ${EXTI}</a>` : `<span class="mini">Fonte: ${esc(i.fonte)}</span>`}${i.schema && i.schema.url && /^https:\/\/www\.milanote\.com\//.test(i.schema.url) ? ` <a class="pill" target="_blank" rel="noopener noreferrer" href="${esc(i.schema.url)}">Template su Milanote ${EXTI}</a>` : ''}</p>
   <h4>Scheda</h4><dl class="kv box"><dt>Fonte</dt><dd>${esc(i.fonte)}</dd><dt>Area d'uso</dt><dd>${esc((ARE[i.area] || {}).nome || '—')}</dd>${i.strumenti.length ? `<dt>Strumenti</dt><dd>${i.strumenti.map(s => esc(STR[s] || s)).join(', ')}</dd>` : ''}<dt>Percorso</dt><dd><code>${esc(i.percorso)}</code> <button class="link" data-copy="${esc(i.percorso)}">copia</button></dd>
   <dt>Dimensione</dt><dd>${i.contenuti.file} file · ${kb(i.contenuti.byte)}</dd>
   <dt>Licenza</dt><dd>${lic ? `${esc(lic.tipo)} <span class="mini">(${lic.origine === 'fonte' ? 'dalla fonte' : 'nella cartella'})</span>` : '<b>non trovata</b>'}</dd>
-  ${i.categoria ? `<dt>Categoria</dt><dd>${esc(i.categoria)}</dd>` : ''}${i.triggers?.length ? `<dt>Si attiva con</dt><dd>${i.triggers.slice(0, 8).map(esc).join(', ')}</dd>` : ''}
+  ${i.categoria ? `<dt>Categoria</dt><dd>${esc(i.categoria)}</dd>` : ''}
   <dt>Scheda .md</dt><dd>${i.scheda ? (window.__ONLINE ? `<span class="mini">${esc(i.scheda)}</span>` : `<a class="lnk" target="_blank" rel="noopener" href="${esc(i.scheda)}">${esc(i.scheda)}</a>`) : '—'}</dd></dl>
-  <h4>Tag</h4><div class="tags">${i.tag.map(t => `<span class="chip">${esc(TAGL[t] || t)}</span>`).join('') || '<span class="mini">nessuno</span>'}</div>
-  ${i.duplicatoDi ? `<h4>È una copia di</h4><div>${link(i.duplicatoDi)}</div>` : ''}${i.copie?.length ? `<h4>Altre copie / versioni</h4>${i.copie.slice(0, 8).map(c => `<div>${link(c, byId[c]?.fonte + ' · ' + byId[c]?.percorso.split('/').slice(2).join('/'))}</div>`).join('')}` : ''}
-  ${i.correlati?.length ? `<h4>Correlati</h4>${i.correlati.map(c => `<div>${link(c)}</div>`).join('')}` : ''}
-  ${HTTP && SRV ? `<h4>Gestisci</h4><div class="edit">
+  ${i.duplicatoDi ? `<h4>È una copia di</h4><div>${link(i.duplicatoDi)}</div>` : ''}${i.copie?.length ? `<h4>Altre copie o versioni</h4>${i.copie.slice(0, 8).map(c => `<div>${link(c, byId[c]?.fonte + ' · ' + byId[c]?.percorso.split('/').slice(2).join('/'))}</div>`).join('')}` : ''}
+  ${i.correlati?.length ? `<h4>Correlati</h4>${i.correlati.map(c => `<div>${link(c)}</div>`).join('')}` : ''}`;
+}
+/* --- Design & Token --- */
+const HEXOK = h => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(h || '').trim());
+const hexN = h => { h = String(h).trim().toUpperCase(); return h.length === 4 ? '#' + [...h.slice(1)].map(c => c + c).join('') : h; };
+const relLum = h => { const n = parseInt(hexN(h).slice(1), 16), f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(n >> 16 & 255) + .7152 * f(n >> 8 & 255) + .0722 * f(n & 255); };
+const contr = (h, bg = '#0A0C10') => { const a = relLum(h), b = relLum(bg); return (Math.max(a, b) + .05) / (Math.min(a, b) + .05); };
+const contrTxt = r => r >= 7 ? 'AAA' : r >= 4.5 ? 'AA' : r >= 3 ? 'AA solo testo grande' : 'basso';
+const FB = { sans: "system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif", serif: "Georgia, 'Times New Roman', serif", mono: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace" };
+const FSZ = { sans: '16px / 1.5 per il testo, 13–14px per le interfacce', serif: '18px / 1.6 per il testo, titoli da 32px', mono: '13–14px / 1.5' };
+const fontCat = f => /mono|code|courier|consolas|menlo|jetbrains|plex mono/i.test(f) ? 'mono' : (/garamond|playfair|georgia|times|didot|bodoni|cormorant|baskerville|caslon|fraunces|lora|merriweather|newsreader|crimson|spectral|serif/i.test(f) && !/sans/i.test(f)) ? 'serif' : 'sans';
+function pDesign(i){
+  const pal = i.palette || [], fonts = i.fonts || [];
+  if (!pal.length && !fonts.length) return `<div class="box tinfo"><b>Nessun colore o font rilevato</b><br><span class="mini">I token (palette, tipografia) si trovano soprattutto nei design system, nei template e nei componenti. Per ricavarli da questo elemento usa «Prompt &amp; AI».</span></div>`;
+  const css = pal.filter(p => HEXOK(p.hex)).map(p => `  --${String(p.nome || 'colore').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}: ${hexN(p.hex)};`).join('\n');
+  return `${pal.length ? `<h4>Palette (${pal.length})</h4><p class="mini">Clic sul riquadro o sul codice: copia l'HEX. Clic destro: copia la classe <code>bg-[…]</code>. I pulsanti copiano la classe Tailwind. Il contrasto è stimato su <code>#0A0C10</code> (tema scuro Frame OS).</p>
+  <div class="tokg">${pal.map(p => { const ok = HEXOK(p.hex), hx = ok ? hexN(p.hex) : String(p.hex || ''), r = ok ? contr(hx) : 0;
+    return `<div class="tok"><button class="tokc" ${ok ? `data-copy="${esc(hx)}" data-msg="Copiato ${esc(hx)}" data-ctx="bg-[${esc(hx)}]" data-ctxmsg="Copiato bg-[${esc(hx)}]"` : 'disabled'} style="background:${esc(hx)}" aria-label="Copia ${esc(hx)}"></button>
+    <div class="tokm"><b>${esc(p.nome || 'colore')}</b><button class="link tokhex" ${ok ? `data-copy="${esc(hx)}" data-msg="Copiato ${esc(hx)}" data-ctx="bg-[${esc(hx)}]" data-ctxmsg="Copiato bg-[${esc(hx)}]"` : 'disabled'}>${esc(hx)}</button>
+    ${ok ? `<span class="mini">Contrasto ${r.toFixed(1)}:1 · ${contrTxt(r)}</span><span class="tokb"><button class="pill sm" data-copy="bg-[${esc(hx)}]" data-msg="Copiato bg-[${esc(hx)}]">bg-[…]</button><button class="pill sm" data-copy="text-[${esc(hx)}]" data-msg="Copiato text-[${esc(hx)}]">text-[…]</button></span>` : '<span class="mini">formato non HEX</span>'}</div></div>`; }).join('')}</div>
+  ${css ? `<p><button class="pill" data-copy=":root {\n${esc(css)}\n}" data-msg="Variabili CSS copiate">Copia tutta la palette come variabili CSS</button></p>` : ''}` : ''}
+  ${fonts.length ? `<h4>Tipografia (${fonts.length})</h4><div class="fontg">${fonts.map(f => { const c = fontCat(f), fam = `font-family: '${f}', ${FB[c]};`;
+    return `<div class="font box"><div class="fsm" style="font-family:'${esc(f)}',${esc(FB[c])}">Aa Abc 123</div><div class="fmm"><b>${esc(f)}</b><span class="mini">Fallback: <code>${esc(FB[c])}</code></span><span class="mini">Taglia di partenza: ${esc(FSZ[c])} <i>(stima dalla famiglia)</i></span><button class="pill sm" data-copy="${esc(fam)}" data-msg="Copiato font-family">Copia font-family</button></div></div>`; }).join('')}</div><p class="mini">Controlla la licenza di ogni font prima di usarlo in un sito. L'anteprima «Aa» usa il font solo se è installato sul tuo dispositivo.</p>` : ''}`;
+}
+/* --- Struttura & Schema --- */
+function pSchemaBody(i){
+  const m = i.schema, L = a => (a || []).filter(Boolean);
+  const ex = m.esempi || {}, exl = [['sito', 'Sito web'], ['dashboard', 'Dashboard'], ['brand', 'Brand']].filter(([k]) => ex[k]);
+  const ric = m.ricrea ? `Ricrea lo schema "${i.titolo}" (template Milanote) dentro FRAME.01 OS.\nStruttura: ${m.disposizione || ''}\nBlocchi: ${L(m.blocchi).map(b => b.nome).join(', ')}.\nIstruzioni: ${m.ricrea}` : '';
+  return `${m.sintesi ? `<p class="schl">${esc(m.sintesi)}</p>` : ''}
+  ${m.disposizione ? `<h4>Come è disposto</h4><p class="ptxt">${esc(m.disposizione)}</p>` : ''}
+  ${L(m.blocchi).length ? `<h4>Blocchi dello schema</h4><div class="schb">${m.blocchi.map((b, n) => `<div class="schc"><span class="schn">${n + 1}</span><b>${esc(b.nome)}</b>${b.contenuto ? `<p>${esc(b.contenuto)}</p>` : ''}${b.funzione ? `<p class="mini">A cosa serve: ${esc(b.funzione)}</p>` : ''}</div>`).join('')}</div>` : ''}
+  ${L(m.uso).length ? `<h4>Come si usa, passo per passo</h4><ol class="steps">${m.uso.map(u => `<li>${esc(u)}</li>`).join('')}</ol>` : ''}
+  ${exl.length ? `<h4>Esempi d'uso nei tuoi progetti</h4><div class="sche">${exl.map(([k, l]) => `<div class="box"><b>${l}</b><p>${esc(ex[k])}</p></div>`).join('')}</div>` : ''}
+  ${m.ricrea ? `<h4>Come ricrearlo in FRAME.01 OS</h4><p class="ptxt">${esc(m.ricrea)}</p><p><button class="pill black" data-copy="${esc(ric)}" data-msg="Prompt copiato">Copia come prompt per l'AI</button></p>` : ''}
+  ${L(m.correlati).length ? `<h4>Template correlati</h4><p>${m.correlati.map(c => `<span class="badge">${esc(c)}</span>`).join(' ')}</p>` : ''}
+  <p class="mini">Schema analizzato dall'immagine pubblica del template: i testi più piccoli possono essere approssimati.</p>`;
+}
+function pStruct(i){
+  const top = (i.contenuti && i.contenuti.top) || [], ext = Object.entries((i.contenuti && i.contenuti.perExt) || {}).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const blocks = top.slice(0, 14).map((t, n) => `<div class="schc"><span class="schn">${n + 1}</span><b>${esc(t.nome)}${t.tipo === 'cartella' ? '/' : ''}</b><p class="mini">${t.tipo === 'cartella' ? t.file + ' file · ' : ''}${kb(t.byte)}</p></div>`).join('');
+  return `${i.schema ? pSchemaBody(i) : ''}
+  ${!i.schema && (i.uso || []).length ? `<h4>Come si usa, passo per passo</h4>${pUso(i)}` : ''}
+  ${blocks ? `<h4>${i.schema ? 'File dell\'elemento' : 'Struttura'} (${i.contenuti.file} file · ${kb(i.contenuti.byte)})</h4><div class="schb">${blocks}</div>
+  <details class="pr"><summary>Tabella completa dei file</summary><div class="box"><table><thead><tr><th>Nome</th><th class="r">File</th><th class="r">Peso</th></tr></thead><tbody>${top.map(t => `<tr><td>${t.tipo === 'file' ? (window.__ONLINE ? esc(t.nome) : `<a class="lnk" target="_blank" rel="noopener" href="${esc(url(i.percorso + '/' + t.nome))}">${esc(t.nome)}</a>`) : esc(t.nome) + '/'}</td><td class="r">${t.tipo === 'cartella' ? t.file : ''}</td><td class="r">${kb(t.byte)}</td></tr>`).join('')}</tbody></table></div></details>` : ''}
+  ${ext.length ? `<h4>Tipi di file</h4><div class="tags">${ext.map(([x, n]) => `<span class="chip">${esc(x)} ${n}</span>`).join('')}</div>` : ''}
+  ${i.estratto ? `<h4>Estratto di ${i.tipo === 'design-system' ? 'DESIGN.md' : 'SKILL.md / README'}</h4><pre>${esc(i.estratto)}</pre>` : ''}
+  ${!i.schema && !(i.uso || []).length && !blocks && !i.estratto ? '<div class="box tinfo"><b>Nessuna struttura rilevata</b><br><span class="mini">Elemento senza file propri (link o riferimento).</span></div>' : ''}`;
+}
+/* --- Prompt & AI --- */
+const FOS_CTX = `CONTESTO FRAME OS (design system da rispettare)
+- Tema scuro: sfondo #0a0c10, testo hsl(210 40% 98%), testo secondario hsl(215 20% 65%), accento hsl(212 100% 50%).
+- Superfici glass: rgba(255,255,255,.035) base, .065 evidenziata, .1 attiva; bordo 1px rgba(255,255,255,.08), hover .16.
+- Raggi: card 12px, controlli 10px, badge e pulsanti di navigazione a pillola (9999px).
+- Barra superiore con backdrop-filter blur(16px) e bordo inferiore; pulsanti di navigazione 36px.
+- Tipografia: Alte Haas Grotesk (fallback Helvetica Neue, Arial, sans-serif) per i testi, Geist Mono per etichette e numeri; 13–14px per le interfacce, titoli con tracking stretto.
+- Componenti: card con hover che schiarisce il bordo (nessun salto di layout), niente ombre pesanti, anello di focus luminoso sottile.
+- Accessibilità: contrasto AA, focus visibile, target tattili da 44px, rispetta prefers-reduced-motion.`;
+function promptBase(i){
+  if (i.tipo === 'prompt' && i.testo) return i.testo;
+  const sl = (i.tipo === 'skill' || i.tipo === 'plugin') && i.nome ? ` (/${i.nome})` : '';
+  return `Usa ${tl(i.tipo).toLowerCase()} «${i.titolo}»${sl} per il progetto {{progetto}} (cliente: {{cliente}}).\n\n${i.descrizione ? 'Che cos\'è: ' + aiClean(i.descrizione) + '\n\n' : ''}Cosa voglio: applicalo al progetto, spiega i passi che segui e consegnami il risultato pronto da usare. Rispetta il design system indicato qui sotto, se presente. Rispondi in italiano.`;
+}
+function promptVars(i, text){ const out = new Map(); (text.match(/\{\{\s*[\w-]+\s*\}\}/g) || []).forEach(m => out.set(m, m.replace(/[{}\s]/g, ''))); (i.variabili || []).forEach(v => { if (v && text.includes(v)) out.set(v, String(v).replace(/^\[|\]$/g, '')); }); return [...out]; }
+function promptResolved(i){ const base = promptBase(i), vals = store.get('pvars', {}) || {}; let t = base; for (const [tok, lab] of promptVars(i, base)) if ((vals[lab] || '').trim()) t = t.split(tok).join(vals[lab].trim()); return t; }
+function pPrompt(i){
+  const base = promptBase(i), vars = promptVars(i, base), vals = store.get('pvars', {}) || {};
+  return `<div class="pbox"><div class="pbh"><b>${i.tipo === 'prompt' && i.testo ? 'Prompt dell\'elemento' : 'Prompt predefinito'}</b><span class="mini">${vars.length ? vars.length + (vars.length === 1 ? ' variabile' : ' variabili') + ' da compilare' : 'nessuna variabile'}</span></div><pre id="pText">${esc(promptResolved(i))}</pre></div>
+  ${vars.length ? `<div class="pvars">${vars.map(([tok, lab]) => `<label class="aig">${esc(lab)}<input type="text" data-pvar="${esc(lab)}" value="${esc(vals[lab] || '')}" placeholder="${esc(tok)}" autocomplete="off"></label>`).join('')}</div><p class="mini">I valori restano in questo browser e valgono per tutti i prompt con la stessa variabile.</p>` : ''}
+  <div class="acts"><button class="pill black" data-pcopy="clean">Copia prompt pulito</button><button class="pill" data-pcopy="ctx">Copia con contesto Frame OS</button></div>
+  <p class="mini">«Con contesto Frame OS» aggiunge in testa le regole del design system (colori, raggi, tipografia, accessibilità) per Claude, ChatGPT o Lovable.</p>
+  <h4>Chiedi all'AI</h4>${aiPanel({ item: i })}`;
+}
+/* --- Note & Gestione --- */
+function pNote(i){
+  const n = noteOf(i), ST = ['Da usare', 'Da valutare', 'Scartato'];
+  if (HTTP && SRV) return `<div class="edit"><h4>Note e stato</h4>
+  <label class="mini" for="eStato">Stato</label><select id="eStato"><option value="">—</option>${ST.map(s => `<option ${n.stato === s ? 'selected' : ''}>${s}</option>`).join('')}</select>
+  <label class="mini" for="eNota">Nota</label><textarea id="eNota" placeholder="Per quale progetto? Cosa tenere, cosa cambiare…">${esc(n.nota || '')}</textarea>
+  <h4>Gestione</h4>
   <label class="mini" for="eTitolo">Titolo</label><input type="text" id="eTitolo" value="${esc(i.titolo)}">
   <label class="mini" for="eDesc">Descrizione</label><textarea id="eDesc" style="min-height:70px">${esc(i.descrizione || '')}</textarea>
   <label class="mini" for="eTag">Tag (separati da virgola; aggiungono quelli automatici)</label><input type="text" id="eTag" value="${esc(((i.annotazione && i.annotazione.tag) || []).join(', '))}" placeholder="es. lusso, motion, cliente-giannini">
   <label class="mini" for="eArea">Area d'uso</label><select id="eArea">${AREE.map(a => `<option value="${a.id}" ${i.area === a.id ? 'selected' : ''}>${esc(a.nome)}</option>`).join('')}</select>
   <label class="mini" for="eStr">Strumenti (virgola: ${esc(Object.values(STR).slice(0, 6).join(', '))}…)</label><input type="text" id="eStr" value="${esc(((i.annotazione && i.annotazione.strumenti) || []).map(s => STR[s] || s).join(', '))}" placeholder="es. Framer, Figma">
-  <label class="mini" for="eStato">Stato</label><select id="eStato"><option value="">—</option>${['Da usare', 'Da valutare', 'Scartato'].map(s => `<option ${n.stato === s ? 'selected' : ''}>${s}</option>`).join('')}</select>
-  <label class="mini" for="eNota">Nota</label><textarea id="eNota" placeholder="Per quale progetto? Cosa tenere, cosa cambiare…">${esc(n.nota || '')}</textarea>
-  <p><button class="pill black" id="eSave">Salva</button> <span class="mini">Salvato in dati/annotazioni.json; sopravvive a ogni scansione.</span></p></div>`
-  : `<h4>Le tue note</h4>
-  <label class="opt">Stato <select id="nStato" ${canAdd() ? '' : 'disabled'}><option value="">—</option>${['Da usare', 'Da valutare', 'Scartato'].map(s => `<option ${n.stato === s ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
-  <textarea id="nNota" ${canAdd() ? '' : 'readonly'} placeholder="Per quale progetto? Cosa tenere, cosa cambiare…">${esc(n.nota || '')}</textarea>
-  <p class="mini">Le note restano in questo browser. Apri il catalogo da <code>Apri-FRAME01-LIBRARY.command</code> per salvarle nei file.</p>`}
-  <p><button class="pill ${S.kit.has(i.id) ? 'on' : 'black'}" data-kit="${esc(i.id)}">${S.kit.has(i.id) ? 'Nel kit ✓ (togli)' : 'Aggiungi al kit'}</button></p>`;
-}
-function pSchema(i){
-  const m = i.schema, L = a => (a || []).filter(Boolean), li = a => `<ul class="gl">${L(a).map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
-  const img = m.img ? (window.__ONLINE ? `<img class="img sch" data-pvf="${esc(m.img)}" alt="Schema di ${esc(i.titolo)}" onerror="this.remove()">` : `<img class="img sch" src="${esc(m.img)}" alt="Schema di ${esc(i.titolo)}" loading="lazy" onerror="this.remove()">`) : '';
-  const ex = m.esempi || {}, exl = [['sito', 'Sito web'], ['dashboard', 'Dashboard'], ['brand', 'Brand']].filter(([k]) => ex[k]);
-  const ric = m.ricrea ? `Ricrea lo schema "${i.titolo}" (template Milanote) dentro FRAME.01 OS.\nStruttura: ${m.disposizione || ''}\nBlocchi: ${L(m.blocchi).map(b => b.nome).join(', ')}.\nIstruzioni: ${m.ricrea}` : '';
-  return `${img ? `<div class="schw">${img}</div>` : ''}
-  ${m.sintesi ? `<p class="schl">${esc(m.sintesi)}</p>` : ''}
-  ${m.disposizione ? `<h4>Come è disposto</h4><p>${esc(m.disposizione)}</p>` : ''}
-  ${L(m.blocchi).length ? `<h4>Blocchi dello schema</h4><div class="schb">${m.blocchi.map((b, n) => `<div class="schc"><span class="schn">${n + 1}</span><b>${esc(b.nome)}</b>${b.contenuto ? `<p>${esc(b.contenuto)}</p>` : ''}${b.funzione ? `<p class="mini">A cosa serve: ${esc(b.funzione)}</p>` : ''}</div>`).join('')}</div>` : ''}
-  ${L(m.uso).length ? `<h4>Come si usa, passo per passo</h4><ol class="steps">${m.uso.map(u => `<li>${esc(u)}</li>`).join('')}</ol>` : ''}
-  ${L(m.quando).length ? `<h4>Quando usarlo</h4>${li(m.quando)}` : ''}
-  ${exl.length ? `<h4>Esempi per i tuoi progetti</h4><div class="sche">${exl.map(([k, l]) => `<div class="box"><b>${l}</b><p>${esc(ex[k])}</p></div>`).join('')}</div>` : ''}
-  ${m.ricrea ? `<h4>Come ricrearlo in FRAME.01 OS</h4><p>${esc(m.ricrea)}</p><p><button class="pill black" data-copy="${esc(ric)}">Copia come prompt per l'AI</button></p>` : ''}
-  ${L(m.correlati).length ? `<h4>Template correlati</h4><p>${m.correlati.map(c => `<span class="badge">${esc(c)}</span>`).join(' ')}</p>` : ''}
-  ${m.url && /^https:\/\/www\.milanote\.com\//.test(m.url) ? `<p><a class="pill black" target="_blank" rel="noopener noreferrer" href="${esc(m.url)}">Apri il template su Milanote ↗</a></p>` : ''}
-  <p class="mini">Schema analizzato dall'immagine pubblica del template: i testi più piccoli possono essere approssimati.</p>`;
+  <p><button class="pill black" id="eSave">Salva</button> <span class="mini">Salvato in dati/annotazioni.json; sopravvive a ogni scansione.</span></p></div>`;
+  return `<h4>Stato</h4><label class="opt">Stato dell'elemento <select id="nStato"><option value="">—</option>${ST.map(s => `<option ${n.stato === s ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
+  <h4>Le tue note</h4><textarea id="nNota" placeholder="Per quale progetto? Cosa tenere, cosa cambiare…">${esc(n.nota || '')}</textarea>
+  <p class="mini">Le note e lo stato di questa versione restano <b>in questo browser</b> (non nei file della libreria). Per salvarli nei dati apri il catalogo dal Mac con <code>Apri-FRAME01-LIBRARY.command</code>.</p>`;
 }
 function pPrev(i){
   if (i.thumb && i.preview?.tipo !== 'html' && i.preview?.tipo !== 'img') return `<div>${thumbImg(i, true)}</div>${i.link && /^https:/.test(i.link) ? `<p><a class="pill black" target="_blank" rel="noopener noreferrer" href="${esc(i.link)}">Apri la pagina ↗</a></p>` : ''}`;
   if (i.preview?.tipo === 'img') return window.__ONLINE ? `<img class="img" style="border-radius:12px;height:auto" data-pvf="${esc(i.preview.file)}" alt="Anteprima">` : `<img class="img" style="border-radius:12px" src="${esc(url(i.preview.file))}" alt="Anteprima">`;
   if (i.preview?.tipo !== 'html') {
-    const none = `<div class="gcbig">${gen(i)}</div><p class="mini">Nessuna immagine per questo elemento: qui sopra un riassunto del contenuto. Guarda <b>Contenuti</b> e <b>Come usarlo</b>.</p>`;
+    const none = `<div class="gcbig">${gen(i)}</div><p class="mini">Nessuna immagine per questo elemento: qui sopra un riassunto del contenuto. Guarda <b>Struttura &amp; Schema</b>.</p>`;
     if (!i.link || !/^https:/.test(i.link)) return none;
     const cov = i.cover && /^https:/.test(i.cover) ? i.cover : null, fb = hasShot(i) ? shot(i.link) : null;
     if (!cov && !fb) return `<p><a class="pill black" target="_blank" rel="noopener noreferrer" href="${esc(i.link)}">Apri il sito ↗</a></p><p class="mini">Anteprime dei siti disattivate: riattivale da Fonti → Impostazioni.</p>`;
@@ -641,15 +742,6 @@ function pPrev(i){
   <p class="mini">${window.__ONLINE ? 'Anteprima cifrata e isolata (sandbox). Alcuni file con risorse esterne possono apparire incompleti.' : 'L\'anteprima gira isolata (sandbox). Per vederla bene apri il catalogo con <code>node scripts/serve.mjs</code>.'}</p>`;
 }
 function fitPv(){ const b = $('#pv'), f = $('#pvf'), w = $('#pvi'); if (!b || !f || !w) return; const fit = Math.min(1, (b.clientWidth - 2) / cur.w); const sc = (cur.z === 'fit' || cur.z == null) ? fit : +cur.z; f.style.width = cur.w + 'px'; f.style.height = Math.round(b.clientHeight / sc) + 'px'; f.style.transform = `scale(${sc})`; w.style.width = Math.round(cur.w * sc) + 'px'; w.style.height = b.clientHeight + 'px'; }
-function pCont(i){
-  const ext = Object.entries(i.contenuti.perExt || {}).sort((a, b) => b[1] - a[1]).slice(0, 10);
-  return `${i.palette?.length ? `<h4>Palette</h4><div class="palette">${i.palette.map(p => `<button class="sw2" data-copy="${esc(p.hex)}" title="Copia ${esc(p.hex)}"><i style="background:${esc(p.hex)}"></i><span>${esc(p.nome)}<br>${esc(p.hex)}</span></button>`).join('')}</div>` : ''}
-  ${i.fonts?.length ? `<h4>Font</h4><div class="tags">${i.fonts.map(f => `<span class="chip">${esc(f)}</span>`).join('')}</div><p class="mini">Controlla la licenza di ogni font prima di usarlo in un sito.</p>` : ''}
-  <h4>Cartelle e file (${i.contenuti.file} · ${kb(i.contenuti.byte)})</h4>
-  <div class="box"><table><thead><tr><th>Nome</th><th class="r">File</th><th class="r">Peso</th></tr></thead><tbody>${i.contenuti.top.map(t => `<tr><td>${t.tipo === 'file' ? (window.__ONLINE ? esc(t.nome) : `<a class="lnk" target="_blank" rel="noopener" href="${esc(url(i.percorso + '/' + t.nome))}">${esc(t.nome)}</a>`) : esc(t.nome) + '/'}</td><td class="r">${t.tipo === 'cartella' ? t.file : ''}</td><td class="r">${kb(t.byte)}</td></tr>`).join('')}</tbody></table></div>
-  <h4>Tipi di file</h4><div class="tags">${ext.map(([x, n]) => `<span class="chip">${esc(x)} ${n}</span>`).join('')}</div>
-  ${i.estratto ? `<h4>Estratto di ${i.tipo === 'design-system' ? 'DESIGN.md' : 'SKILL.md / README'}</h4><pre>${esc(i.estratto)}</pre>` : ''}`;
-}
 function pUso(i){
   return `<ol class="steps">${i.uso.map(u => `<li><b>${esc(u.t)}</b>${esc(u.d)}${u.file ? `<div class="mini">File: <code>${esc(u.file)}</code></div>` : ''}${u.cmd ? `<div class="cmd"><pre>${esc(u.cmd)}</pre><button class="pill" data-copy="${esc(u.cmd)}">Copia</button></div>` : ''}</li>`).join('')}</ol>
   <p class="mini">Esegui i comandi dalla cartella della libreria e sostituisci <code>&lt;progetto&gt;</code> con il percorso del tuo progetto. In alternativa metti l'elemento nel <b>Kit</b> e genera il comando di copia.</p>`;
@@ -1043,6 +1135,14 @@ document.addEventListener('click', e => {
     S.limit = 96; render(); return; }
 });
 
+
+document.addEventListener('keydown', e => {
+  const tb = e.target.closest && e.target.closest('.subtabs'); if (!tb || !cur) return;
+  const ks = TABS.map(t => t[0]); let n = ks.indexOf(cur.tab);
+  if (e.key === 'ArrowRight') n = (n + 1) % ks.length; else if (e.key === 'ArrowLeft') n = (n - 1 + ks.length) % ks.length; else if (e.key === 'Home') n = 0; else if (e.key === 'End') n = ks.length - 1; else return;
+  e.preventDefault(); cur.tab = ks[n]; setLastTab(cur.tab); drawRender(); const b = document.getElementById('tab-' + cur.tab); if (b) b.focus();
+});
+document.addEventListener('contextmenu', e => { const c = e.target.closest && e.target.closest('[data-ctx]'); if (c) { e.preventDefault(); copy(c.dataset.ctx, c.dataset.ctxmsg); } });
 /* ---------- eventi ---------- */
 document.addEventListener('click', e => {
   const t = e.target;
@@ -1052,15 +1152,16 @@ document.addEventListener('click', e => {
   const fv = t.closest('[data-fav]'); if (fv) { e.stopPropagation(); toggleFav(fv.dataset.fav); render(); if (cur) drawRender(); return; }
   const cpr = t.closest('[data-cprompt]'); if (cpr) { e.stopPropagation(); copy(byId[cpr.dataset.cprompt].testo || ''); return; }
   const kit = t.closest('[data-kit]'); if (kit) { e.stopPropagation(); toggleKit(kit.dataset.kit); render(); if (cur) drawRender(); if ($('#dlgKit').open) kitRender(); return; }
-  const cp = t.closest('[data-copy]'); if (cp) { copy(cp.dataset.copy); return; }
+  const cp = t.closest('[data-copy]'); if (cp) { copy(cp.dataset.copy, cp.dataset.msg); return; }
   const cl = t.closest('[data-close]'); if (cl) { $('#' + cl.dataset.close).close(); return; }
   const op = t.closest('[data-open]'); if (op) { openItem(op.dataset.open); return; }
-  const tab = t.closest('[data-tab]'); if (tab && cur) { cur.tab = tab.dataset.tab; drawRender(); return; }
+  const tab = t.closest('[data-tab]'); if (tab && cur) { cur.tab = tab.dataset.tab; setLastTab(cur.tab); drawRender(); return; }
+  const pc = t.closest('[data-pcopy]'); if (pc && cur) { const x = promptResolved(byId[cur.id]); copy(pc.dataset.pcopy === 'ctx' ? FOS_CTX + '\n\n' + x : x, pc.dataset.pcopy === 'ctx' ? 'Prompt con contesto Frame OS copiato' : 'Prompt copiato'); return; }
   const w = t.closest('[data-w]'); if (w && cur) { cur.w = +w.dataset.w; drawRender(); return; }
   const pz = t.closest('[data-z]'); if (pz && cur) { cur.z = pz.dataset.z; drawRender(); return; }
   if (t.closest('#dClose') || t === $('#backdrop')) { closeItem(); return; }
   const tp = t.closest('[data-tipo]'); if (tp) { S.tipo = tp.dataset.tipo; S.limit = 96; render(); return; }
-  const tg = t.closest('[data-tag]'); if (tg) { const k = tg.dataset.tag; S.tag.has(k) ? S.tag.delete(k) : S.tag.add(k); S.limit = 96; renderTags(); render(); return; }
+  const tg = t.closest('[data-tag]'); if (tg) { const k = tg.dataset.tag; S.tag.has(k) ? S.tag.delete(k) : S.tag.add(k); S.limit = 96; renderTags(); render(); const nb = [...document.querySelectorAll('[data-tag]')].find(x => x.dataset.tag === k && x.offsetParent); if (nb) nb.focus({ preventScroll: true }); return; }
   if (t.closest('#more')) { S.limit += 96; render(); return; }
   if (t.closest('#bExport')) { exportNotes(); return; }
   if (t.closest('#eSave') && cur) { saveItem(cur.id); return; }
@@ -1073,16 +1174,17 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { if (cur) closeItem(); }
   else if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); $('#q').focus(); }
   else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('#q').focus(); $('#q').select(); }
-  else if ((e.key === 'Enter' || e.key === ' ') && document.activeElement?.classList.contains('card')) { e.preventDefault(); openItem(document.activeElement.dataset.id); }
+  else if (e.key === 'Enter' && document.activeElement?.classList.contains('card')) { e.preventDefault(); openItem(document.activeElement.dataset.id); }
 });
 document.addEventListener('input', e => {
   if (e.target.id === 'q') { S.q = e.target.value; S.limit = 96; if (S.page === 'home' && S.q.trim()) setPage('tutto'); else render(); }
-  else if (e.target.id === 'nNota' && cur) { saveNote(cur.id, { nota: e.target.value }); }
+  else if (e.target.id === 'nNota' && cur) { persistNote(cur.id, { nota: e.target.value }); }
+  else if (e.target.dataset && e.target.dataset.pvar && cur) { const v = store.get('pvars', {}) || {}; v[e.target.dataset.pvar] = e.target.value; store.set('pvars', v); const pt = $('#pText'); if (pt) pt.textContent = promptResolved(byId[cur.id]); }
   else if (e.target.id === 'kitDest') { store.set('dest', e.target.value); kitRender(); }
 });
 document.addEventListener('change', e => {
   const id = e.target.id;
-  if (id === 'nStato' && cur) { if (saveNote(cur.id, { stato: e.target.value }, true)) render(); else e.target.value = getNote(byId[cur.id]).stato || ''; }
+  if (id === 'nStato' && cur) { if (persistNote(cur.id, { stato: e.target.value }, true)) { if (canAdd()) render(); } else e.target.value = noteOf(byId[cur.id]).stato || ''; }
   else if (id === 'fStato') { S.stato = e.target.value; S.limit = 96; render(); }
   else if (id === 'fSort') { S.sort = e.target.value; render(); }
   else if (id === 'fPrev') { S.prev = e.target.checked; render(); }
@@ -1117,22 +1219,16 @@ function activeList(){
 function renderActive(){
   const a = activeList();
   $('#active').innerHTML = a.map(([k, l]) => `<button class="chip on" data-clear="${esc(k)}" aria-label="Togli filtro ${esc(l)}">${esc(l)} <span aria-hidden="true">✕</span></button>`).join('');
-  $('#fN').textContent = a.length; $('#tbFN').textContent = a.length;
+  $('#fN').textContent = a.length; $('#tbFN').textContent = a.length; $('#bAzzera').hidden = !a.length;
   $('#sArea').textContent = S.area ? (PSHORT[S.area] || S.area) : 'Tutte'; $('#sStrum').textContent = S.strum ? (STR[S.strum] || S.strum) : 'Tutti';
   $('#sFonte').textContent = S.fonte || 'Tutte'; $('#sTipo').textContent = S.tipo ? tl(S.tipo) : 'Tutti'; $('#sTag').textContent = S.tag.size ? S.tag.size + ' selezionati' : 'Nessuno';
   const o = [S.stato, S.prev, S.dup, S.favOnly].filter(Boolean).length; $('#sOpz').textContent = o ? o + ' attive' : 'Predefinite';
 }
 function applyView(){
-  const g = $('#grid'), z = S.z[S.view]; let dense = false;
-  g.className = 'grid v-' + S.view;
-  if (S.view === 'var') { const cw = Math.round(170 + z * 3.2); g.style.setProperty('--cw', cw + 'px'); dense = cw < 215; }
-  else if (S.view === 'fix') { const want = Math.round(8 - z * 0.07), max = Math.max(1, Math.floor((g.clientWidth || innerWidth) / 120)); const cols = Math.min(want, max); g.style.setProperty('--cols', cols); dense = cols >= 6; }
-  else g.style.setProperty('--lt', Math.round(72 + z * 1.8) + 'px');
-  if (dense && S.view !== 'list') g.classList.add('dense');
-  $('#zoom').value = z;
+  const g = $('#grid'); g.className = 'grid v-' + S.view + (S.view === 'densa' ? ' dense' : ''); g.style.removeProperty('--cw'); g.style.removeProperty('--cols');
+  const lh = $('#lhead'); if (lh) lh.hidden = S.view !== 'lista';
   document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === S.view));
 }
-function zoomBy(d){ S.z[S.view] = Math.max(0, Math.min(100, S.z[S.view] + d)); store.set('z', S.z); applyView(); }
 function setPanel(open){ $('#fpanel').hidden = !open; $('#bFiltri').setAttribute('aria-expanded', open); $('#tbFiltri').classList.toggle('on', open); }
 document.querySelectorAll('.acc').forEach(a => { if (S.acc.has(a.dataset.acc)) { a.classList.add('open'); a.querySelector('.acc-h').setAttribute('aria-expanded', 'true'); } });
 document.addEventListener('click', e => {
@@ -1145,17 +1241,16 @@ document.addEventListener('click', e => {
     else if (k.startsWith('tag:')) { S.tag.delete(k.slice(4)); renderTags(); } else if (k === 'stato') { S.stato = ''; $('#fStato').value = ''; }
     else if (k === 'ids') S.ids = null; else if (k === 'prev') { S.prev = false; $('#fPrev').checked = false; } else if (k === 'dup') { S.dup = false; $('#fDup').checked = false; }
     S.limit = 96; render(); return; }
-  const vw = t.closest('[data-view]'); if (vw) { S.view = vw.dataset.view; store.set('view', S.view); applyView(); return; }
-  if (t.closest('#zIn')) { zoomBy(10); return; } if (t.closest('#zOut')) { zoomBy(-10); return; }
+  if (t.closest('#bAzzera')) { clearFilters(); S.macro = ''; S.limit = 96; renderTags(); render(); return; }
+  const mc = t.closest('[data-macro]'); if (mc) { S.macro = S.macro === mc.dataset.macro ? '' : mc.dataset.macro; renderTags(); const nb = document.querySelector('[data-macro="' + mc.dataset.macro + '"]'); if (nb) nb.focus(); return; }
+  if (S.macro && !t.closest('.mmenu')) { S.macro = ''; renderTags(); }
+  const vw = t.closest('[data-view]'); if (vw) { S.view = vw.dataset.view; try { localStorage.setItem('frame01.library.viewMode', S.view); } catch {} applyView(); return; }
   const go = t.closest('[data-go]'); if (go) { const k = go.dataset.go;
     if (k === 'home') { if (S.page === 'home') scrollTo({ top: 0, behavior: 'smooth' }); else setPage('home'); }
     else if (k === 'filtri') { const open = $('#fpanel').hidden; setPanel(open); if (open) $('#fpanel').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
     else if (k === 'kit') $('#bKit').click(); else if (k === 'menu') $('#dlgMenu').showModal();
     else if (k[0] === '#') { $('#dlgMenu').close(); const el = $(k); if (!el) return; if (el.tagName === 'A') location.href = el.href; else el.click(); } }
 });
-document.addEventListener('input', e => { if (e.target.id === 'zoom') { S.z[S.view] = +e.target.value; store.set('z', S.z); applyView(); } });
-document.addEventListener('keydown', e => { if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || e.ctrlKey || e.metaKey) return; if (e.key === '+' || e.key === '=') zoomBy(10); else if (e.key === '-') zoomBy(-10); });
-$('#main').addEventListener('wheel', e => { if (!(e.ctrlKey || e.metaKey)) return; e.preventDefault(); zoomBy(e.deltaY < 0 ? 4 : -4); }, { passive: false });
 window.addEventListener('resize', applyView);
 
 /* ---------- v3: pagine, area, strumento, kit di pagina, aggiorna ---------- */
@@ -1186,9 +1281,9 @@ document.addEventListener('click', e => {
 });
 async function dirLink(){ try { const h = await window.showDirectoryPicker({ id: 'f01-inbox', mode: 'read' }); await idb('readwrite', s => s.put(h, 'inbox')); DIR = h; pvCache.clear(); toast('Cartella collegata: ' + h.name); fontiRender(); render(); } catch (e) { if (e && e.name !== 'AbortError') toast('Non riesco ad aprire la cartella'); } }
 document.addEventListener('change', e => { if (e.target.id === 'optShots') { S.shots = e.target.checked; store.set('shots', S.shots); render(); if (cur) drawRender(); } });
-document.addEventListener('keydown', e => { if (!cur || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || e.ctrlKey || e.metaKey || e.altKey) return; if (e.key === 'ArrowRight') navItem(1); else if (e.key === 'ArrowLeft') navItem(-1); });
+document.addEventListener('keydown', e => { if (!cur || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || (document.activeElement && document.activeElement.closest && document.activeElement.closest('.subtabs')) || e.ctrlKey || e.metaKey || e.altKey) return; if (e.key === 'ArrowRight') navItem(1); else if (e.key === 'ArrowLeft') navItem(-1); });
 { let x0 = 0, y0 = 0, ok = false; const dr = $('#drawer');
-  dr.addEventListener('touchstart', e => { const t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; ok = x0 > 28 && !e.target.closest('.pv, pre, table, .tabs, .dev, textarea, input, select'); }, { passive: true });
+  dr.addEventListener('touchstart', e => { const t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; ok = x0 > 28 && !e.target.closest('.pv, pre, table, .subtabs, .dev, textarea, input, select'); }, { passive: true });
   dr.addEventListener('touchend', e => { if (!ok) return; const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; if (Math.abs(dx) > 90 && Math.abs(dx) > Math.abs(dy) * 2) navItem(dx < 0 ? 1 : -1); }, { passive: true }); }
 document.body.insertAdjacentHTML('beforeend', '<button id="toTop" aria-label="Torna su" title="Torna su"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></button>');
 addEventListener('scroll', () => $('#toTop').classList.toggle('show', scrollY > 700), { passive: true });
@@ -1214,6 +1309,51 @@ if (HTTP) { api('stato').then(r => { if (r && r.ok) {
   items.forEach(i => { i.preferito = S.fav.has(i.id); if (ann[i.id]) i.annotazione = ann[i.id]; });
   updScan(); render(); if (cur) drawRender(); syncBadge(); } }); }
 { const h0 = decodeURIComponent(location.hash.slice(1)); if (h0 && !h0.startsWith('/') && byId[h0]) openItem(h0); }
+/* ---------- Quick Look (step 3): Spazio su una scheda con il focus ---------- */
+(function(){
+  const ql = document.createElement('div'); ql.className = 'qlk'; ql.id = 'qlk'; ql.hidden = true; ql.setAttribute('role', 'dialog'); ql.setAttribute('aria-modal', 'true'); ql.setAttribute('aria-label', 'Anteprima rapida');
+  document.body.appendChild(ql);
+  let curId = null, from = null;
+  const cards = () => [...document.querySelectorAll('#grid .card')];
+  const cardOf = id => cards().find(c => c.dataset.id === id);
+  function fill(id){
+    const i = byId[id]; if (!i) return; curId = id;
+    const nt = noteOf(i), tg = taglineOf(i);
+    const meta = [['Fonte', i.fonte], ['Area', PSHORT[i.area] || i.area], ['Strumenti', (i.strumenti || []).map(s => STR[s] || s).join(', ')], ['File', i.contenuti && i.contenuti.file ? i.contenuti.file + ' file' : ''], ['Stato', nt.stato]].filter(x => x[1]);
+    ql.innerHTML = `<div class="qlc"><div class="qlm media">${media(i)}</div><div class="qlb">
+      <div><span class="badge t-${esc(i.tipo)}">${esc(tl(i.tipo))}</span></div><h2>${esc(i.titolo)}</h2>${tg ? `<p>${esc(tg)}</p>` : ''}
+      <div class="tags">${(i.tag || []).slice(0, 8).map(t => `<span class="chip">${esc(TAGL[t] || t)}</span>`).join('')}</div>
+      <dl>${meta.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+      <div class="qlf"><kbd>Spazio</kbd> o <kbd>Esc</kbd> chiude · <kbd>Invio</kbd> apre la scheda · <kbd>←</kbd> <kbd>→</kbd> scorrono</div></div></div>`;
+    ql.querySelectorAll('[data-pv]').forEach(fillFrame); observe(ql);
+  }
+  function open(id, src){ from = src || from; fill(id); ql.hidden = false; }
+  function close(){ if (ql.hidden) return; ql.hidden = true; ql.innerHTML = ''; const c = curId && cardOf(curId); curId = null; if (c) c.focus({ preventScroll: true }); }
+  function step(d){ const cs = cards(); const k = cs.findIndex(c => c.dataset.id === curId); const n = cs[k + d]; if (!n) return; n.focus({ preventScroll: true }); n.scrollIntoView({ block: 'nearest' }); fill(n.dataset.id); }
+  window.__ql = { open, close, isOpen: () => !ql.hidden };
+  ql.addEventListener('click', e => { if (e.target === ql) close(); });
+  const typing = () => /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!ql.hidden) {
+      if (e.key === ' ' || e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); close(); }
+      else if (e.key === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); const id = curId; close(); openItem(id); }
+      else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); e.stopImmediatePropagation(); step(1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); e.stopImmediatePropagation(); step(-1); }
+      return;
+    }
+    if (cur || typing()) return;
+    const a = document.activeElement, c = a && a.classList && a.classList.contains('card') ? a : null; if (!c) return;
+    if (e.key === ' ') { e.preventDefault(); open(c.dataset.id, c); return; }
+    if (e.key.startsWith('Arrow')) {
+      const cs = cards(), k = cs.indexOf(c); let n = null;
+      if (e.key === 'ArrowRight') n = cs[k + 1]; else if (e.key === 'ArrowLeft') n = cs[k - 1];
+      else { const r = c.getBoundingClientRect(), dir = e.key === 'ArrowDown' ? 1 : -1; let best = 1e9;
+        cs.forEach(o => { const q = o.getBoundingClientRect(), dy = (q.top - r.top) * dir; if (dy > 8) { const sc = dy * 4 + Math.abs(q.left - r.left); if (sc < best) { best = sc; n = o; } } }); }
+      if (n) { e.preventDefault(); n.focus(); n.scrollIntoView({ block: 'nearest' }); }
+    }
+  }, true);
+})();
 })();
 try { document.getElementById('qk').textContent = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? '⌘K' : 'Ctrl K'; } catch {}
 </script>
