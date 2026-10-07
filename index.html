@@ -282,7 +282,7 @@ button,a,.card,.acard,.pg{touch-action:manipulation}
     <label class="opt"><input type="checkbox" id="fDup"> Mostra copie e doppioni</label></div></div></div>
   <div class="fp-foot"><button class="pill" id="bReset">Azzera filtri</button><button class="pill black" id="bChiudiF">Fatto</button></div>
 </section>
-<div class="count" id="countRow"><span id="count" aria-live="polite"></span> <span class="mini" id="meta"></span></div>
+<div class="count" id="countRow"><span id="count" aria-live="polite"></span> <span class="mini" id="meta"></span><span class="mini" id="sync"></span></div>
 <main id="main"><div class="grid" id="grid"></div><div id="moreWrap"></div></main>
 <nav class="tabbar" aria-label="Navigazione">
   <button data-go="home" class="on" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Home</button>
@@ -336,14 +336,17 @@ const AREE = C.meta.aree || [], ARE = Object.fromEntries(AREE.map(a => [a.id, a]
 const PSHORT = { brief: 'Brief', design: 'Design', web: 'Siti web', piattaforme: 'Piattaforme', motion: 'Motion e 3D', media: 'Immagini AI', presentazioni: 'Documenti', controllo: 'Controllo', automazione: 'Automazione', prompt: 'Prompt', risorse: 'Altro' };
 const items = C.items.map(i => ({ ...i, tag: i.tag || [], strumenti: i.strumenti || [], _hay: [(ARE[i.area] || {}).nome, (i.strumenti || []).map(s => STR[s] || s).join(' '), i.testo, i.titolo, i.nome, i.descrizione, i.fonte, i.categoria, (i.tag || []).map(t => TAGL[t] || t).join(' '), (i.triggers || []).join(' ')].join(' ').toLowerCase() }));
 const byId = Object.fromEntries(items.map(i => [i.id, i]));
-const S = { stato: '', q: '', tipo: '', tag: new Set(), fonte: '', dup: false, prev: false, sort: 'nome', limit: 96, kit: new Set(store.get('kit', []).filter(id => byId[id])), note: store.get('note', {}) };
+const S = { stato: '', q: '', tipo: '', tag: new Set(), fonte: '', dup: false, prev: false, sort: 'nome', limit: 96, kit: new Set(store.get('kit', []).filter(id => byId[id])), note: {} };
 let cur = null;
 S.view = store.get('view', matchMedia('(max-width:640px)').matches ? 'fix' : 'var');
 S.z = Object.assign({ var: 40, fix: 45, list: 35 }, store.get('z', {}));
 S.acc = new Set(store.get('acc', []));
 S.shots = store.get('shots', true); S.recent = store.get('recent', []).filter(id => byId[id]);
 S.page = 'home'; S.area = ''; S.strum = ''; S.favOnly = false;
-{ const fv = store.get('fav', null); S.fav = new Set((fv || items.filter(i => i.preferito).map(i => i.id)).filter(id => byId[id])); }
+// Una sola versione: preferiti e note vivono nei dati (dati/annotazioni.json → catalogo → online), non nel browser.
+// LEGACY = ciò che questo browser aveva salvato in passato: viene portato nei dati una volta sola (solo sul Mac).
+const LEGACY = { fav: store.get('fav', null), note: store.get('note', {}) };
+S.fav = new Set(items.filter(i => i.preferito).map(i => i.id));
 
 const HTTP = location.protocol === 'http:' && !window.__ONLINE;
 async function api(fn, body){
@@ -572,8 +575,8 @@ function pOver(i){
   <label class="mini" for="eNota">Nota</label><textarea id="eNota" placeholder="Per quale progetto? Cosa tenere, cosa cambiare…">${esc(n.nota || '')}</textarea>
   <p><button class="pill black" id="eSave">Salva</button> <span class="mini">Salvato in dati/annotazioni.json; sopravvive a ogni scansione.</span></p></div>`
   : `<h4>Le tue note</h4>
-  <label class="opt">Stato <select id="nStato"><option value="">—</option>${['Da usare', 'Da valutare', 'Scartato'].map(s => `<option ${n.stato === s ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
-  <textarea id="nNota" placeholder="Per quale progetto? Cosa tenere, cosa cambiare…">${esc(n.nota || '')}</textarea>
+  <label class="opt">Stato <select id="nStato" ${canAdd() ? '' : 'disabled'}><option value="">—</option>${['Da usare', 'Da valutare', 'Scartato'].map(s => `<option ${n.stato === s ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
+  <textarea id="nNota" ${canAdd() ? '' : 'readonly'} placeholder="Per quale progetto? Cosa tenere, cosa cambiare…">${esc(n.nota || '')}</textarea>
   <p class="mini">Le note restano in questo browser. Apri il catalogo da <code>Apri-FRAME01-LIBRARY.command</code> per salvarle nei file.</p>`}
   <p><button class="pill ${S.kit.has(i.id) ? 'on' : 'black'}" data-kit="${esc(i.id)}">${S.kit.has(i.id) ? 'Nel kit ✓ (togli)' : 'Aggiungi al kit'}</button></p>`;
 }
@@ -697,7 +700,7 @@ async function saveItem(id){
   if (patch.tag.length) i.tag = [...new Set([...i.tag, ...patch.tag])];
   if (patch.strumenti.length) i.strumenti = [...new Set([...i.strumenti, ...patch.strumenti])];
   if (patch.area) i.area = patch.area;
-  S.note[id] = { ...(S.note[id] || {}), stato: patch.stato, nota: patch.nota }; store.set('note', S.note);
+  S.note[id] = { ...(S.note[id] || {}), stato: patch.stato, nota: patch.nota };
   toast('Salvato'); renderTags(); render(); drawRender();
 }
 const updN = () => SRV ? (SRV.nuove || []).length + (SRV.modificate || []).length : 0;
@@ -707,13 +710,52 @@ async function scan(){
   const fine = () => { bs.forEach(b => { b.disabled = false; }); updScan(); const b2 = $('#bScan2'); if (b2) b2.textContent = 'Riprova'; };
   if (n) { const v = await api('versione', { motivo: 'nuove cartelle: ' + [...(SRV.nuove || []), ...(SRV.modificate || [])].slice(0, 4).join(', ') }); if (!v.ok) { toast(v.errore || 'Backup non riuscito: non aggiorno'); fine(); return; } toast('Backup salvato in 2-BACKUP'); }
   const r = await api('scansiona'); 
-  if (r.ok) { toast('Catalogo aggiornato'); setTimeout(() => location.reload(), 600); } else { toast(r.errore || 'Errore'); fine(); }
+  if (r.ok) {
+    if (SRV && SRV.puoPubblicare) { bs.forEach(b => { b.textContent = 'Pubblico online…'; }); toast('Catalogo aggiornato · pubblico online (1–3 minuti)…'); const p = await api('pubblica', { senzaScan: true }); toast(p.ok ? 'Locale e online allineati: pubblicato' : 'Locale aggiornato, ma online non pubblicato: ' + (p.errore || 'errore')); }
+    else toast('Catalogo aggiornato');
+    setTimeout(() => location.reload(), 900);
+  } else { toast(r.errore || 'Errore'); fine(); }
 }
 function toggleKit(id){ S.kit.has(id) ? S.kit.delete(id) : S.kit.add(id); store.set('kit', [...S.kit]); }
+const SOLA_LETTURA = 'Versione di sola consultazione: modifica dal Mac, poi «Pubblica online».';
 function toggleFav(id){
-  const on = !S.fav.has(id); on ? S.fav.add(id) : S.fav.delete(id); store.set('fav', [...S.fav]);
+  if (!canAdd()) { toast(SOLA_LETTURA); return; }
+  const on = !S.fav.has(id); on ? S.fav.add(id) : S.fav.delete(id);
   if (byId[id]) byId[id].preferito = on;
-  if (HTTP && SRV) api('annota', { id, patch: { preferito: on } }).then(r => { if (!r.ok) toast(r.errore || 'Preferito non salvato nel file'); });
+  api('annota', { id, patch: { preferito: on } }).then(r => { if (!r.ok) toast(r.errore || 'Preferito non salvato nel file'); else syncBadge(true); });
+}
+// note e stato: si salvano nei dati (annotazioni.json), uguali ovunque dopo la pubblicazione
+const noteT = {};
+function saveNote(id, patch, subito){
+  if (!canAdd()) { toast(SOLA_LETTURA); return false; }
+  S.note[id] = { ...(S.note[id] || getNote(byId[id])), ...patch };
+  if (byId[id]) byId[id].annotazione = { ...(byId[id].annotazione || {}), ...patch };
+  const invia = () => api('annota', { id, patch }).then(r => { if (!r.ok) toast(r.errore || 'Nota non salvata'); else syncBadge(true); });
+  clearTimeout(noteT[id]); if (subito) invia(); else noteT[id] = setTimeout(invia, 700);
+  return true;
+}
+/* ---------- allineamento locale ↔ online ---------- */
+let syncT, syncN = 0;
+function syncBadge(ritarda){
+  const el = $('#sync'); if (!el) return;
+  if (window.__ONLINE) { const m = C.meta; el.textContent = ' · build ' + (m.build || '—') + (m.pubblicato ? ' · pubblicata il ' + new Date(m.pubblicato).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) : ''); return; }
+  if (!canAdd()) return;
+  clearTimeout(syncT);
+  syncT = setTimeout(async () => {
+    const r = await api('online'); if (!r || !r.ok) { el.textContent = ''; return; }
+    if (r.allineata) { el.innerHTML = ` · build ${esc(r.build)} · <b>online allineata ✓</b>`; syncN = 0; }
+    else if (!r.online) el.innerHTML = ` · build ${esc(r.build)} · ${r.errore === 'HTTP 404' ? 'online ancora a una versione precedente' : 'online non raggiungibile (' + esc(r.errore || '?') + ')'} <button class="pill" data-pubblica="1">Pubblica online</button>`;
+    else { el.innerHTML = ` · build ${esc(r.build)} · <b>online indietro</b> (build ${esc(r.online.build)}) <button class="pill black" data-pubblica="1">Pubblica online</button>`; if (syncN > 0 && syncN < 9) { syncN++; syncBadge(20000); } }
+  }, ritarda ? (typeof ritarda === 'number' ? ritarda : 1500) : 0);
+}
+let pubblicando = false;
+async function pubblica(opz){
+  if (pubblicando) return; pubblicando = true;
+  const el = $('#sync'); if (el) el.innerHTML = ' · <b>Pubblico online…</b> (1–3 minuti, non chiudere)';
+  const r = await api('pubblica', opz || {});
+  pubblicando = false;
+  if (!r.ok) { toast(r.errore || 'Pubblicazione non riuscita'); syncBadge(); return false; }
+  toast('Pubblicato: la pagina online si aggiorna entro 1–2 minuti'); syncN = 1; syncBadge(20000); return true;
 }
 
 /* ---------- eventi ---------- */
@@ -735,6 +777,7 @@ document.addEventListener('click', e => {
   if (t.closest('#bExport')) { exportNotes(); return; }
   if (t.closest('#eSave') && cur) { saveItem(cur.id); return; }
   const ar = t.closest('[data-arch]'); if (ar) { api('fonte', { azione: ar.dataset.az, nome: ar.dataset.arch }).then(r => { if (r.ok) { toast('Fatto: ora premi Aggiorna'); fontiRender(); SRV.archivio = r.archiviata ? [...(SRV.archivio || []), r.archiviata] : (SRV.archivio || []).filter(x => x !== r.ripristinata); fontiRender(); } else toast(r.errore); }); return; }
+  if (t.closest('[data-pubblica]')) { pubblica(); return; }
   if (t.closest('#bScan')) { scan(); return; }
   const c = t.closest('.card'); if (c) openItem(c.dataset.id);
 });
@@ -745,12 +788,12 @@ document.addEventListener('keydown', e => {
 });
 document.addEventListener('input', e => {
   if (e.target.id === 'q') { S.q = e.target.value; S.limit = 96; if (S.page === 'home' && S.q.trim()) setPage('tutto'); else render(); }
-  else if (e.target.id === 'nNota' && cur) { const n = S.note[cur.id] = { ...getNote(byId[cur.id]), ...(S.note[cur.id] || {}), nota: e.target.value }; store.set('note', S.note); }
+  else if (e.target.id === 'nNota' && cur) { saveNote(cur.id, { nota: e.target.value }); }
   else if (e.target.id === 'kitDest') { store.set('dest', e.target.value); kitRender(); }
 });
 document.addEventListener('change', e => {
   const id = e.target.id;
-  if (id === 'nStato' && cur) { S.note[cur.id] = { ...(S.note[cur.id] || getNote(byId[cur.id])), stato: e.target.value }; store.set('note', S.note); render(); }
+  if (id === 'nStato' && cur) { if (saveNote(cur.id, { stato: e.target.value }, true)) render(); else e.target.value = getNote(byId[cur.id]).stato || ''; }
   else if (id === 'fStato') { S.stato = e.target.value; S.limit = 96; render(); }
   else if (id === 'fSort') { S.sort = e.target.value; render(); }
   else if (id === 'fPrev') { S.prev = e.target.checked; render(); }
@@ -868,13 +911,18 @@ if (window.__ONLINE && /iPhone|iPad|iPod/.test(navigator.userAgent) || (window._
 const th = store.get('theme', null); if (th) document.documentElement.dataset.theme = th;
 $('#meta').textContent = `${C.meta.totale} elementi · ${C.meta.fonti} ${C.meta.fonti === 1 ? 'fonte' : 'fonti'}`;
 { const h0 = decodeURIComponent(location.hash.slice(1)); if (h0.startsWith('/') && validPage(h0.slice(1))) S.page = h0.slice(1); else if (h0 && byId[h0]) S.page = ARE[byId[h0].area] ? byId[h0].area : 'tutto'; }
-renderTags(); render();
+renderTags(); render(); syncBadge();
 if (HTTP) { api('stato').then(r => { if (r && r.ok) {
   SRV = r; $('#bScan').hidden = false;
-  const srv = new Set(Object.entries(r.annotazioni || {}).filter(([, a]) => a && a.preferito).map(([id]) => id).filter(id => byId[id]));
-  S.fav.forEach(id => { if (!srv.has(id)) api('annota', { id, patch: { preferito: true } }); });
-  srv.forEach(id => S.fav.add(id)); store.set('fav', [...S.fav]);
-  updScan(); render(); if (cur) drawRender(); } }); }
+  // il file dati/annotazioni.json è l'unica fonte: preferiti e note si leggono da lì
+  const ann = r.annotazioni || {};
+  S.fav = new Set(Object.entries(ann).filter(([, a]) => a && a.preferito).map(([id]) => id).filter(id => byId[id]));
+  // una tantum: ciò che era rimasto solo nel browser di questo Mac passa nei dati, poi il browser non lo usa più
+  if (Array.isArray(LEGACY.fav)) LEGACY.fav.forEach(id => { if (byId[id] && !S.fav.has(id)) { S.fav.add(id); api('annota', { id, patch: { preferito: true } }); } });
+  Object.entries(LEGACY.note || {}).forEach(([id, n]) => { if (byId[id] && n && (n.stato || n.nota) && !(ann[id] && (ann[id].stato || ann[id].nota))) { ann[id] = { ...(ann[id] || {}), stato: n.stato || '', nota: n.nota || '' }; api('annota', { id, patch: { stato: n.stato || '', nota: n.nota || '' } }); } });
+  try { localStorage.removeItem('f01lib.fav'); localStorage.removeItem('f01lib.note'); } catch {}
+  items.forEach(i => { i.preferito = S.fav.has(i.id); if (ann[i.id]) i.annotazione = ann[i.id]; });
+  updScan(); render(); if (cur) drawRender(); syncBadge(); } }); }
 { const h0 = decodeURIComponent(location.hash.slice(1)); if (h0 && !h0.startsWith('/') && byId[h0]) openItem(h0); }
 })();
 </script>
