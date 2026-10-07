@@ -74,3 +74,49 @@ a{color:var(--accent-ink)}
 @media(prefers-contrast:more){.top,.card,.pill,.chip{border-color:var(--glass-edge)}}
 @media(max-width:640px){.top{margin:8px;border-radius:var(--radius-shell)}.grid{padding:12px 8px 30px}}
 .brand small{display:block}.mini{font:11px/14px var(--mono);letter-spacing:.027em}
+
+/* ===== Design system v2 (07/10/2026) — scale, alias, colori per tipo, stati dei componenti ===== */
+:root{
+/* scala tipografica (px) */
+--fs-xs:11px;--fs-sm:12px;--fs-md:13px;--fs-base:14px;--fs-lg:16px;--fs-xl:22px;
+/* livelli (z-index) */
+--z-pages:25;--z-bar:30;--z-float:34;--z-tabbar:35;--z-scrim:40;--z-drawer:50;--z-full:80;--z-full-ui:81;--z-toast:100;
+/* ombre e velo */
+--scrim:rgba(0,0,0,.4);
+--shadow-pop:0 14px 32px -10px rgba(0,0,0,.5);--shadow-lift:0 8px 24px -8px rgba(0,0,0,.5);--shadow-modal:0 30px 80px rgba(0,0,0,.4);--shadow-drawer:-20px 0 60px rgba(0,0,0,.25);
+/* alias dei vecchi nomi del viewer: seguono il tema, nessuna copia */
+--chip:var(--chip-bg);--warn:var(--status-orange);--warnbg:var(--warn-bg);--ok:var(--status-green);--focus:var(--ring);--shadow:var(--shadow-card);
+--star:light-dark(#8a5f00,#f0b35a);
+/* colore per tipo: testo ≥ 4.5:1 su badge (16% di tinta) in chiaro e scuro */
+--t-skill:light-dark(#2343c0,#8095e8);--t-design-system:light-dark(#971d48,#e4739b);--t-template:light-dark(#085865,#0fa6bf);
+--t-plugin:light-dark(#4d1ce1,#a287f0);--t-modello-media:light-dark(#8c3607,#f47029);--t-progetto:light-dark(#1b5b27,#34ae4b);
+--t-html:light-dark(#4d5359,#949ba2);--t-font:light-dark(#7e2b92,#c77ed8);--t-immagini:light-dark(#395c08,#6bab0f);
+--t-prompt:light-dark(#764500,#f08c00);--t-componente:light-dark(#095b42,#12b886);--t-riferimento:light-dark(#813b01,#fd7e14);
+--t-documento:light-dark(#7b4000,#eb7a00);--t-risorsa:light-dark(#13548e,#4d9ee8)}
+.t-skill{--tc:var(--t-skill)}.t-design-system{--tc:var(--t-design-system)}.t-template{--tc:var(--t-template)}.t-plugin{--tc:var(--t-plugin)}
+.t-modello-media{--tc:var(--t-modello-media)}.t-progetto{--tc:var(--t-progetto)}.t-html{--tc:var(--t-html)}.t-font{--tc:var(--t-font)}
+.t-immagini{--tc:var(--t-immagini)}.t-prompt{--tc:var(--t-prompt)}.t-componente{--tc:var(--t-componente)}.t-riferimento{--tc:var(--t-riferimento)}
+.t-documento{--tc:var(--t-documento)}.t-risorsa{--tc:var(--t-risorsa)}
+
+/* Famiglia "chip": .pill (azione/filtro) · .chip (etichetta/filtro piccolo) · .badge (tipo) · .kitbtn (azione mini)
+   Stati comuni: hover, attivo (.on / aria-pressed), premuto, disabilitato, focus (globale :focus-visible). */
+button.chip{transition:border-color .15s,background-color .15s,color .15s}
+button.chip:hover{border-color:var(--fg)}
+button.chip[aria-pressed=true]{background:var(--pill-active);color:var(--pill-active-fg);border-color:transparent}
+.pill[aria-pressed=true],.kitbtn[aria-pressed=true]{background:var(--pill-active);color:var(--pill-active-fg);border-color:transparent}
+.pill,.kitbtn,.favbtn,.icon,button.chip{-webkit-tap-highlight-color:transparent}
+.pill:active,.kitbtn:active,.favbtn:active,.icon:active,button.chip:active{transform:scale(.97)}
+.pill:disabled,.kitbtn:disabled,.favbtn:disabled,.icon:disabled,button.chip:disabled,
+.pill[aria-disabled=true],.kitbtn[aria-disabled=true],.icon[aria-disabled=true]{opacity:.45;cursor:not-allowed;transform:none}
+/* taglie: .sm compatta, .lg per barre touch */
+.pill.sm{min-height:28px;padding:4px 10px;font-size:var(--fs-sm)}
+.pill.lg{min-height:var(--touch-target);padding:var(--space-3) var(--space-5)}
+.chip.sm{padding:1px 8px;font-size:var(--fs-xs)}
+.chip.lg{padding:var(--space-1) var(--space-3);font-size:var(--fs-md)}
+/* pulsanti tondi/mini: stessa risposta al passaggio del mouse */
+.icon,.favbtn,.kitbtn{transition:border-color .15s,background-color .15s,color .15s,transform .15s}
+.icon:hover,.favbtn:hover,.kitbtn:hover{border-color:var(--fg)}
+.favbtn.on:hover{border-color:currentColor}
+@media(prefers-reduced-motion:reduce){.pill:active,.kitbtn:active,.favbtn:active,.icon:active,button.chip:active{transform:none}}
+.pill,.chip,.badge,.kitbtn,.favbtn{border-radius:var(--radius-pill)}
+.badge{line-height:normal}
