@@ -421,3 +421,27 @@ html body .tools .achips{flex:1 1 100%;min-width:0}
 .kfa{display:flex;gap:8px;margin-left:auto}
 .kfoot kbd{font:inherit;border:1px solid var(--glass-border);border-radius:6px;padding:0 5px;background:var(--glass)}
 @media(max-width:760px){.kfoot .mini{display:none}.kfa{width:100%;justify-content:flex-end}}
+
+/* ===== Preloader come FRAME.01 OS (08/10/2026): traccia → luce → riempimento → titolo, poi «Depth Reveal» ===== */
+.pl-screen{position:fixed;inset:0;z-index:120;display:grid;place-items:center;background:var(--bg);color:var(--fg);transition:opacity 600ms cubic-bezier(.16,1,.3,1);will-change:opacity}
+html[data-boot=reveal] .pl-screen{opacity:0;pointer-events:none}
+.pl-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.pl-stack{display:grid;justify-items:center;gap:14px}
+.pl-mark{display:block;width:min(150px,46vw);height:auto;overflow:visible;--pl-sw:4;--pl-rw:7}
+.pl-trace{stroke-width:var(--pl-sw);stroke-dasharray:1;stroke-dashoffset:1;opacity:.9;animation:pl-draw 2300ms cubic-bezier(.65,0,.35,1) 200ms forwards,pl-fade 700ms ease 2900ms forwards}
+.pl-run{stroke-width:var(--pl-rw);stroke-dasharray:.045 .955;stroke-dashoffset:.045;opacity:0;animation:pl-around 2600ms cubic-bezier(.45,0,.25,1) 300ms forwards}
+.pl-fill{opacity:0;animation:pl-in 900ms cubic-bezier(.16,1,.3,1) 2700ms forwards}
+.pl-title{font-family:var(--mono,ui-monospace,monospace);font-size:10px;letter-spacing:.32em;text-transform:uppercase;opacity:0;margin:0;padding-left:.32em;animation:pl-in 700ms ease 3100ms forwards}
+.pl-load{position:relative;display:block;width:56px;height:1px;overflow:hidden;background:color-mix(in oklab,currentColor 16%,transparent);opacity:0;animation:pl-in 500ms ease 3200ms forwards}
+.pl-load::after{content:"";position:absolute;inset:0 auto 0 0;width:40%;background:currentColor;animation:pl-slide 1200ms cubic-bezier(.45,0,.25,1) infinite}
+:root[data-theme=dark] .pl-mark{--pl-sw:5;--pl-rw:9}:root[data-theme=dark] .pl-trace{opacity:1}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .pl-mark{--pl-sw:5;--pl-rw:9}:root:not([data-theme=light]) .pl-trace{opacity:1}}
+@keyframes pl-draw{to{stroke-dashoffset:0}}
+@keyframes pl-around{0%{opacity:0;stroke-dashoffset:.045}10%{opacity:1}90%{opacity:1}100%{opacity:0;stroke-dashoffset:-.955}}
+@keyframes pl-fade{to{opacity:0}}
+@keyframes pl-in{to{opacity:1}}
+@keyframes pl-slide{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+/* app sfocata sotto il preloader, poi nitida in 600 ms */
+html[data-boot=wait] body>:not(.pl-screen):not(script):not(style):not(#gate){filter:blur(12px);transform:scale(.99)}
+html[data-boot=reveal] body>:not(.pl-screen):not(script):not(style):not(#gate){transition:filter 600ms cubic-bezier(.16,1,.3,1),transform 600ms cubic-bezier(.16,1,.3,1);will-change:filter,transform}
+@media(prefers-reduced-motion:reduce){.pl-screen{display:none}}
