@@ -501,7 +501,7 @@ function card(i){
   <div class="body"><div class="row"><span class="badge t-${esc(i.tipo)}">${esc(tl(i.tipo))}</span>${showA ? `<span class="mini">· ${esc(PSHORT[i.area])}</span>` : ''}${i.copie ? `<span class="mini">+${i.copie.length} copie</span>` : ''}${i.duplicatoDi ? '<span class="mini">copia</span>' : ''}${st ? `<span class="mini">· ${esc(st)}</span>` : ''}</div>
   <h3>${esc(i.titolo)}</h3><p>${esc(i.descrizione)}</p>
   <div class="tags">${tools}${i.tag.slice(0, 3).map(t => `<span class="chip">${esc(TAGL[t] || t)}</span>`).join('')}</div></div>
-  <footer class="cf"><span>${i.tipo === 'prompt' ? esc(i.categoria || 'prompt') : esc(i.fonte) + ' · ' + i.contenuti.file + ' file'}</span><span class="cfb"><button class="favbtn ${fv ? 'on' : ''}" data-fav="${esc(i.id)}" aria-pressed="${fv}" aria-label="${fv ? 'Togli dai preferiti' : 'Aggiungi ai preferiti'}" title="Preferito">${fv ? '★' : '☆'}</button>${i.tipo === 'prompt' ? `<button class="kitbtn" data-cprompt="${esc(i.id)}">Copia</button>` : ''}<button class="kitbtn ${on ? 'on' : ''}" data-kit="${esc(i.id)}" aria-pressed="${on}">${on ? 'Nel kit ✓' : '+ Kit'}</button></span></footer></article>`;
+  <footer class="cf"><span>${i.tipo === 'prompt' ? esc(i.categoria || 'prompt') : esc(i.fonte) + ' · ' + i.contenuti.file + ' file'}</span><span class="cfb"><button class="favbtn eyebtn" data-ql="${esc(i.id)}" aria-label="Anteprima rapida" title="Anteprima rapida (Spazio)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="favbtn ${fv ? 'on' : ''}" data-fav="${esc(i.id)}" aria-pressed="${fv}" aria-label="${fv ? 'Togli dai preferiti' : 'Aggiungi ai preferiti'}" title="Preferito">${fv ? '★' : '☆'}</button>${i.tipo === 'prompt' ? `<button class="kitbtn" data-cprompt="${esc(i.id)}">Copia</button>` : ''}<button class="kitbtn ${on ? 'on' : ''}" data-kit="${esc(i.id)}" aria-pressed="${on}">${on ? 'Nel kit ✓' : '+ Kit'}</button></span></footer></article>`;
 }
 /* ---------- anteprime (server locale · cifrate online · cartella collegata) ---------- */
 const FSA = 'showDirectoryPicker' in window;
@@ -1164,13 +1164,6 @@ const GOALS = [
     { t: '2 · Colore e tipografia', d: 'Palette con contrasti verificati e abbinamenti di font.', spec: { tag: ['colore', 'tipografia'] } },
     { t: '3 · Design system e riferimenti', d: 'Come trasformare l’identità in regole riusabili.', spec: { tipo: ['design-system'] } },
     { t: '4 · Immagini e moodboard', d: 'Direzione visiva e generazione di immagini coerenti.', spec: { area: 'media' } }] },
-  { id: 'logo', t: 'Logo: dai loghi di partenza al definitivo', d: 'Analisi dei loghi esistenti, brief, brainstorming, concept, rifinitura SVG e consegna. Modello: Logo Design Project Plan (Milanote).', ob: 'portare i loghi .FRAME di partenza (SVG) a versioni definitive: analisi, brief, concept, rifinitura e consegna', fasi: [
-    { t: '1 · Analisi dei loghi di partenza', d: 'Il progetto «Logo brand (.FRAME)»: copie dei 6 SVG, analisi di cosa funziona e cosa manca, checklist di rifinitura.', spec: { tipo: ['progetto'], q: 'Logo brand' } },
-    { t: '2 · Brief e posizionamento', d: 'Chi è il marchio, che cosa deve dire il logo, dove si colloca rispetto agli altri. Compila il brief e la mappa.', spec: { tipo: ['riferimento'], q: 'logo brief|positioning|brand audit|brand strategy|brand personality' } },
-    { t: '3 · Brainstorming e moodboard', d: 'Colore, stile e tipografia per le varianti mancanti (STUDIO, PROJECT, LAB, monogramma).', spec: { tipo: ['riferimento'], q: 'logo.*(brainstorm|moodboard)' } },
-    { t: '4 · Piano e concept', d: 'Il Project Plan tiene insieme tutto; la presentazione mette a confronto due direzioni con applicazioni e feedback.', spec: { tipo: ['riferimento'], q: 'logo project plan|design presentation' } },
-    { t: '5 · Rifinitura tecnica SVG', d: 'Contorni, griglia, area di rispetto, misure minime e prove su fondi diversi. Skill e prompt utili per vettoriali e logo.', spec: { tipo: ['skill', 'prompt', 'plugin'], q: 'logo|svg|vector|vettori|illustrator|brand-?identity' } },
-    { t: '6 · Consegna', d: 'Versioni ufficiali, palette e applicazioni in una pagina sola, poi inserimento in FRAME.01 OS.', spec: { tipo: ['riferimento'], q: 'assets handover|brand assets|brand board' } }] },
   { id: 'immagini-video', t: 'Immagini AI, video e motion', d: 'Dal prompt al risultato: modelli, stili e montaggio.', ob: 'immagini AI, video e motion per un progetto', fasi: [
     { t: '1 · Idee e prompt', d: 'Prompt pronti da adattare a soggetto e stile.', spec: { tipo: ['prompt'], q: 'image|immagin|video|midjourney|scena' } },
     { t: '2 · Modelli per immagini e video', d: 'Descrizioni e prompt dettagliati per generare scene e adattamenti.', spec: { tipo: ['modello-media'] } },
@@ -1319,6 +1312,7 @@ document.addEventListener('click', e => {
   const ak = t.closest('[data-aik]'); if (ak) { AI.kind = ak.dataset.aik; aiRefresh(); return; }
   const ac = t.closest('[data-aicopy]'); if (ac) { copy($('#aiText').value); toast('Copiato: incollalo in Claude o ChatGPT'); return; }
   const ad = t.closest('[data-aidlg]'); if (ad) { openAI(); return; }
+  const qb = t.closest('[data-ql]'); if (qb) { e.stopPropagation(); if (window.__ql) window.__ql.open(qb.dataset.ql, qb.closest('.card')); return; }
   const fv = t.closest('[data-fav]'); if (fv) { e.stopPropagation(); toggleFav(fv.dataset.fav); render(); if (cur) drawRender(); return; }
   const cpr = t.closest('[data-cprompt]'); if (cpr) { e.stopPropagation(); copy(byId[cpr.dataset.cprompt].testo || ''); return; }
   const kit = t.closest('[data-kit]'); if (kit) { e.stopPropagation(); toggleKit(kit.dataset.kit); render(); if (cur) drawRender(); if ($('#dlgKit').open) kitRender(); return; }
@@ -1494,14 +1488,19 @@ if (HTTP) { api('stato').then(r => { if (r && r.ok) {
       <div><span class="badge t-${esc(i.tipo)}">${esc(tl(i.tipo))}</span></div><h2>${esc(i.titolo)}</h2>${tg ? `<p>${esc(tg)}</p>` : ''}
       <div class="tags">${(i.tag || []).slice(0, 8).map(t => `<span class="chip">${esc(TAGL[t] || t)}</span>`).join('')}</div>
       <dl>${meta.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
-      <div class="qlf"><kbd>Spazio</kbd> o <kbd>Esc</kbd> chiude · <kbd>Invio</kbd> apre la scheda · <kbd>←</kbd> <kbd>→</kbd> scorrono</div></div></div>`;
+      <div class="qlt"><button class="pill" data-qa="prev" aria-label="Precedente">←</button><button class="pill" data-qa="next" aria-label="Successivo">→</button><button class="pill on" data-qa="open">Apri scheda</button></div>
+      <div class="qlf"><kbd>Spazio</kbd> o <kbd>Esc</kbd> chiude · <kbd>Invio</kbd> apre la scheda · <kbd>←</kbd> <kbd>→</kbd> scorrono</div></div><button class="qlx" data-qa="close" aria-label="Chiudi anteprima">✕</button></div>`;
     ql.querySelectorAll('[data-pv]').forEach(fillFrame); observe(ql);
   }
   function open(id, src){ from = src || from; fill(id); ql.hidden = false; }
   function close(){ if (ql.hidden) return; ql.hidden = true; ql.innerHTML = ''; const c = curId && cardOf(curId); curId = null; if (c) c.focus({ preventScroll: true }); }
   function step(d){ const cs = cards(); const k = cs.findIndex(c => c.dataset.id === curId); const n = cs[k + d]; if (!n) return; n.focus({ preventScroll: true }); n.scrollIntoView({ block: 'nearest' }); fill(n.dataset.id); }
   window.__ql = { open, close, isOpen: () => !ql.hidden };
-  ql.addEventListener('click', e => { if (e.target === ql) close(); });
+  ql.addEventListener('click', e => { if (e.target === ql) { close(); return; } const b = e.target.closest('[data-qa]'); if (!b) return; const k = b.dataset.qa; if (k === 'close') close(); else if (k === 'prev') step(-1); else if (k === 'next') step(1); else if (k === 'open') { const id = curId; close(); openItem(id); } });
+  // touch: scorrimento orizzontale = precedente/successivo
+  let sx = null, sy = 0;
+  ql.addEventListener('touchstart', e => { if (e.touches.length === 1) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; } }, { passive: true });
+  ql.addEventListener('touchend', e => { if (sx === null) return; const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy; sx = null; if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1); }, { passive: true });
   const typing = () => /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
   document.addEventListener('keydown', e => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
