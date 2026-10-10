@@ -460,3 +460,20 @@ html[data-boot=reveal] body>:not(.pl-screen):not(script):not(style):not(#gate){t
 :root,:root[data-theme=light]{--flute-base:#d3d5d8;--bg:#d3d5d8;--fg:#11110f;--mfg:#44474c;--card:#e8e9eb;--chip-bg:#c8cacf;--glass:rgba(255,255,255,.45);--glass-strong:rgba(255,255,255,.7);--glass-solid:#e9eaec;--glass-border:rgba(255,255,255,.75);--glass-hi:rgba(255,255,255,.65);--glass-edge:#44474c;--border:rgba(17,17,15,.18);--input:#6a6d73;--ring:#0a58c8;--accent-ink:#0a4fb3;--pill-active:rgba(17,17,15,.94);--pill-active-fg:#f5f5f5;--aurora-1:rgba(76,99,140,.22);--aurora-2:rgba(120,122,126,.2);--aurora-3:rgba(110,122,134,.16);--flute-amber:transparent;--flute-cream:rgba(235,235,235,.5);--flute-ice:rgba(208,213,219,.6);--flute-steel:rgba(60,85,130,.18)}
 @media(pointer:coarse),(max-width:760px){html body .eyebtn{min-width:44px;min-height:36px}}
 @media(max-width:760px){html body .card .cf{flex-wrap:wrap;row-gap:6px}html body .card .cf>span:first-child{flex:1 1 100%;min-width:0}html body .card .cfb{margin-left:auto}}
+
+/* UX (10/10/2026): conteggi, stato vuoto, bersagli 44px e testo minimo 12px su mobile */
+.lnk{background:none;border:0;padding:0;font:inherit;color:var(--accent-ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.empty .eact{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+@media(max-width:760px){
+ html body{--fs-xs:12px}
+ html body .tools .trow:first-child{flex-wrap:wrap}
+ html body .tools .tcount{flex:1 1 100%;white-space:normal;overflow:visible;text-overflow:clip;min-width:0}
+ html body .seg .vl{display:inline}
+ html body .seg button{min-height:44px;width:auto;padding:0 12px;gap:6px}
+ html body .favbtn,html body .kitbtn{min-height:44px;min-width:44px}
+ html body .card .cfb{gap:6px}
+ html body .card .cfb .kitbtn{padding:0 12px}
+ html body button.chip,html body .filters .pill,html body .macro button{min-height:44px}
+}
+@media(pointer:coarse){html body .favbtn,html body .kitbtn{min-height:44px;min-width:44px}}
+@media(max-width:760px){html body .crumb button,html body .lnk{min-height:44px;display:inline-flex;align-items:center}html body #q,html body .icon,html body #bTheme{min-height:44px}html body .topbar .icon,html body #bTheme{min-width:44px}}
