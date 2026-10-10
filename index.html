@@ -1164,6 +1164,13 @@ const GOALS = [
     { t: '2 · Colore e tipografia', d: 'Palette con contrasti verificati e abbinamenti di font.', spec: { tag: ['colore', 'tipografia'] } },
     { t: '3 · Design system e riferimenti', d: 'Come trasformare l’identità in regole riusabili.', spec: { tipo: ['design-system'] } },
     { t: '4 · Immagini e moodboard', d: 'Direzione visiva e generazione di immagini coerenti.', spec: { area: 'media' } }] },
+  { id: 'logo', t: 'Logo: dai loghi di partenza al definitivo', d: 'Percorso completato (v1.0, 10/10/2026): analisi, brief, direzioni, 17 SVG definitivi, regole d\u2019uso e consegna. Modello: Logo Design Project Plan (Milanote).', ob: 'portare i loghi .FRAME di partenza (SVG) a versioni definitive: analisi, brief, concept, rifinitura e consegna', fasi: [
+    { t: '1 \u00b7 Analisi dei loghi di partenza', d: 'Il progetto \u00abLogo brand (.FRAME)\u00bb: analisi dei 6 SVG, cosa funzionava e cosa mancava, file definitivi.', fatta: true, spec: { tipo: ['progetto'], qt: 'Logo brand', ids: ['frame01-logo-brand::.'] } },
+    { t: '2 \u00b7 Brief e posizionamento', d: 'Chi \u00e8 il marchio, che cosa deve dire il logo, dove si colloca. Compila il brief e la mappa (nel progetto: documenti 01 e 02).', fatta: true, spec: { tipo: ['riferimento'], qt: 'logo brief|positioning|brand personality', uniq: true } },
+    { t: '3 \u00b7 Brainstorming e moodboard', d: 'Colore, stile e tipografia: tre rami e una direzione scelta (documento 03).', fatta: true, spec: { tipo: ['riferimento'], qt: 'logo brainstorm|logo moodboard', uniq: true } },
+    { t: '4 \u00b7 Piano e concept', d: 'Il Project Plan tiene insieme il lavoro; la presentazione mette a confronto le direzioni.', fatta: true, spec: { tipo: ['riferimento'], qt: 'logo project plan|design presentation', uniq: true } },
+    { t: '5 \u00b7 Rifinitura tecnica SVG', d: 'Contorni, colori, misure minime, area di rispetto (documento 04). Skill utili per estrarre e raccogliere gli elementi del marchio.', fatta: true, spec: { tipo: ['skill', 'prompt', 'plugin'], qt: 'svg|vector|vettori|brandkit|brand extract', uniq: true, ids: ['frame01-logo-brand::.'] } },
+    { t: '6 \u00b7 Consegna', d: 'Versioni ufficiali, palette e supporti in una pagina sola (consegna/index.html), poi inserimento in FRAME.01 OS.', fatta: true, spec: { tipo: ['riferimento'], qt: 'assets handover|brand assets|brand board|Logo brand', uniq: true, ids: ['frame01-logo-brand::consegna', 'frame01-logo-brand::svg/definitivi', 'frame01-logo-brand::.'] } }] },
   { id: 'immagini-video', t: 'Immagini AI, video e motion', d: 'Dal prompt al risultato: modelli, stili e montaggio.', ob: 'immagini AI, video e motion per un progetto', fasi: [
     { t: '1 · Idee e prompt', d: 'Prompt pronti da adattare a soggetto e stile.', spec: { tipo: ['prompt'], q: 'image|immagin|video|midjourney|scena' } },
     { t: '2 · Modelli per immagini e video', d: 'Descrizioni e prompt dettagliati per generare scene e adattamenti.', spec: { tipo: ['modello-media'] } },
@@ -1185,16 +1192,20 @@ const GOALS = [
 ];
 const GSTATO = i => (getNote(i).stato || '');
 function resolve(spec){
-  const re = spec.q ? new RegExp(spec.q, 'i') : null;
+  const re = spec.q ? new RegExp(spec.q, 'i') : null, rt = spec.qt ? new RegExp(spec.qt, 'i') : null;
   const out = items.filter(i => {
     if (i.duplicatoDi || GSTATO(i) === 'Scartato') return false;
     if (spec.area && i.area !== spec.area) return false;
     if (spec.tipo && !spec.tipo.includes(i.tipo)) return false;
     if (spec.tag || re) { const a = spec.tag && (i.tag || []).some(t => spec.tag.includes(t)), b = re && re.test(`${i.titolo} ${i.nome} ${i.descrizione}`); if (!(a || b)) return false; }
+    if (rt && !rt.test(`${i.titolo} ${i.nome}`)) return false;
     return true;
   });
   const sc = i => (i.thumb ? 3 : i.preview ? 2 : 0) + (S.fav.has(i.id) ? 3 : 0) + (GSTATO(i) === 'Da usare' ? 2 : 0) + ((i.descrizione || '').length > 60 ? 1 : 0);
-  return out.sort((a, b) => sc(b) - sc(a) || a.titolo.localeCompare(b.titolo, 'it'));
+  let res = out.sort((a, b) => sc(b) - sc(a) || a.titolo.localeCompare(b.titolo, 'it'));
+  if (spec.uniq) { const seen = new Set(); res = res.filter(i => !seen.has(i.titolo) && seen.add(i.titolo)); }
+  if (spec.ids) { const fixed = spec.ids.map(id => byId[id]).filter(Boolean); res = [...fixed, ...res.filter(i => !spec.ids.includes(i.id))]; }
+  return res;
 }
 const gridMini = ids => `<div class="grid v-var gmini" style="--cw:230px">${ids.map(i => card(i)).join('')}</div>`;
 function pObiettivi(){
@@ -1202,7 +1213,7 @@ function pObiettivi(){
     const g = GOALS.find(x => x.id === S.goalId); if (!g) { S.goalId = ''; return pObiettivi(); }
     return `<div class="hhead"><div class="crumb"><button data-goal="">Per obiettivo</button> › <span>${esc(g.t)}</span></div><h1>${esc(g.t)}</h1><p>${esc(g.d)}</p></div>
     <div class="acts" style="padding:0 var(--space-4) var(--space-3)"><button class="pill black" data-goalai="${g.id}">✦ Chiedi all'AI un piano completo</button></div>
-    ${g.fasi.map((f, k) => { const r = resolve(f.spec); return `<section class="fase"><div class="fh"><h2>${esc(f.t)}</h2><span class="mini">${r.length} elementi</span></div><p class="fd">${esc(f.d)}</p>${r.length ? gridMini(r.slice(0, 4)) : '<p class="mini">Nessun elemento trovato in libreria per questa fase: puoi aggiungerne con Importa.</p>'}
+    ${g.fasi.map((f, k) => { const r = resolve(f.spec); return `<section class="fase"><div class="fh"><h2>${esc(f.t)}</h2><span class="mini">${f.fatta ? '✓ Fatta · ' : ''}${r.length} elementi</span></div><p class="fd">${esc(f.d)}</p>${r.length ? gridMini(r.slice(0, 4)) : '<p class="mini">Nessun elemento trovato in libreria per questa fase: puoi aggiungerne con Importa.</p>'}
       <div class="acts"><button class="pill" data-phaseall="${g.id}:${k}" ${r.length ? '' : 'disabled'}>Vedi tutti (${r.length})</button><button class="pill" data-phaseai="${g.id}:${k}" ${r.length ? '' : 'disabled'}>✦ Chiedi all'AI</button></div></section>`; }).join('')}`;
   }
   return `<div class="hhead"><h1>Per obiettivo</h1><p>Dimmi che cosa devi fare: ti mostro in che ordine usare gli strumenti della libreria, fase per fase.</p></div>
