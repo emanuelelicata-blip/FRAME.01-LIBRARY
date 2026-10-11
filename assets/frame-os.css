@@ -477,3 +477,5 @@ html[data-boot=reveal] body>:not(.pl-screen):not(script):not(style):not(#gate){t
 }
 @media(pointer:coarse){html body .favbtn,html body .kitbtn{min-height:44px;min-width:44px}}
 @media(max-width:760px){html body .crumb button,html body .lnk{min-height:44px;display:inline-flex;align-items:center}html body #q,html body .icon,html body #bTheme{min-height:44px}html body .topbar .icon,html body #bTheme{min-width:44px}}
+/* Completezza delle schede */
+.box.qual{margin-bottom:12px}.box.qual ul{margin:6px 0 4px;padding-left:18px}

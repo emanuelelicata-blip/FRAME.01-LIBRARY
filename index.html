@@ -289,7 +289,7 @@ button,a,.card,.acard,.pg{touch-action:manipulation}
 <section class="home" id="home" hidden></section>
 <div class="tools" id="tools">
   <div class="trow"><span class="tcount" id="tcount" aria-live="polite"></span><span class="qhint" aria-hidden="true"><kbd>Spazio</kbd> anteprima</span><span class="tspace"></span>
-    <label class="opt">Ordina <select id="fSort"><option value="nome">Nome</option><option value="recenti">Più recenti</option><option value="fonte">Fonte</option><option value="preferiti">Preferiti in cima</option></select></label>
+    <label class="opt">Ordina <select id="fSort"><option value="nome">Nome</option><option value="recenti">Più recenti</option><option value="fonte">Fonte</option><option value="preferiti">Preferiti in cima</option><option value="completezza">Meno complete prima</option></select></label>
     <div class="seg" role="group" aria-label="Modalità di vista">
       <button data-view="visuale" aria-pressed="false" aria-label="Griglia visuale" title="Griglia visuale: anteprime grandi"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="10" rx="1.5"/><rect x="13" y="4" width="7" height="5" rx="1.5"/><rect x="4" y="16" width="7" height="4" rx="1.5"/><rect x="13" y="11" width="7" height="9" rx="1.5"/></svg><span class="vl">Visuale</span></button>
       <button data-view="densa" aria-pressed="false" aria-label="Griglia densa" title="Griglia densa: più schede compatte"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="5" height="5" rx="1"/><rect x="9.5" y="3.5" width="5" height="5" rx="1"/><rect x="15.5" y="3.5" width="5" height="5" rx="1"/><rect x="3.5" y="9.5" width="5" height="5" rx="1"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><rect x="15.5" y="9.5" width="5" height="5" rx="1"/><rect x="3.5" y="15.5" width="5" height="5" rx="1"/><rect x="9.5" y="15.5" width="5" height="5" rx="1"/><rect x="15.5" y="15.5" width="5" height="5" rx="1"/></svg><span class="vl">Densa</span></button>
@@ -411,7 +411,7 @@ const AREE = C.meta.aree || [], ARE = Object.fromEntries(AREE.map(a => [a.id, a]
 const PSHORT = { brief: 'Brief', design: 'Design', web: 'Siti web', piattaforme: 'Piattaforme', motion: 'Motion e 3D', media: 'Immagini AI', presentazioni: 'Documenti', controllo: 'Controllo', automazione: 'Automazione', prompt: 'Prompt', risorse: 'Altro' };
 const items = C.items.map(i => ({ ...i, tag: i.tag || [], strumenti: i.strumenti || [], _hay: [(ARE[i.area] || {}).nome, (i.strumenti || []).map(s => STR[s] || s).join(' '), i.testo, i.titolo, i.nome, i.descrizione, i.fonte, i.categoria, (i.tag || []).map(t => TAGL[t] || t).join(' '), (i.triggers || []).join(' ')].join(' ').toLowerCase() }));
 const byId = Object.fromEntries(items.map(i => [i.id, i]));
-const S = { stato: '', q: '', tipo: '', tag: new Set(), fonte: '', dup: false, prev: false, sort: 'nome', limit: 96, kit: new Set(store.get('kit', []).filter(id => byId[id])), note: {} };
+const S = { stato: '', q: '', tipo: '', tag: new Set(), fonte: '', dup: false, prev: false, incomp: false, sort: 'nome', limit: 96, kit: new Set(store.get('kit', []).filter(id => byId[id])), note: {} };
 let cur = null;
 const VMODES = ['visuale', 'densa', 'lista'];
 S.view = (() => { try { const v = localStorage.getItem('frame01.library.viewMode'); if (VMODES.includes(v)) return v; } catch {} const o = store.get('view', null); if (o === 'list') return 'lista'; if (o === 'fix') return 'densa'; return matchMedia('(max-width:640px)').matches ? 'densa' : 'visuale'; })();
@@ -446,6 +446,7 @@ function match(i, skip){
   if (skip !== 'fonte' && S.fonte && i.fonte !== S.fonte) return false;
   { const st = getNote(i).stato || ''; if (S.stato === '') { if (st === 'Scartato') return false; } else if (S.stato === '-') { if (st) return false; } else if (S.stato !== '*' && st !== S.stato) return false; }
   if (S.prev && !i.preview && !(i.tipo === 'design-system' && i.palette?.length)) return false;
+  if (S.incomp && !(i.qualita && i.qualita.punti <= 2)) return false;
   for (const t of S.tag) if (!hasTag(i, t)) return false;
   return terms.every(t => i._hay.includes(t));
 }
@@ -453,7 +454,7 @@ function list(){
   const r = items.filter(i => match(i));
   const o = Object.keys(C.meta.tipi);
   const cmp = { nome: (a, b) => a.titolo.localeCompare(b.titolo, 'it'), tipo: (a, b) => o.indexOf(a.tipo) - o.indexOf(b.tipo) || a.titolo.localeCompare(b.titolo, 'it'), peso: (a, b) => b.contenuti.byte - a.contenuti.byte,
-    recenti: (a, b) => ((b.contenuti.mod || 0) - (a.contenuti.mod || 0)) || a.titolo.localeCompare(b.titolo, 'it'), fonte: (a, b) => String(a.fonte).localeCompare(String(b.fonte), 'it') || a.titolo.localeCompare(b.titolo, 'it'), preferiti: (a, b) => (S.fav.has(b.id) - S.fav.has(a.id)) || a.titolo.localeCompare(b.titolo, 'it') };
+    completezza: (a, b) => ((a.qualita ? a.qualita.punti : 9) - (b.qualita ? b.qualita.punti : 9)) || a.titolo.localeCompare(b.titolo, 'it'), recenti: (a, b) => ((b.contenuti.mod || 0) - (a.contenuti.mod || 0)) || a.titolo.localeCompare(b.titolo, 'it'), fonte: (a, b) => String(a.fonte).localeCompare(String(b.fonte), 'it') || a.titolo.localeCompare(b.titolo, 'it'), preferiti: (a, b) => (S.fav.has(b.id) - S.fav.has(a.id)) || a.titolo.localeCompare(b.titolo, 'it') };
   const q = S.q.trim().toLowerCase();
   if (q) { const sc = i => { const t = (i.titolo + ' ' + i.nome).toLowerCase(); return (t === q ? 100 : 0) + (t.startsWith(q) ? 40 : 0) + (t.includes(q) ? 20 : 0) + (i.tag.some(g => (TAGL[g] || g).toLowerCase().includes(q)) ? 8 : 0) + (i.duplicatoDi ? -5 : 0); }; return r.sort((a, b) => sc(b) - sc(a) || (cmp[S.sort] || cmp.nome)(a, b)); }
   return r.sort(cmp[S.sort] || cmp.nome);
@@ -602,7 +603,7 @@ function render0(){
   observe(g);
   { const kb = document.querySelector('[data-kitpage]'); if (kb) kb.textContent = all.length ? 'Aggiungi ' + (all.length > 200 ? 'i primi 200' : all.length === 1 ? 'l\'elemento' : 'i ' + all.length) + ' al kit' : 'Aggiungi al kit'; }
   $('#moreWrap').innerHTML = all.length > shown.length ? `<button class="pill more" id="more">Mostra altri ${Math.min(96, all.length - shown.length)} (${all.length - shown.length} restanti)</button>` : '';
-  $('#tcount').textContent = `${all.length} elementi${S.q || S.tipo || S.tag.size || S.fonte || S.prev || S.area || S.strum || S.favOnly || S.ids ? ' (filtrati)' : ''} · ${S.kit.size} ${S.kit.size === 1 ? 'selezionato' : 'selezionati'} nel kit`;
+  $('#tcount').textContent = `${all.length} elementi${S.q || S.tipo || S.tag.size || S.fonte || S.prev || S.incomp || S.area || S.strum || S.favOnly || S.ids ? ' (filtrati)' : ''} · ${S.kit.size} ${S.kit.size === 1 ? 'selezionato' : 'selezionati'} nel kit`;
   const ft = $('#fTipo'); const counts = {};
   items.forEach(i => { if (match(i, 'tipo')) counts[i.tipo] = (counts[i.tipo] || 0) + 1; });
   const tot = Object.values(counts).reduce((a, b) => a + b, 0);
@@ -771,7 +772,8 @@ function pPrompt(i){
 /* --- Note & Gestione --- */
 function pNote(i){
   const n = noteOf(i), ST = ['Da usare', 'Da valutare', 'Scartato'];
-  if (HTTP && SRV) return `<div class="edit"><h4>Note e stato</h4>
+  const q = i.qualita, qb = q ? `<div class="box qual"><b>Completezza ${q.punti}/${q.tot}</b>${q.mancano.length ? `<ul class="gl">${q.mancano.map(m => `<li>${esc(m)}</li>`).join('')}</ul>` : '<div class="mini">Scheda completa.</div>'}${i.tagAuto && i.tagAuto.length ? `<div class="mini">Tag aggiunti in automatico: ${i.tagAuto.map(t => esc(TAGL[t] || t)).join(', ')}${i.areaAuto ? ' · area scelta in automatico' : ''}</div>` : (i.areaAuto ? '<div class="mini">Area scelta in automatico.</div>' : '')}</div>` : '';
+  if (HTTP && SRV) return `${qb}<div class="edit"><h4>Note e stato</h4>
   <label class="mini" for="eStato">Stato</label><select id="eStato"><option value="">—</option>${ST.map(s => `<option ${n.stato === s ? 'selected' : ''}>${s}</option>`).join('')}</select>
   <label class="mini" for="eNota">Nota</label><textarea id="eNota" placeholder="Per quale progetto? Cosa tenere, cosa cambiare…">${esc(n.nota || '')}</textarea>
   <h4>Gestione</h4>
@@ -781,7 +783,7 @@ function pNote(i){
   <label class="mini" for="eArea">Area d'uso</label><select id="eArea">${AREE.map(a => `<option value="${a.id}" ${i.area === a.id ? 'selected' : ''}>${esc(a.nome)}</option>`).join('')}</select>
   <label class="mini" for="eStr">Strumenti (virgola: ${esc(Object.values(STR).slice(0, 6).join(', '))}…)</label><input type="text" id="eStr" value="${esc(((i.annotazione && i.annotazione.strumenti) || []).map(s => STR[s] || s).join(', '))}" placeholder="es. Framer, Figma">
   <p><button class="pill black" id="eSave">Salva</button> <span class="mini">Salvato in dati/annotazioni.json; sopravvive a ogni scansione.</span></p></div>`;
-  return `<h4>Stato</h4><label class="opt">Stato dell'elemento <select id="nStato"><option value="">—</option>${ST.map(s => `<option ${n.stato === s ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
+  return `${qb}<h4>Stato</h4><label class="opt">Stato dell'elemento <select id="nStato"><option value="">—</option>${ST.map(s => `<option ${n.stato === s ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
   <h4>Le tue note</h4><textarea id="nNota" placeholder="Per quale progetto? Cosa tenere, cosa cambiare…">${esc(n.nota || '')}</textarea>
   <p class="mini">Le note e lo stato di questa versione restano <b>in questo browser</b> (non nei file della libreria). Per salvarli nei dati apri il catalogo dal Mac con <code>Apri-FRAME01-LIBRARY.command</code>.</p>`;
 }
@@ -1264,10 +1266,11 @@ function renderSide(){
 function renderQuick(){
   const q = $('#quick'); if (!q) return; const ct = {}, cs = {};
   items.forEach(i => { if (match(i, 'tipo')) ct[i.tipo] = (ct[i.tipo] || 0) + 1; if (match(i, 'strum')) i.strumenti.forEach(s => cs[s] = (cs[s] || 0) + 1); });
+  const nInc = items.filter(i => !i.duplicatoDi && i.qualita && i.qualita.punti <= 2).length;
   const row = (lab, html) => html ? `<div class="qrow"><span class="ql">${lab}</span><div class="qc">${html}</div></div>` : '';
   const tipi = Object.keys(C.meta.tipi).filter(t => ct[t] || S.tipo === t).map(t => `<button class="chip${S.tipo === t ? ' on' : ''}" data-tipo="${S.tipo === t ? '' : esc(t)}" aria-pressed="${S.tipo === t}">${esc(tl(t))} <span class="n">${ct[t] || 0}</span></button>`).join('');
   const str = Object.entries(cs).sort((a, b) => b[1] - a[1]).slice(0, 14).map(([s, n]) => `<button class="chip${S.strum === s ? ' on' : ''}" data-strum="${S.strum === s ? '' : esc(s)}" aria-pressed="${S.strum === s}">${esc(STR[s] || s)} <span class="n">${n}</span></button>`).join('');
-  q.innerHTML = row('Tipo', tipi) + row('Strumento', str) + `<div class="qrow"><span class="ql">Altro</span><div class="qc"><button class="chip${S.favOnly ? ' on' : ''}" data-quick="fav" aria-pressed="${!!S.favOnly}">★ Preferiti</button><button class="chip${S.prev ? ' on' : ''}" data-quick="prev" aria-pressed="${!!S.prev}">Con anteprima</button><button class="chip" data-quick="more">Tutti i filtri…</button><button class="chip" data-quick="reset">Azzera</button></div></div>`;
+  q.innerHTML = row('Tipo', tipi) + row('Strumento', str) + `<div class="qrow"><span class="ql">Altro</span><div class="qc"><button class="chip${S.favOnly ? ' on' : ''}" data-quick="fav" aria-pressed="${!!S.favOnly}">★ Preferiti</button><button class="chip${S.prev ? ' on' : ''}" data-quick="prev" aria-pressed="${!!S.prev}">Con anteprima</button><button class="chip${S.incomp ? ' on' : ''}" data-quick="incomp" aria-pressed="${!!S.incomp}" title="Schede con poche informazioni: pochi tag, nessuna anteprima o licenza">Da completare <span class="n">${nInc}</span></button><button class="chip" data-quick="more">Tutti i filtri…</button><button class="chip" data-quick="reset">Azzera</button></div></div>`;
 }
 function renderTBanner(){
   const b = $('#tbanner'); if (!b) return; const ti = S.tipo && TIPO_INFO[S.tipo];
@@ -1275,7 +1278,7 @@ function renderTBanner(){
   b.innerHTML = `<div class="box tinfo"><b>${esc(tl(S.tipo))}</b>: ${esc(ti.cos)}.<br><span class="mini">Come si usa: ${esc(ti.uso)} Esempio: ${esc(ti.esempio)}</span></div>`;
 }
 
-function clearFilters(){ S.ids = null; S.area = ''; S.strum = ''; S.favOnly = false; $('#fFav').checked = false; S.q = ''; $('#q').value = ''; S.tipo = ''; S.tag.clear(); S.fonte = ''; S.stato = ''; $('#fStato').value = ''; S.prev = false; S.dup = false; $('#fPrev').checked = false; $('#fDup').checked = false; }
+function clearFilters(){ S.ids = null; S.area = ''; S.strum = ''; S.favOnly = false; $('#fFav').checked = false; S.q = ''; $('#q').value = ''; S.tipo = ''; S.tag.clear(); S.fonte = ''; S.stato = ''; $('#fStato').value = ''; S.prev = false; S.incomp = false; S.dup = false; $('#fPrev').checked = false; $('#fDup').checked = false; }
 function render(){
   const home = S.page === 'home', sp = SPECIAL.has(S.page);
   const q = $('#quick'), tb = $('#tbanner');
@@ -1298,7 +1301,7 @@ document.addEventListener('click', e => {
   if ((x = t.closest('[data-tipopage]'))) { const tp = x.dataset.tipopage; clearFilters(); setPage('tutto'); S.tipo = tp; renderTags(); render(); return; }
   if ((x = t.closest('[data-sidego]'))) { const el = $(x.dataset.sidego); if (el) el.click(); return; }
   if ((x = t.closest('[data-quick]'))) { const k = x.dataset.quick;
-    if (k === 'fav') { S.favOnly = !S.favOnly; $('#fFav').checked = S.favOnly; } else if (k === 'prev') { S.prev = !S.prev; $('#fPrev').checked = S.prev; }
+    if (k === 'fav') { S.favOnly = !S.favOnly; $('#fFav').checked = S.favOnly; } else if (k === 'prev') { S.prev = !S.prev; $('#fPrev').checked = S.prev; } else if (k === 'incomp') { S.incomp = !S.incomp; }
     else if (k === 'reset') { clearFilters(); renderTags(); } else if (k === 'more') { setPanel(true); $('#fpanel').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
     S.limit = 96; render(); return; }
 });
@@ -1362,7 +1365,7 @@ document.addEventListener('change', e => {
   else if (id === 'fDup') { S.dup = e.target.checked; render(); }
   else if (id === 'pgSel' && cur) { cur.page = +e.target.value; drawRender(); }
 });
-$('#bReset').onclick = () => { S.ids = null; S.area = ''; S.strum = ''; S.favOnly = false; $('#fFav').checked = false; S.q = ''; S.tipo = ''; S.tag.clear(); S.fonte = ''; S.stato = ''; $('#fStato').value = ''; S.prev = false; S.dup = false; $('#q').value = ''; $('#fPrev').checked = false; $('#fDup').checked = false; renderTags(); render(); };
+$('#bReset').onclick = () => { S.ids = null; S.area = ''; S.strum = ''; S.favOnly = false; $('#fFav').checked = false; S.q = ''; S.tipo = ''; S.tag.clear(); S.fonte = ''; S.stato = ''; $('#fStato').value = ''; S.prev = false; S.incomp = false; S.dup = false; $('#q').value = ''; $('#fPrev').checked = false; $('#fDup').checked = false; renderTags(); render(); };
 $('#bKit').onclick = () => { kitRender(); $('#dlgKit').showModal(); };
 $('#bGuida').onclick = () => { guidaRender(); $('#dlgGuida').showModal(); };
 document.addEventListener('click', e => { const b = e.target.closest('[data-fonte]'); if (b) { S.fonte = b.dataset.fonte; S.limit = 96; render(); } });
@@ -1382,7 +1385,7 @@ function activeList(){
   S.tag.forEach(t => a.push(['tag:' + t, TAGL[t] || t]));
   if (S.stato) a.push(['stato', 'Stato: ' + (S.stato === '*' ? 'tutti' : S.stato === '-' ? 'senza stato' : S.stato)]);
   if (S.ids) a.push(['ids', S.idsLabel || 'Selezione']);
-  if (S.prev) a.push(['prev', 'Con anteprima']); if (S.dup) a.push(['dup', 'Con copie']);
+  if (S.prev) a.push(['prev', 'Con anteprima']); if (S.incomp) a.push(['incomp', 'Da completare']); if (S.dup) a.push(['dup', 'Con copie']);
   return a;
 }
 function renderActive(){
@@ -1408,7 +1411,7 @@ document.addEventListener('click', e => {
   const cl = t.closest('[data-clear]'); if (cl) { const k = cl.dataset.clear;
     if (k === 'q') { S.q = ''; $('#q').value = ''; } else if (k === 'area') S.area = ''; else if (k === 'strum') S.strum = ''; else if (k === 'fav') { S.favOnly = false; $('#fFav').checked = false; } else if (k === 'fonte') S.fonte = ''; else if (k === 'tipo') S.tipo = '';
     else if (k.startsWith('tag:')) { S.tag.delete(k.slice(4)); renderTags(); } else if (k === 'stato') { S.stato = ''; $('#fStato').value = ''; }
-    else if (k === 'ids') S.ids = null; else if (k === 'prev') { S.prev = false; $('#fPrev').checked = false; } else if (k === 'dup') { S.dup = false; $('#fDup').checked = false; }
+    else if (k === 'ids') S.ids = null; else if (k === 'prev') { S.prev = false; $('#fPrev').checked = false; } else if (k === 'incomp') { S.incomp = false; } else if (k === 'dup') { S.dup = false; $('#fDup').checked = false; }
     S.limit = 96; render(); return; }
   if (t.closest('#bAzzera')) { clearFilters(); S.macro = ''; S.limit = 96; renderTags(); render(); return; }
   const mc = t.closest('[data-macro]'); if (mc) { S.macro = S.macro === mc.dataset.macro ? '' : mc.dataset.macro; renderTags(); const nb = document.querySelector('[data-macro="' + mc.dataset.macro + '"]'); if (nb) nb.focus(); return; }
