@@ -483,7 +483,42 @@ const LEGACY = { fav: store.get('fav', null), note: store.get('note', {}) };
 S.fav = new Set(items.filter(i => i.preferito).map(i => i.id));
 
 const HTTP = location.protocol === 'http:' && !window.__ONLINE;
+/* --- Modifiche online (cloud): sovrapposte al catalogo, il Mac le scarica in annotazioni.json --- */
+const ED = { ok: false, data: {} }; const edPend = {}; let edT;
+const canEdit = () => canAdd() || ED.ok;
+function applyOverlay(){
+  Object.entries(ED.data).forEach(([id, p]) => { const i = byId[id]; if (!i || !p) return;
+    if ('preferito' in p) { p.preferito === true ? S.fav.add(id) : S.fav.delete(id); i.preferito = p.preferito === true; }
+    const a = { ...(i.annotazione || {}) };
+    for (const k of ['titolo', 'descrizione', 'nota', 'stato', 'tag', 'strumenti', 'area', 'prontezza', 'unitoA', 'tieniDoppio']) if (k in p) { const v = p[k]; if (v === '' || (Array.isArray(v) && !v.length)) delete a[k]; else a[k] = v; }
+    i.annotazione = a;
+    if ('stato' in p || 'nota' in p) S.note[id] = { ...(S.note[id] || {}), ...('stato' in p ? { stato: p.stato } : {}), ...('nota' in p ? { nota: p.nota } : {}) };
+    if (p.titolo) i.titolo = p.titolo; if (p.descrizione) i.descrizione = p.descrizione;
+    if (Array.isArray(p.tag) && p.tag.length) i.tag = [...new Set([...(i.tag || []), ...p.tag])];
+    if (Array.isArray(p.strumenti) && p.strumenti.length) i.strumenti = [...new Set([...(i.strumenti || []), ...p.strumenti])];
+    if (p.area) i.area = p.area;
+    if (p.prontezza && i.valutazione) i.valutazione = { ...i.valutazione, prontezza: p.prontezza, origine: 'manuale' };
+    if (p.unitoA) i.duplicatoDi = p.unitoA;
+  });
+}
+async function edInit(){
+  if (!window.__ONLINE) return;
+  try { const sb = await sbGet(); const { data } = await sb.auth.getSession(); if (!data.session) return;
+    const r = await sb.from('kv').select('v').eq('k', 'annota').maybeSingle(); ED.data = (r.data && r.data.v) || {}; ED.ok = true; applyOverlay(); render(); }
+  catch (e) {}
+}
+function cloudAnnota(id, patch){ ED.data[id] = { ...(ED.data[id] || {}), ...patch }; edPend[id] = { ...(edPend[id] || {}), ...patch }; clearTimeout(edT); edT = setTimeout(edFlush, 700); }
+async function edFlush(){
+  const send = { ...edPend }; Object.keys(send).forEach(k => delete edPend[k]); if (!Object.keys(send).length) return;
+  const back = e => { toast('Salvataggio nel cloud non riuscito: ' + e); Object.entries(send).forEach(([id, p]) => { edPend[id] = { ...p, ...(edPend[id] || {}) }; }); };
+  try { const sb = await sbGet(); const { data: s } = await sb.auth.getSession(); if (!s.session) return back('accedi di nuovo');
+    const r = await sb.from('kv').select('v').eq('k', 'annota').maybeSingle(); const rem = (r.data && r.data.v) || {};
+    Object.entries(send).forEach(([id, p]) => { rem[id] = { ...(rem[id] || {}), ...p }; });
+    const w = await sb.from('kv').upsert({ user_id: s.session.user.id, k: 'annota', v: rem, updated_at: new Date().toISOString() }, { onConflict: 'user_id,k' });
+    if (w.error) back(w.error.message); } catch (e) { back(e.message || e); }
+}
 async function api(fn, body){
+  if (fn === 'annota' && !canAdd() && ED.ok) { cloudAnnota(body.id, body.patch); return { ok: true }; }
   try { const r = await fetch('/api/' + fn, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-F01': '1' }, body: JSON.stringify(body || {}) }); return await r.json(); }
   catch (e) { return { ok: false, errore: 'Server non raggiungibile: avvia Apri-FRAME01-LIBRARY.command' }; }
 }
@@ -711,10 +746,10 @@ const lastTab = () => { try { const t = sessionStorage.getItem('f01lib.dtab'); r
 const setLastTab = t => { try { sessionStorage.setItem('f01lib.dtab', t); } catch {} };
 // note personali: nei dati se c'è il server locale; altrimenti (online, iPhone) restano in questo browser
 const LN = { get: id => (store.get('lnote', {}) || {})[id] || {}, set(id, patch){ const a = store.get('lnote', {}) || {}; a[id] = { ...(a[id] || {}), ...patch }; store.set('lnote', a); } };
-const noteOf = i => { const n = getNote(i), l = canAdd() ? {} : LN.get(i.id); return { stato: l.stato !== undefined ? l.stato : (n.stato || ''), nota: l.nota !== undefined ? l.nota : (n.nota || '') }; };
+const noteOf = i => { const n = getNote(i), l = canEdit() ? {} : LN.get(i.id); return { stato: l.stato !== undefined ? l.stato : (n.stato || ''), nota: l.nota !== undefined ? l.nota : (n.nota || '') }; };
 const noteCount = i => { const n = noteOf(i); return (n.nota ? 1 : 0) + (n.stato ? 1 : 0); };
 const tabLabel = (k, l, i) => k === 'note' && noteCount(i) ? `${l}<span class="tbadge" aria-label="${noteCount(i)} note attive">${noteCount(i)}</span>` : l;
-function persistNote(id, patch, subito){ if (canAdd()) return saveNote(id, patch, subito); LN.set(id, patch); refreshNoteBadge(); return true; }
+function persistNote(id, patch, subito){ if (canEdit()) return saveNote(id, patch, subito); LN.set(id, patch); refreshNoteBadge(); return true; }
 function refreshNoteBadge(){ if (!cur) return; const b = document.getElementById('tab-note'); if (b) b.innerHTML = tabLabel('note', 'Note & Gestione', byId[cur.id]); }
 function openItem(id, tab){
   if (!byId[id]) return; const prev = cur; const t0 = TABOLD[tab] || tab; cur = { id, tab: TABK.has(t0) ? t0 : lastTab(), page: 0, w: 1440, z: 'fit', seq: (prev && prev.seq && prev.seq.includes(id)) ? prev.seq : list().map(x => x.id) };
@@ -844,7 +879,7 @@ function pPrompt(i){
 function pNote(i){
   const n = noteOf(i), ST = ['Da usare', 'Da valutare', 'Scartato'];
   const q = i.qualita, qb = q ? `<div class="box qual"><b>Completezza ${q.punti}/${q.tot}</b>${q.mancano.length ? `<ul class="gl">${q.mancano.map(m => `<li>${esc(m)}</li>`).join('')}</ul>` : '<div class="mini">Scheda completa.</div>'}${i.tagAuto && i.tagAuto.length ? `<div class="mini">Tag aggiunti in automatico: ${i.tagAuto.map(t => esc(TAGL[t] || t)).join(', ')}${i.areaAuto ? ' · area scelta in automatico' : ''}</div>` : (i.areaAuto ? '<div class="mini">Area scelta in automatico.</div>' : '')}</div>` : '';
-  if (HTTP && SRV) return `${qb}<div class="edit"><h4>Note e stato</h4>
+  if ((HTTP && SRV) || ED.ok) return `${qb}<div class="edit"><h4>Note e stato</h4>
   <label class="mini" for="eStato">Stato</label><select id="eStato"><option value="">—</option>${ST.map(s => `<option ${n.stato === s ? 'selected' : ''}>${s}</option>`).join('')}</select>
   <label class="mini" for="eNota">Nota</label><textarea id="eNota" placeholder="Per quale progetto? Cosa tenere, cosa cambiare…">${esc(n.nota || '')}</textarea>
   <h4>Gestione</h4>
@@ -854,7 +889,7 @@ function pNote(i){
   <label class="mini" for="eArea">Area d'uso</label><select id="eArea">${AREE.map(a => `<option value="${a.id}" ${i.area === a.id ? 'selected' : ''}>${esc(a.nome)}</option>`).join('')}</select>
   <label class="mini" for="ePront">Prontezza (vince sulla valutazione automatica)</label><select id="ePront"><option value="">Automatica (${esc(prName(i.valutazione ? i.valutazione.prontezza : ''))})</option>${Object.keys(VAL.prontezza).map(k => `<option value="${k}" ${i.annotazione && i.annotazione.prontezza === k ? 'selected' : ''}>${esc(prName(k))}</option>`).join('')}</select>
   <label class="mini" for="eStr">Strumenti (virgola: ${esc(Object.values(STR).slice(0, 6).join(', '))}…)</label><input type="text" id="eStr" value="${esc(((i.annotazione && i.annotazione.strumenti) || []).map(s => STR[s] || s).join(', '))}" placeholder="es. Framer, Figma">
-  <p><button class="pill black" id="eSave">Salva</button> <span class="mini">Salvato in dati/annotazioni.json; sopravvive a ogni scansione.</span></p></div>`;
+  <p><button class="pill black" id="eSave">Salva</button> <span class="mini">${canAdd() ? 'Salvato in dati/annotazioni.json; sopravvive a ogni scansione.' : 'Salvato nel tuo cloud: arriva nei dati dal Mac («Link salvati» → Scarica modifiche).'}</span></p></div>`;
   return `${qb}<h4>Stato</h4><label class="opt">Stato dell'elemento <select id="nStato"><option value="">—</option>${ST.map(s => `<option ${n.stato === s ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
   <h4>Le tue note</h4><textarea id="nNota" placeholder="Per quale progetto? Cosa tenere, cosa cambiare…">${esc(n.nota || '')}</textarea>
   <p class="mini">Le note e lo stato di questa versione restano <b>in questo browser</b> (non nei file della libreria). Per salvarli nei dati apri il catalogo dal Mac con <code>Apri-FRAME01-LIBRARY.command</code>.</p>`;
@@ -1093,7 +1128,7 @@ async function scan(){
 function toggleKit(id){ S.kit.has(id) ? S.kit.delete(id) : S.kit.add(id); store.set('kit', [...S.kit]); }
 const SOLA_LETTURA = 'Versione di sola consultazione: modifica dal Mac, poi «Pubblica online».';
 function toggleFav(id){
-  if (!canAdd()) { toast(SOLA_LETTURA); return; }
+  if (!canEdit()) { toast(SOLA_LETTURA); return; }
   const on = !S.fav.has(id); on ? S.fav.add(id) : S.fav.delete(id);
   if (byId[id]) byId[id].preferito = on;
   api('annota', { id, patch: { preferito: on } }).then(r => { if (!r.ok) toast(r.errore || 'Preferito non salvato nel file'); else syncBadge(true); });
@@ -1101,7 +1136,7 @@ function toggleFav(id){
 // note e stato: si salvano nei dati (annotazioni.json), uguali ovunque dopo la pubblicazione
 const noteT = {};
 function saveNote(id, patch, subito){
-  if (!canAdd()) { toast(SOLA_LETTURA); return false; }
+  if (!canEdit()) { toast(SOLA_LETTURA); return false; }
   S.note[id] = { ...(S.note[id] || getNote(byId[id])), ...patch };
   if (byId[id]) byId[id].annotazione = { ...(byId[id].annotazione || {}), ...patch };
   const invia = () => api('annota', { id, patch }).then(r => { if (!r.ok) toast(r.errore || 'Nota non salvata'); else syncBadge(true); });
@@ -1246,7 +1281,7 @@ function miniCard(i, extra){
 }
 let discLimit = 30;
 function pPulizia(){
-  const pr = pairs(), di = toDiscard(), uniti = items.filter(i => i.uniMotivo && i.duplicatoDi), ok = canAdd();
+  const pr = pairs(), di = toDiscard(), uniti = items.filter(i => i.uniMotivo && i.duplicatoDi), ok = canEdit();
   const lock = ok ? '' : '<div class="warn">Qui puoi guardare; le decisioni si prendono aprendo la libreria dal Mac (<code>Apri-FRAME01-LIBRARY.command</code>) e poi si pubblicano.</div>';
   return `<div class="hhead"><h1>Pulizia</h1><p>Doppioni e schede poco utili. <b>Nulla viene cancellato</b>: unire o archiviare si può sempre annullare dalla scheda (stato e «unita a»).</p></div>${lock}
   <div class="hsec">Da confermare · ${pr.length}</div>
@@ -1290,7 +1325,8 @@ let SBC = window.__SB || null; const CLOUD = { sess: undefined, links: [], msg: 
 async function sbGet(){ if (SBC) return SBC; const m = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm'); SBC = m.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }); return SBC; }
 async function cloudInit(){
   try { const sb = await sbGet(); const { data } = await sb.auth.getSession(); CLOUD.sess = data.session || null;
-    if (CLOUD.sess) { const r = await sb.from('links').select('id,url,nota,collezione,stato,created_at').order('created_at', { ascending: false }).limit(300); if (r.error) CLOUD.msg = 'Cloud: ' + r.error.message; else CLOUD.links = r.data || []; } }
+    if (CLOUD.sess) { const r = await sb.from('links').select('id,url,nota,collezione,stato,created_at').order('created_at', { ascending: false }).limit(300); if (r.error) CLOUD.msg = 'Cloud: ' + r.error.message; else CLOUD.links = r.data || [];
+      const k = await sb.from('kv').select('v').eq('k', 'annota').maybeSingle(); CLOUD.mods = (k.data && k.data.v) ? Object.keys(k.data.v).length : 0; } }
   catch (e) { CLOUD.sess = null; CLOUD.msg = 'Cloud non raggiungibile.'; }
   cloudPaint();
 }
@@ -1304,7 +1340,7 @@ function cloudHtml(){
   return `<p class="mini">Connesso: ${esc(CLOUD.sess.user.email || '')} · <button class="link" data-cl="esci">Esci</button></p>
   <p><textarea id="clUrl" rows="3" placeholder="Incolla uno o più link (uno per riga)" style="width:100%"></textarea></p>
   <p><input id="clCol" placeholder="Collezione (facoltativa)" style="width:100%;max-width:260px"> <input id="clNota" placeholder="Nota (facoltativa)" style="width:100%;max-width:260px"> <button class="pill black" data-cl="salva">Salva nel cloud</button></p>
-  ${canAdd() ? `<p><button class="pill black" data-cl="importa" ${nuovi.length ? '' : 'disabled'}>Importa ${nuovi.length} nuovi nel catalogo</button></p>` : '<p class="mini">L\'importazione nel catalogo si fa dal Mac: i link restano al sicuro qui finché non li importi.</p>'}
+  ${canAdd() ? `<p><button class="pill black" data-cl="importa" ${nuovi.length ? '' : 'disabled'}>Importa ${nuovi.length} nuovi nel catalogo</button> <button class="pill black" data-cl="scarica" ${CLOUD.mods ? '' : 'disabled'}>Scarica ${CLOUD.mods || 0} schede modificate online</button></p>` : '<p class="mini">L\'importazione nel catalogo si fa dal Mac: i link restano al sicuro qui finché non li importi.</p>'}
   ${CLOUD.msg ? `<p class="mini">${esc(CLOUD.msg)}</p>` : ''}
   <div>${CLOUD.links.slice(0, 40).map(l => `<div class="vlog"><span class="mini">${esc(l.stato)}</span> <a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.url.replace(/^https?:\/\//, '').slice(0, 70))}</a> <button class="link" data-cl="del" data-id="${esc(l.id)}" aria-label="Elimina">✕</button></div>`).join('') || '<p class="mini">Nessun link nel cloud.</p>'}</div>`;
 }
@@ -1324,6 +1360,11 @@ document.addEventListener('click', async e => {
         const r = await sb.from('links').upsert(urls.map(url => ({ url, collezione: col, nota })), { onConflict: 'user_id,url', ignoreDuplicates: true });
         CLOUD.msg = r.error ? 'Salvataggio non riuscito: ' + r.error.message : urls.length + ' link inviati al cloud.'; await cloudInit(); } }
     else if (a === 'del') { await sb.from('links').delete().eq('id', b.dataset.id); await cloudInit(); }
+    else if (a === 'scarica') {
+      const k = await sb.from('kv').select('v').eq('k', 'annota').maybeSingle(); const m = (k.data && k.data.v) || {}; let ok = 0, ko = 0;
+      for (const [id, patch] of Object.entries(m)) { const r = await api('annota', { id, patch }); if (r && r.ok !== false && !r.errore) { ok++; delete m[id]; } else ko++; }
+      await sb.from('kv').upsert({ user_id: CLOUD.sess.user.id, k: 'annota', v: m, updated_at: new Date().toISOString() }, { onConflict: 'user_id,k' });
+      CLOUD.msg = ok + ' schede scaricate nei dati' + (ko ? ' · ' + ko + ' non riuscite' : '') + '. Ora aggiorna e pubblica.'; toast('Modifiche scaricate'); await cloudInit(); }
     else if (a === 'importa') {
       const nuovi = CLOUD.links.filter(l => l.stato === 'nuovo'); const r = await api('risorse', { azione: 'aggiungi', testo: nuovi.map(l => l.url).join('\n'), origine: 'incolla' });
       if (!r || r.ok === false || r.errore) CLOUD.msg = (r && r.errore) || 'Importazione non riuscita.';
@@ -1426,13 +1467,13 @@ document.addEventListener('click', e => {
   const refresh = () => { renderPages(); render(); };
   if (d.pront !== undefined) { S.pront = d.pront; S.limit = 96; render(); return; }
   if (d.origine !== undefined) { S.origine = d.origine; setPage('tutto'); S.origine = d.origine; render(); return; }
-  if (d.un) { const [dupId, keepId, ka, kb2] = d.un.split('|'); const key = ka + '|' + kb2; if (!canAdd()) return; persistNote(dupId, { unitoA: keepId }, true); byId[dupId].duplicatoDi = keepId; cleanDone.add(key); store.set('cleanDone', [...cleanDone]); toast('Unite. L\'altra scheda resta nascosta tra le copie.'); refresh(); return; }
-  if (d.keep) { cleanDone.add(d.keep); store.set('cleanDone', [...cleanDone]); const [x, y] = d.keep.split('|'); if (canAdd()) { persistNote(x, { tieniDoppio: true }, true); persistNote(y, { tieniDoppio: true }, true); } toast('Tenute entrambe.'); refresh(); return; }
-  if (d.disc) { if (!canAdd()) return; persistNote(d.disc, { stato: 'Scartato' }, true); toast('Archiviata (stato Scartato).'); refresh(); return; }
-  if (d.tieni) { if (!canAdd()) return; persistNote(d.tieni, { prontezza: 'verificare', stato: 'Da valutare' }, true); if (byId[d.tieni].valutazione) byId[d.tieni].valutazione = { ...byId[d.tieni].valutazione, prontezza: 'verificare', origine: 'manuale' }; toast('Tenuta: ora «Da verificare».'); refresh(); return; }
-  if (d.discall) { const di = toDiscard(); if (!canAdd() || !di.length) return; if (!confirm(`Archiviare ${di.length} schede? Si può annullare cambiando lo stato dalla scheda.`)) return; di.forEach(i => persistNote(i.id, { stato: 'Scartato' }, true)); toast(di.length + ' archiviate.'); refresh(); return; }
+  if (d.un) { const [dupId, keepId, ka, kb2] = d.un.split('|'); const key = ka + '|' + kb2; if (!canEdit()) return; persistNote(dupId, { unitoA: keepId }, true); byId[dupId].duplicatoDi = keepId; cleanDone.add(key); store.set('cleanDone', [...cleanDone]); toast('Unite. L\'altra scheda resta nascosta tra le copie.'); refresh(); return; }
+  if (d.keep) { cleanDone.add(d.keep); store.set('cleanDone', [...cleanDone]); const [x, y] = d.keep.split('|'); if (canEdit()) { persistNote(x, { tieniDoppio: true }, true); persistNote(y, { tieniDoppio: true }, true); } toast('Tenute entrambe.'); refresh(); return; }
+  if (d.disc) { if (!canEdit()) return; persistNote(d.disc, { stato: 'Scartato' }, true); toast('Archiviata (stato Scartato).'); refresh(); return; }
+  if (d.tieni) { if (!canEdit()) return; persistNote(d.tieni, { prontezza: 'verificare', stato: 'Da valutare' }, true); if (byId[d.tieni].valutazione) byId[d.tieni].valutazione = { ...byId[d.tieni].valutazione, prontezza: 'verificare', origine: 'manuale' }; toast('Tenuta: ora «Da verificare».'); refresh(); return; }
+  if (d.discall) { const di = toDiscard(); if (!canEdit() || !di.length) return; if (!confirm(`Archiviare ${di.length} schede? Si può annullare cambiando lo stato dalla scheda.`)) return; di.forEach(i => persistNote(i.id, { stato: 'Scartato' }, true)); toast(di.length + ' archiviate.'); refresh(); return; }
   if (d.discmore) { discLimit += 30; render(); return; }
-  if (d.split) { if (!canAdd()) return; persistNote(d.split, { tieniDoppio: true }, true); byId[d.split].duplicatoDi = null; toast('Unione annullata dopo la prossima scansione (ora è visibile).'); refresh(); return; }
+  if (d.split) { if (!canEdit()) return; persistNote(d.split, { tieniDoppio: true }, true); byId[d.split].duplicatoDi = null; toast('Unione annullata dopo la prossima scansione (ora è visibile).'); refresh(); return; }
   if (d.copyreq) { copy('Analizza le risorse in coda della libreria e aggiornala con tipo, tag, guida all\'uso, valutazione di prontezza e anteprima.', 'Richiesta copiata: incollala nella chat con Claude.'); return; }
   if (d.bgen) { PIANO = genPiano(BRIEF); savePiano(); toast('Percorso generato.'); render(); return; }
   if (d.bcopy) { copy(claudeRequest(BRIEF), 'Brief copiato: incollalo nella chat con Claude.'); return; }
@@ -1659,7 +1700,7 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => {
   const id = e.target.id;
-  if (id === 'nStato' && cur) { if (persistNote(cur.id, { stato: e.target.value }, true)) { if (canAdd()) render(); } else e.target.value = noteOf(byId[cur.id]).stato || ''; }
+  if (id === 'nStato' && cur) { if (persistNote(cur.id, { stato: e.target.value }, true)) { if (canEdit()) render(); } else e.target.value = noteOf(byId[cur.id]).stato || ''; }
   else if (id === 'fStato') { S.stato = e.target.value; S.limit = 96; render(); }
   else if (id === 'fSort') { S.sort = e.target.value; render(); }
   else if (id === 'fPrev') { S.prev = e.target.checked; render(); }
@@ -1786,6 +1827,7 @@ if (HTTP) { api('stato').then(r => { if (r && r.ok) {
   items.forEach(i => { i.preferito = S.fav.has(i.id); if (ann[i.id]) i.annotazione = ann[i.id]; });
   updScan(); render(); if (cur) drawRender(); syncBadge(); } }); }
 { const h0 = decodeURIComponent(location.hash.slice(1)); if (h0 && !h0.startsWith('/') && byId[h0]) openItem(h0); }
+edInit();
 /* ---------- Quick Look (step 3): Spazio su una scheda con il focus ---------- */
 (function(){
   const ql = document.createElement('div'); ql.className = 'qlk'; ql.id = 'qlk'; ql.hidden = true; ql.setAttribute('role', 'dialog'); ql.setAttribute('aria-modal', 'true'); ql.setAttribute('aria-label', 'Anteprima rapida');
