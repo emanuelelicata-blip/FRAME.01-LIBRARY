@@ -45,6 +45,16 @@
 @keyframes gspin{to{transform:rotate(360deg)}}
 #gerr{display:none;padding:10px 12px;border-radius:10px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#fca5a5;font-size:13px}
 #gerr.on{display:block}
+#gate input[type=email]#gmail,#gate input[type=password]#gmpw{width:100%;box-sizing:border-box;height:46px;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.35);color:#f8fafc;font:16px system-ui;outline:none}
+#gate #gmail:focus,#gate #gmpw:focus{border-color:hsl(212 100% 50%);box-shadow:0 0 0 3px hsl(212 100% 50%/.25)}
+#glogin{display:grid;gap:10px}
+#gate .gbtn2{display:flex;align-items:center;justify-content:center;gap:10px;height:46px;border-radius:9999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#f8fafc;font:600 14px system-ui;cursor:pointer}
+#gate .gbtn2:hover{background:rgba(255,255,255,.12)}#gate .gbtn2:focus-visible{outline:2px solid hsl(212 100% 50%);outline-offset:3px}
+#gate .grow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#gate .gor{margin:0;text-align:center;color:#6b7686;font:11px ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase}
+#gate details#gkey>summary{cursor:pointer;color:#a8b3c4;font-size:13px;list-style:none;text-align:center;padding:6px}
+#gate details#gkey[open]>summary{margin-bottom:10px}
+#gate details#gkey>div{display:grid;gap:14px}
 @media(prefers-reduced-motion:reduce){#gate{transition:none}#gate form.shake{animation:none}.gspin{animation-duration:1.6s}#gbtn{transition:none}}
 </style>
 <style>
@@ -361,13 +371,19 @@ button,a,.card,.acard,.pg{touch-action:manipulation}
 <dialog id="dlgAI" aria-label="Chiedi all'AI"><div class="dlg" id="dlgAIBody"></div></dialog>
 <div id="gate"><form id="gform" autocomplete="on" aria-labelledby="gt">
 <div class="gmono"><span class="gbadge" aria-hidden="true"><svg viewBox="0 0 720 111"><use href="#f01"/></svg></span><div><h1 id="gt">FRAME.01</h1><p class="gsub">Library · Secure Vault</p></div></div>
-<p class="gp">Inserisci la chiave d'accesso per decrittare il catalogo locale.</p>
+<p class="gp">Accedi con il tuo account per aprire il catalogo.</p>
+<div id="glogin"><button type="button" class="gbtn2" id="ggoogle">Continua con Google</button>
+<p class="gor">oppure con email</p>
+<input id="gmail" type="email" autocomplete="username" placeholder="Email" aria-label="Email">
+<input id="gmpw" type="password" autocomplete="current-password" placeholder="Password dell'account" aria-label="Password dell'account">
+<div class="grow"><button type="button" class="gbtn2" id="glog">Accedi</button><button type="button" class="gbtn2" id="gsign">Crea account</button></div></div>
+<details id="gkey"><summary>Usa la chiave d'accesso</summary><div>
 <input type="text" name="username" value="library" autocomplete="username" hidden>
 <div class="gfield"><svg class="gi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-<input id="gpw" type="password" autocomplete="current-password" placeholder="Chiave d'accesso" aria-label="Password" autofocus required>
+<input id="gpw" type="password" autocomplete="current-password" placeholder="Chiave d'accesso" aria-label="Password">
 <button type="button" id="geye" aria-pressed="false" aria-label="Mostra password"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.5 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.7 9.7 0 0 0 4-.9M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
 <label class="grem"><input id="grem" class="gck" type="checkbox"> Ricorda su questo dispositivo</label>
-<button id="gbtn" type="submit">Sblocca</button>
+<button id="gbtn" type="submit">Sblocca</button></div></details>
 <div id="gerr" role="alert" aria-live="assertive"></div></form></div>
 <script>
 (function(){
@@ -383,16 +399,34 @@ async function open(pw){
   const g=$('#gate'); g.classList.add('out'); setTimeout(()=>g.remove(),260);
   if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
-function busy(on){ const b=$('#gbtn'); b.disabled=on; $('#gpw').disabled=on; $('#grem').disabled=on; $('#geye').disabled=on; $('#gform').setAttribute('aria-busy',on);
+function busy(on){ const b=$('#gbtn'); b.disabled=on; $('#gpw').disabled=on; ['#gmail','#gmpw','#ggoogle','#glog','#gsign'].forEach(x=>{$(x).disabled=on}); $('#grem').disabled=on; $('#geye').disabled=on; $('#gform').setAttribute('aria-busy',on);
   b.innerHTML=on?'<span class="gspin" aria-hidden="true"></span><span>Decrittazione catalogo…</span>':'Sblocca'; }
 function fail(msg){ const e=$('#gerr'); e.textContent=msg; e.classList.add('on'); const f=$('#gform'); f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); }
 async function go(pw,rem){ busy(true); $('#gerr').classList.remove('on');
   try{ await open(pw); if(rem){try{localStorage.setItem('f01pw',pw)}catch{}} }
   catch(e){ busy(false); try{localStorage.removeItem('f01pw')}catch{} fail((e&&e.name==='OperationError')?'Password errata. Riprova.':'Errore: '+(e&&e.message||e)); const i=$('#gpw'); i.focus(); i.select(); } }
-$('#gform').addEventListener('submit',e=>{e.preventDefault();go($('#gpw').value,$('#grem').checked)});
+const SBU='https://vaqqbiwhzmzlqgllwlhr.supabase.co',SBK='sb_publishable_53brJanwUpQCJ5LrvNBQDA_9M20T99-';let SB=null;
+async function sbc(){ if(SB) return SB; const m=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm'); SB=m.createClient(SBU,SBK,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}); return SB; }
+async function viaAccount(){ busy(true); $('#gerr').classList.remove('on');
+  try{ const sb=await sbc(); const {data}=await sb.auth.getSession(); if(!data.session){ busy(false); return false; }
+    const r=await sb.from('vault').select('secret').eq('id',1).maybeSingle();
+    if(r.error||!r.data||!r.data.secret){ await sb.auth.signOut(); busy(false); fail('Account non autorizzato: questo indirizzo non ha accesso alla libreria.'); return false; }
+    window.__SB=sb; await open(r.data.secret); return true; }
+  catch(e){ busy(false); fail('Errore: '+(e&&e.message||e)); return false; } }
+async function loginMail(nuovo){ const m=$('#gmail').value.trim(), p=$('#gmpw').value; if(!m||!p){ fail('Scrivi email e password.'); return; }
+  $('#gerr').classList.remove('on');
+  try{ const sb=await sbc();
+    if(nuovo){ const r=await sb.auth.signUp({email:m,password:p,options:{emailRedirectTo:location.origin+location.pathname}}); if(r.error) fail('Registrazione non riuscita: '+r.error.message); else { const e=$('#gerr'); e.textContent='Controlla la posta e conferma l'indirizzo, poi accedi.'; e.classList.add('on'); } return; }
+    const r=await sb.auth.signInWithPassword({email:m,password:p}); if(r.error){ fail('Accesso non riuscito: '+r.error.message); return; }
+    await viaAccount(); }
+  catch(e){ fail('Errore: '+(e&&e.message||e)); } }
+$('#gform').addEventListener('submit',e=>{e.preventDefault(); const a=document.activeElement; if(a&&a.closest&&a.closest('#glogin')){ loginMail(false); return; } const pw=$('#gpw').value; if(!pw){ fail('Inserisci la chiave d'accesso.'); return; } go(pw,$('#grem').checked)});
+$('#ggoogle').addEventListener('click',async()=>{ try{ const sb=await sbc(); await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}}); }catch(e){ fail('Errore: '+(e&&e.message||e)); } });
+$('#glog').addEventListener('click',()=>loginMail(false)); $('#gsign').addEventListener('click',()=>loginMail(true));
 $('#geye').addEventListener('click',()=>{ const i=$('#gpw'), b=$('#geye'), show=i.type==='password'; i.type=show?'text':'password'; b.setAttribute('aria-pressed',show); b.setAttribute('aria-label',show?'Nascondi password':'Mostra password'); i.focus(); });
-$('#gpw').focus();
-try{const p=localStorage.getItem('f01pw'); if(p){ $('#grem').checked=true; go(p,true); }}catch{}
+let pwSalvata=null; try{pwSalvata=localStorage.getItem('f01pw')}catch{}
+if(pwSalvata){ $('#grem').checked=true; $('#gkey').open=true; go(pwSalvata,true); }
+else if(/access_token|code=|sb-/.test(location.hash+location.search) || Object.keys(localStorage).some(k=>/^sb-.*auth-token$/.test(k))) viaAccount();
 })();
 </script>
 <noscript><p class="empty">Serve JavaScript per il catalogo.</p></noscript>
@@ -1238,9 +1272,58 @@ function pImport(){
   ${step(2, 'Analizza', coda ? `${coda} risorse in coda: da analizzare.` : 'Nessuna risorsa in coda: tutte analizzate.', `<p class="mini">Stato: ${Object.entries(st).map(([k, n]) => `${esc(k)} ${n}`).join(' · ') || '—'}</p><p><button class="pill black" data-copyreq="1">Copia la richiesta per Claude</button></p><p class="mini">Incollala in questa chat: Claude legge titolo, didascalia e pagina, e compila tipo, tag, guida, valutazione.</p>`)}
   ${step(3, 'Catalogo', `${all.length} elementi unici${(C.meta.pulizia || {}).uniti ? `, ${C.meta.pulizia.uniti} doppioni uniti` : ''}.`, `<p class="mini">${cleanCount()} voci in <button class="link" data-page="pulizia">Pulizia</button> · valutate: ${Object.entries((VAL.conteggi || {})).map(([k, n]) => `${esc(prName(k))} ${n}`).join(', ')}</p><p class="mini">Instagram sta in un catalogo a parte.</p>`)}
   </div>
+  <div class="hsec">Link dal cloud (account)</div>
+  <div class="box" id="cloudbox" style="margin:0 12px;padding:10px 14px">${cloudHtml()}</div>${(setTimeout(cloudInit, 0), '')}
   <div class="hsec">Cosa è entrato e quando</div>
   ${log.length ? `<div class="box" style="margin:0 12px;padding:8px 14px">${log.map(l => `<div class="vlog"><b>${esc(new Date(l.data).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }))}</b> <span>${l.primoRegistro ? 'Primo registro: ' + l.totale + ' elementi' : '+' + (l.nuove || 0) + ' nuovi (' + Object.entries(l.perOrigine || {}).map(([k, n]) => k + ' ' + n).join(', ') + ')'}</span> <span class="mini">${l.daAnalizzare ? l.daAnalizzare + ' da analizzare' : ''}</span></div>`).join('')}</div>` : '<div class="empty"><p>Il registro parte dalla prossima scansione.</p></div>'}`;
 }
+/* --- Cloud (Supabase): account e link importati online. URL e chiave pubblicabile sono pubbliche per progetto; i dati sono protetti da RLS. --- */
+const SB_URL = 'https://vaqqbiwhzmzlqgllwlhr.supabase.co', SB_KEY = 'sb_publishable_53brJanwUpQCJ5LrvNBQDA_9M20T99-';
+let SBC = window.__SB || null; const CLOUD = { sess: undefined, links: [], msg: '', busy: false };
+async function sbGet(){ if (SBC) return SBC; const m = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm'); SBC = m.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }); return SBC; }
+async function cloudInit(){
+  try { const sb = await sbGet(); const { data } = await sb.auth.getSession(); CLOUD.sess = data.session || null;
+    if (CLOUD.sess) { const r = await sb.from('links').select('id,url,nota,collezione,stato,created_at').order('created_at', { ascending: false }).limit(300); if (r.error) CLOUD.msg = 'Cloud: ' + r.error.message; else CLOUD.links = r.data || []; } }
+  catch (e) { CLOUD.sess = null; CLOUD.msg = 'Cloud non raggiungibile.'; }
+  cloudPaint();
+}
+function cloudHtml(){
+  if (CLOUD.sess === undefined) return '<p class="mini">Collegamento al cloud…</p>';
+  if (!CLOUD.sess) return `<p class="mini">Accedi per salvare link dal telefono e importarli nel catalogo.</p>
+  ${window.__ONLINE ? '<p><button class="pill black" data-cl="google">Continua con Google</button></p>' : ''}
+  <p><input id="clMail" type="email" placeholder="Email" autocomplete="username" style="width:100%;max-width:320px"> <input id="clPw" type="password" placeholder="Password" autocomplete="current-password" style="width:100%;max-width:320px"></p>
+  <p><button class="pill black" data-cl="login">Accedi</button> <button class="pill" data-cl="signup">Crea account</button></p>${CLOUD.msg ? `<p class="mini">${esc(CLOUD.msg)}</p>` : ''}`;
+  const nuovi = CLOUD.links.filter(l => l.stato === 'nuovo');
+  return `<p class="mini">Connesso: ${esc(CLOUD.sess.user.email || '')} · <button class="link" data-cl="esci">Esci</button></p>
+  <p><textarea id="clUrl" rows="3" placeholder="Incolla uno o più link (uno per riga)" style="width:100%"></textarea></p>
+  <p><input id="clCol" placeholder="Collezione (facoltativa)" style="width:100%;max-width:260px"> <input id="clNota" placeholder="Nota (facoltativa)" style="width:100%;max-width:260px"> <button class="pill black" data-cl="salva">Salva nel cloud</button></p>
+  ${canAdd() ? `<p><button class="pill black" data-cl="importa" ${nuovi.length ? '' : 'disabled'}>Importa ${nuovi.length} nuovi nel catalogo</button></p>` : '<p class="mini">L\'importazione nel catalogo si fa dal Mac: i link restano al sicuro qui finché non li importi.</p>'}
+  ${CLOUD.msg ? `<p class="mini">${esc(CLOUD.msg)}</p>` : ''}
+  <div>${CLOUD.links.slice(0, 40).map(l => `<div class="vlog"><span class="mini">${esc(l.stato)}</span> <a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.url.replace(/^https?:\/\//, '').slice(0, 70))}</a> <button class="link" data-cl="del" data-id="${esc(l.id)}" aria-label="Elimina">✕</button></div>`).join('') || '<p class="mini">Nessun link nel cloud.</p>'}</div>`;
+}
+function cloudPaint(){ const b = document.getElementById('cloudbox'); if (b) b.innerHTML = cloudHtml(); }
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-cl]'); if (!b || CLOUD.busy) return; const a = b.dataset.cl, v = id => (document.getElementById(id) || {}).value || '';
+  CLOUD.busy = true; CLOUD.msg = '';
+  try { const sb = await sbGet();
+    if (a === 'google') { await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } }); }
+    else if (a === 'login') { const r = await sb.auth.signInWithPassword({ email: v('clMail').trim(), password: v('clPw') }); if (r.error) CLOUD.msg = 'Accesso non riuscito: ' + r.error.message; else await cloudInit(); }
+    else if (a === 'signup') { const r = await sb.auth.signUp({ email: v('clMail').trim(), password: v('clPw'), options: { emailRedirectTo: location.origin + location.pathname } }); CLOUD.msg = r.error ? 'Registrazione non riuscita: ' + r.error.message : 'Controlla la posta e conferma l\'indirizzo, poi accedi.'; }
+    else if (a === 'esci') { await sb.auth.signOut(); CLOUD.sess = null; CLOUD.links = []; }
+    else if (a === 'salva') {
+      const urls = [...new Set(v('clUrl').split(/\s+/).filter(u => /^https?:\/\/\S+$/i.test(u)))].slice(0, 100);
+      if (!urls.length) CLOUD.msg = 'Nessun link valido (devono iniziare con http o https).';
+      else { const col = v('clCol').trim().slice(0, 80) || null, nota = v('clNota').trim().slice(0, 500) || null;
+        const r = await sb.from('links').upsert(urls.map(url => ({ url, collezione: col, nota })), { onConflict: 'user_id,url', ignoreDuplicates: true });
+        CLOUD.msg = r.error ? 'Salvataggio non riuscito: ' + r.error.message : urls.length + ' link inviati al cloud.'; await cloudInit(); } }
+    else if (a === 'del') { await sb.from('links').delete().eq('id', b.dataset.id); await cloudInit(); }
+    else if (a === 'importa') {
+      const nuovi = CLOUD.links.filter(l => l.stato === 'nuovo'); const r = await api('risorse', { azione: 'aggiungi', testo: nuovi.map(l => l.url).join('\n'), origine: 'incolla' });
+      if (!r || r.ok === false || r.errore) CLOUD.msg = (r && r.errore) || 'Importazione non riuscita.';
+      else { const x = r.risultato || r; await sb.from('links').update({ stato: 'importato' }).in('id', nuovi.map(l => l.id)); CLOUD.msg = 'Importati: ' + (x.aggiunte ?? nuovi.length) + (x.doppie ? ' · già presenti: ' + x.doppie : '') + '. Ora aggiorna il catalogo.'; toast('Link importati dal cloud'); await cloudInit(); } }
+  } catch (err) { CLOUD.msg = 'Errore: ' + (err && err.message || err); }
+  CLOUD.busy = false; cloudPaint();
+});
 /* --- Brief --- */
 const BRIEF0 = { nome: '', cliente: '', stile: 'brand-identity', obiettivo: '', pubblico: '', output: [], scadenza: '', vincoli: '', riferimenti: '', note: '' };
 let BRIEF = { ...BRIEF0, ...store.get('brief', {}) }; let PIANO = store.get('piano', null);
