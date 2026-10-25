@@ -416,11 +416,11 @@ async function viaAccount(){ busy(true); $('#gerr').classList.remove('on');
 async function loginMail(nuovo){ const m=$('#gmail').value.trim(), p=$('#gmpw').value; if(!m||!p){ fail('Scrivi email e password.'); return; }
   $('#gerr').classList.remove('on');
   try{ const sb=await sbc();
-    if(nuovo){ const r=await sb.auth.signUp({email:m,password:p,options:{emailRedirectTo:location.origin+location.pathname}}); if(r.error) fail('Registrazione non riuscita: '+r.error.message); else { const e=$('#gerr'); e.textContent='Controlla la posta e conferma l'indirizzo, poi accedi.'; e.classList.add('on'); } return; }
+    if(nuovo){ const r=await sb.auth.signUp({email:m,password:p,options:{emailRedirectTo:location.origin+location.pathname}}); if(r.error) fail('Registrazione non riuscita: '+r.error.message); else { const e=$('#gerr'); e.textContent='Controlla la posta e conferma l\'indirizzo, poi accedi.'; e.classList.add('on'); } return; }
     const r=await sb.auth.signInWithPassword({email:m,password:p}); if(r.error){ fail('Accesso non riuscito: '+r.error.message); return; }
     await viaAccount(); }
   catch(e){ fail('Errore: '+(e&&e.message||e)); } }
-$('#gform').addEventListener('submit',e=>{e.preventDefault(); const a=document.activeElement; if(a&&a.closest&&a.closest('#glogin')){ loginMail(false); return; } const pw=$('#gpw').value; if(!pw){ fail('Inserisci la chiave d'accesso.'); return; } go(pw,$('#grem').checked)});
+$('#gform').addEventListener('submit',e=>{e.preventDefault(); const a=document.activeElement; if(a&&a.closest&&a.closest('#glogin')){ loginMail(false); return; } const pw=$('#gpw').value; if(!pw){ fail('Inserisci la chiave d\'accesso.'); return; } go(pw,$('#grem').checked)});
 $('#ggoogle').addEventListener('click',async()=>{ try{ const sb=await sbc(); await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}}); }catch(e){ fail('Errore: '+(e&&e.message||e)); } });
 $('#glog').addEventListener('click',()=>loginMail(false)); $('#gsign').addEventListener('click',()=>loginMail(true));
 $('#geye').addEventListener('click',()=>{ const i=$('#gpw'), b=$('#geye'), show=i.type==='password'; i.type=show?'text':'password'; b.setAttribute('aria-pressed',show); b.setAttribute('aria-label',show?'Nascondi password':'Mostra password'); i.focus(); });
