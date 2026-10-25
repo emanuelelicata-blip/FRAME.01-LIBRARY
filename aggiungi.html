@@ -1,0 +1,44 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="color-scheme" content="dark"><title>Aggiungi link · FRAME.01 LIBRARY</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:#0a0c10;color:#f8fafc;font:15px/1.45 system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif}
+main{width:min(460px,100%);display:grid;gap:14px;padding:26px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1)}
+h1{margin:0;font:600 15px ui-monospace,Menlo,monospace;letter-spacing:.08em}p{margin:0;color:#a8b3c4;font-size:13.5px}
+input,textarea{width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.35);color:#f8fafc;font:16px system-ui;outline:none}
+input:focus,textarea:focus{border-color:hsl(212 100% 50%);box-shadow:0 0 0 3px hsl(212 100% 50%/.25)}
+button{min-height:46px;border-radius:9999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:#f8fafc;font:600 14px system-ui;cursor:pointer;padding:0 16px}
+button.p{background:#f8fafc;color:#0a0c10;border:0}button:disabled{opacity:.6}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}#msg{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.06);font-size:13px;display:none}#msg.on{display:block}#msg.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#fca5a5}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:13px}li{display:flex;gap:8px;justify-content:space-between;color:#a8b3c4}li a{color:#f8fafc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+a.back{color:#a8b3c4;font-size:13px}.link{background:none;border:0;color:#a8b3c4;text-decoration:underline;min-height:0;padding:0;font-weight:400}
+</style></head><body><main>
+<h1>FRAME.01 · AGGIUNGI LINK</h1>
+<div id="msg" role="alert"></div>
+<section id="login"><p>Accedi con il tuo account per salvare link senza aprire il catalogo.</p><br>
+<div style="display:grid;gap:10px"><button type="button" id="g">Continua con Google</button>
+<input id="m" type="email" autocomplete="username" placeholder="Email"><input id="pw" type="password" autocomplete="current-password" placeholder="Password dell'account">
+<div class="row"><button class="p" type="button" id="in">Accedi</button><button type="button" id="up">Crea account</button></div></div></section>
+<section id="app" hidden><p id="who"></p><br>
+<div style="display:grid;gap:10px"><textarea id="u" rows="4" placeholder="Incolla uno o più link (uno per riga)"></textarea>
+<input id="c" placeholder="Collezione (facoltativa)"><input id="n" placeholder="Nota (facoltativa)">
+<button class="p" type="button" id="s">Salva</button></div><br><ul id="l"></ul><br><p><button class="link" id="out">Esci</button></p></section>
+<a class="back" href="./">← Torna al catalogo</a>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
+const sb=createClient('https://vaqqbiwhzmzlqgllwlhr.supabase.co','sb_publishable_53brJanwUpQCJ5LrvNBQDA_9M20T99-',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const $=s=>document.querySelector(s), esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function say(t,err){const m=$('#msg');m.textContent=t;m.className='on'+(err?' err':'');}
+async function show(){const {data}=await sb.auth.getSession();const s=data.session;$('#login').hidden=!!s;$('#app').hidden=!s;if(!s)return;
+ $('#who').textContent='Connesso: '+(s.user.email||'');const r=await sb.from('links').select('url,stato').order('created_at',{ascending:false}).limit(15);
+ if(r.error){say('Account non autorizzato o non confermato: '+r.error.message,1);return}
+ $('#l').innerHTML=(r.data||[]).map(x=>'<li><a href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer">'+esc(x.url.replace(/^https?:\/\//,''))+'</a><span>'+esc(x.stato)+'</span></li>').join('')||'<li>Nessun link ancora.</li>';}
+$('#g').onclick=()=>sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
+$('#in').onclick=async()=>{const r=await sb.auth.signInWithPassword({email:$('#m').value.trim(),password:$('#pw').value});if(r.error)say('Accesso non riuscito: '+r.error.message,1);else{$('#msg').className='';show()}};
+$('#up').onclick=async()=>{const r=await sb.auth.signUp({email:$('#m').value.trim(),password:$('#pw').value,options:{emailRedirectTo:location.origin+location.pathname}});say(r.error?'Registrazione non riuscita: '+r.error.message:"Controlla la posta e conferma l'indirizzo, poi accedi.",!!r.error)};
+$('#out').onclick=async()=>{await sb.auth.signOut();show()};
+$('#s').onclick=async()=>{const urls=[...new Set($('#u').value.split(/\s+/).filter(u=>/^https?:\/\/\S+$/i.test(u)))].slice(0,100);
+ if(!urls.length){say('Nessun link valido: devono iniziare con http o https.',1);return}
+ const c=$('#c').value.trim().slice(0,80)||null,n=$('#n').value.trim().slice(0,500)||null;
+ const r=await sb.from('links').upsert(urls.map(url=>({url,collezione:c,nota:n})),{onConflict:'user_id,url',ignoreDuplicates:true});
+ if(r.error)say('Salvataggio non riuscito: '+r.error.message,1);else{say(urls.length+' link salvati. Li importi nel catalogo dal Mac.');$('#u').value='';show()}};
+show();
+</script></main></body></html>
