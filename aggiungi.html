@@ -1,4 +1,4 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="color-scheme" content="dark"><title>Aggiungi link · FRAME.01 LIBRARY</title>
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="color-scheme" content="dark"><link rel="manifest" href="aggiungi.webmanifest"><link rel="apple-touch-icon" href="assets/icons/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="F01 Link"><meta name="theme-color" content="#0a0c10"><title>Aggiungi link · FRAME.01 LIBRARY</title>
 <style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:#0a0c10;color:#f8fafc;font:15px/1.45 system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif}
 main{width:min(460px,100%);display:grid;gap:14px;padding:26px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1)}
@@ -20,17 +20,23 @@ a.back{color:#a8b3c4;font-size:13px}.link{background:none;border:0;color:#a8b3c4
 <section id="app" hidden><p id="who"></p><br>
 <div style="display:grid;gap:10px"><textarea id="u" rows="4" placeholder="Incolla uno o più link (uno per riga)"></textarea>
 <input id="c" placeholder="Collezione (facoltativa)"><input id="n" placeholder="Nota (facoltativa)">
-<button class="p" type="button" id="s">Salva</button></div><br><ul id="l"></ul><br><p><button class="link" id="out">Esci</button></p></section>
-<a class="back" href="./">← Torna al catalogo</a>
+<button class="p" type="button" id="s">Salva</button></div><br><input id="q" type="search" placeholder="Cerca nei link salvati"><br><ul id="l"></ul><br><p><button class="link" id="out">Esci</button></p></section>
+<a class="back" href="./#/salvati">← Apri la libreria (Link salvati)</a>
 <script type="module">
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
 const sb=createClient('https://vaqqbiwhzmzlqgllwlhr.supabase.co','sb_publishable_53brJanwUpQCJ5LrvNBQDA_9M20T99-',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=s=>document.querySelector(s), esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function say(t,err){const m=$('#msg');m.textContent=t;m.className='on'+(err?' err':'');}
 async function show(){const {data}=await sb.auth.getSession();const s=data.session;$('#login').hidden=!!s;$('#app').hidden=!s;if(!s)return;
- $('#who').textContent='Connesso: '+(s.user.email||'');const r=await sb.from('links').select('url,stato').order('created_at',{ascending:false}).limit(15);
+ $('#who').textContent='Connesso: '+(s.user.email||'');const r=await sb.from('links').select('id,url,nota,collezione,stato').order('created_at',{ascending:false}).limit(200);
  if(r.error){say('Account non autorizzato o non confermato: '+r.error.message,1);return}
- $('#l').innerHTML=(r.data||[]).map(x=>'<li><a href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer">'+esc(x.url.replace(/^https?:\/\//,''))+'</a><span>'+esc(x.stato)+'</span></li>').join('')||'<li>Nessun link ancora.</li>';}
+ ALL=r.data||[];paint();}
+let ALL=[];function paint(){const q=($('#q').value||'').toLowerCase();const L=ALL.filter(x=>!q||(x.url+' '+(x.nota||'')+' '+(x.collezione||'')).toLowerCase().includes(q)).slice(0,60);
+ $('#l').innerHTML=L.map(x=>'<li><a href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer" title="'+esc(x.nota||'')+'">'+esc(x.url.replace(/^https?:\/\//,''))+'</a><span>'+esc(x.stato)+' <button class="link" data-del="'+esc(x.id)+'" aria-label="Elimina">✕</button></span></li>').join('')||'<li>Nessun link.</li>';}
+$('#q').oninput=paint;
+$('#l').onclick=async e=>{const b=e.target.closest('[data-del]');if(!b)return;await sb.from('links').delete().eq('id',b.dataset.del);show()};
+// link condivisi dal telefono (Condividi → F01 Link) o da ?url=
+{const u=new URL(location.href),t=[u.searchParams.get('url'),u.searchParams.get('text'),u.searchParams.get('title')].filter(Boolean).join(' ');const f=t.split(/\s+/).filter(x=>/^https?:\/\/\S+$/i.test(x));if(f.length){$('#u').value=f.join('\n');history.replaceState(null,'',location.pathname)}}
 $('#g').onclick=()=>sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
 $('#in').onclick=async()=>{const r=await sb.auth.signInWithPassword({email:$('#m').value.trim(),password:$('#pw').value});if(r.error)say('Accesso non riuscito: '+r.error.message,1);else{$('#msg').className='';show()}};
 $('#up').onclick=async()=>{const r=await sb.auth.signUp({email:$('#m').value.trim(),password:$('#pw').value,options:{emailRedirectTo:location.origin+location.pathname}});say(r.error?'Registrazione non riuscita: '+r.error.message:"Controlla la posta e conferma l'indirizzo, poi accedi.",!!r.error)};

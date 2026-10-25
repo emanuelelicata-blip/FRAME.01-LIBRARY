@@ -616,7 +616,7 @@ function observe(root){ root.querySelectorAll('.thumb, .media:has(img[data-pv])'
 
 const canAdd = () => HTTP && !!SRV && !!(typeof SRV === 'object');
 function aCount(){ const c = {}; items.forEach(i => { if (!i.duplicatoDi && !isIG(i)) c[i.area] = (c[i.area] || 0) + 1; }); return c; }
-function pageList(){ const c = aCount(); return [['home', 'Panoramica', null], ['obiettivi', 'Per obiettivo', null], ['tipi', 'Che cosa c\'è', null], ['tutto', 'Tutto', items.filter(i => !i.duplicatoDi && !isIG(i)).length], ...AREE.map(a => [a.id, PSHORT[a.id] || a.nome, c[a.id] || 0]), ['instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length], ['preferiti', '★ Preferiti', S.fav.size], ['progetto-brief', 'Brief progetto', null], ['pulizia', 'Pulizia', cleanCount()], ['import', 'Import', null], ['sviluppo', 'Skill e plugin', null]]; }
+function pageList(){ const c = aCount(); return [['home', 'Panoramica', null], ['obiettivi', 'Per obiettivo', null], ['tipi', 'Che cosa c\'è', null], ['tutto', 'Tutto', items.filter(i => !i.duplicatoDi && !isIG(i)).length], ...AREE.map(a => [a.id, PSHORT[a.id] || a.nome, c[a.id] || 0]), ['instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length], ['preferiti', '★ Preferiti', S.fav.size], ['progetto-brief', 'Brief progetto', null], ['pulizia', 'Pulizia', cleanCount()], ['import', 'Import', null], ['salvati', 'Link salvati', null], ['sviluppo', 'Skill e plugin', null]]; }
 const validPage = p => pageList().some(x => x[0] === p);
 function pageHash(){ return S.page === 'home' ? location.pathname + location.search : '#/' + S.page; }
 function setPage(p, fromHash){
@@ -1260,6 +1260,12 @@ function pPulizia(){
   ${uniti.length ? uniti.map(i => `<div class="box vpair">${miniCard(i, ` <span class="mini">· ${esc(i.uniMotivo)} · unita a</span> <button class="link" data-open="${esc(i.duplicatoDi)}">${esc((byId[i.duplicatoDi] || {}).titolo || '')}</button>`)}${ok ? `<div class="vact"><button class="pill" data-split="${esc(i.id)}">Annulla unione</button></div>` : ''}</div>`).join('') : '<div class="empty"><p>Nessuna unione automatica.</p></div>'}`;
 }
 /* --- Import --- */
+function pSalvati(){
+  setTimeout(cloudInit, 0);
+  return `<div class="hhead"><h1>Link salvati</h1><p>I link che salvi dal telefono o dal Mac con il tuo account. Quelli nuovi si importano nel catalogo dal Mac (Import).</p></div>
+  <div class="box" id="cloudbox" style="margin:0 12px;padding:10px 14px">${cloudHtml()}</div>
+  <p class="mini" style="margin:10px 12px"> · su iPhone: Condividi → «Aggiungi alla schermata Home».</p>`;
+}
 function pImport(){
   const all = items.filter(i => !i.duplicatoDi), por = {}, st = {};
   all.forEach(i => { por[i.origine || 'Cartella'] = (por[i.origine || 'Cartella'] || 0) + 1; });
@@ -1407,7 +1413,7 @@ function pBrief(){
   <p class="vact"><button class="pill black" data-bgen="1">Genera percorso</button><button class="pill" data-bcopy="1">Copia brief per Claude</button><button class="pill" data-breset="1">Azzera</button></p>
   <details class="vimp"><summary class="mini">Importa il piano di Claude</summary><textarea id="b_imp" placeholder="Incolla qui il JSON che ti ha dato Claude" style="min-height:90px"></textarea><p><button class="pill" data-bimp="1">Importa piano</button></p></details></div>${plan}`;
 }
-function renderSpecialNew(){ const p = S.page; return p === 'pulizia' ? pPulizia() : p === 'import' ? pImport() : p === 'progetto-brief' ? pBrief() : null; }
+function renderSpecialNew(){ const p = S.page; return p === 'pulizia' ? pPulizia() : p === 'import' ? pImport() : p === 'salvati' ? pSalvati() : p === 'progetto-brief' ? pBrief() : null; }
 document.addEventListener('input', e => {
   const t = e.target, k = t.dataset && t.dataset.bf; if (!k) return; BRIEF[k] = t.value; store.set('brief', BRIEF);
 });
@@ -1436,7 +1442,7 @@ document.addEventListener('click', e => {
   if (d.pkit && PIANO) { const ids = [...new Set(PIANO.steps.flatMap(s => s.items))].filter(id => byId[id]).slice(0, 200); ids.forEach(id => S.kit.add(id)); store.set('kit', [...S.kit]); toast(ids.length + ' elementi nel kit.'); render(); return; }
 }, true);
 
-const SPECIAL = new Set(['obiettivi', 'tipi', 'sviluppo', 'pulizia', 'import', 'progetto-brief']);
+const SPECIAL = new Set(['obiettivi', 'tipi', 'sviluppo', 'pulizia', 'import', 'salvati', 'progetto-brief']);
 S.ids = null; S.idsLabel = ''; S.goalId = '';
 const GOALS = [
   { id: 'sito-lusso', t: 'Sito web per un brand di lusso', d: 'Hotel, auto, ristorazione: identità forte, motion misurato, tempi di caricamento bassi.', ob: 'sito web per un brand di lusso (hotel, automotive, ristorazione)', fasi: [
@@ -1554,7 +1560,7 @@ function renderSide(){
   el.innerHTML = `<div class="sg"><h2>Esplora</h2>${it('home', 'Panoramica', null)}${it('obiettivi', 'Per obiettivo', null, 'Cosa devi fare?')}${it('tipi', 'Che cosa c\'è', null, 'Cos\'è ogni tipo e come si usa')}${it('tutto', 'Tutto', tot)}${it('preferiti', '★ Preferiti', S.fav.size)}${it('instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length, 'Catalogo a parte')}</div>
   <div class="sg"><h2>Per area d'uso</h2>${AREE.filter(a => c[a.id] || a.id !== 'risorse').map(a => `<button class="si${S.page === a.id ? ' on" aria-current="page' : ''}" data-page="${a.id}" title="${esc(a.desc)}"><span>${esc(PSHORT[a.id] || a.nome)}</span><span class="n">${c[a.id] || 0}</span></button>`).join('')}</div>
   <div class="sg"><h2>Per tipo</h2>${Object.keys(C.meta.tipi).filter(t => ct[t]).map(t => `<button class="si${S.tipo === t && !SPECIAL.has(S.page) ? ' on" aria-current="true' : ''}" data-tipopage="${esc(t)}" title="${esc((TIPO_INFO[t] || {}).cos || '')}"><span>${esc(tl(t))}</span><span class="n">${ct[t]}</span></button>`).join('')}</div>
-  <div class="sg"><h2>Lavoro</h2>${it('progetto-brief', 'Brief progetto', null, 'Dal punto zero all\'output')}${it('pulizia', 'Pulizia', cleanCount(), 'Doppioni e schede da scartare')}${it('import', 'Import', null, 'Cosa entra e da dove')}</div>
+  <div class="sg"><h2>Lavoro</h2>${it('progetto-brief', 'Brief progetto', null, 'Dal punto zero all\'output')}${it('pulizia', 'Pulizia', cleanCount(), 'Doppioni e schede da scartare')}${it('import', 'Import', null, 'Cosa entra e da dove')}${it('salvati', 'Link salvati', null, 'Salvati dal telefono o dal Mac')}</div>
   <div class="sg"><h2>Strumenti</h2>${it('sviluppo', 'Creare skill e plugin', null)}<button class="si" data-sidego="#bFonti"><span>Fonti</span></button><button class="si" data-sidego="#bGuida"><span>Guida</span></button><button class="si" data-sidego="#bKit"><span>Kit</span><span class="n">${S.kit.size}</span></button></div>`;
 }
 /* filtri rapidi sempre visibili (desktop) e spiegazione del tipo */
