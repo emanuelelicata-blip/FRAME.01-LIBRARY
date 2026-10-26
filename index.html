@@ -306,10 +306,16 @@ button,a,.card,.acard,.pg{touch-action:manipulation}
   <div class="bar">
     <a class="brandlogo" href="./" aria-label="FRAME.01-LIBRARY"><svg viewBox="0 0 720 111" aria-hidden="true" focusable="false"><use href="#f01"/></svg></a>
     <nav class="nav" aria-label="Navigazione principale">
-      <a class="navi on" href="./" aria-current="page"><i>01</i>Libreria</a>
-      
-      <button class="navi" id="bFonti"><i>03</i>Fonti</button>
-      <button class="navi" id="bGuida"><i>04</i>Guida</button>
+      <a class="navi on" href="./" aria-current="page" id="nvHome"><i>01</i>Libreria</a>
+      <div class="ddw"><button class="navi" data-dd="esplora" aria-haspopup="true" aria-expanded="false"><i>02</i>Esplora<svg class="ic dc" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddm" role="menu" data-ddm="esplora" hidden></div></div>
+      <div class="ddw"><button class="navi" data-dd="coll" aria-haspopup="true" aria-expanded="false"><i>03</i>Collezioni<svg class="ic dc" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddm" role="menu" data-ddm="coll" hidden></div></div>
+      <div class="ddw"><button class="navi" data-dd="lavoro" aria-haspopup="true" aria-expanded="false"><i>04</i>Lavoro<svg class="ic dc" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddm" role="menu" data-ddm="lavoro" hidden></div></div>
+      <div class="ddw"><button class="navi" data-dd="strumenti" aria-haspopup="true" aria-expanded="false"><i>05</i>Strumenti<svg class="ic dc" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddm" role="menu" data-ddm="strumenti" hidden>
+        <button data-page="sviluppo" role="menuitem"><span>Creare skill e plugin<small>Come si scrivono, modelli e prompt</small></span></button>
+        
+        <button id="bFonti" role="menuitem"><span>Fonti<small>Da dove arriva ogni cosa</small></span></button>
+        <button id="bGuida" role="menuitem"><span>Guida<small>Come funziona la libreria</small></span></button>
+        <button data-dd-go="#bKit" role="menuitem"><span>Kit<small>Gli elementi scelti per un progetto</small></span></button></div></div>
     </nav>
     <label class="search"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="q" type="search" placeholder="Cerca: gsap, luxury, landing…" aria-label="Cerca nella libreria" autocomplete="off"><kbd class="kbd" id="qk" aria-hidden="true">/</kbd></label>
     <button class="pill" id="bScan" hidden>Aggiorna</button>
@@ -325,6 +331,7 @@ button,a,.card,.acard,.pg{touch-action:manipulation}
 <div class="tools" id="tools">
   <div class="trow"><span class="tcount" id="tcount" aria-live="polite"></span><span class="qhint" aria-hidden="true"><kbd>Spazio</kbd> anteprima</span><span class="tspace"></span>
     <label class="opt">Ordina <select id="fSort"><option value="nome">Nome</option><option value="recenti">Più recenti</option><option value="fonte">Fonte</option><option value="preferiti">Preferiti in cima</option><option value="prontezza">Più pronte prima</option><option value="completezza">Meno complete prima</option></select></label>
+    <label class="opt" id="grpOpt">Raggruppa <select id="fGroup"><option value="">Nessuno</option><option value="tipo">Per tipo</option><option value="tag">Per tema</option><option value="strumento">Per strumento</option><option value="prontezza">Per prontezza</option><option value="fonte">Per raccolta</option><option value="area">Per area</option></select></label>
     <div class="seg" role="group" aria-label="Modalità di vista">
       <button data-view="visuale" aria-pressed="false" aria-label="Griglia visuale" title="Griglia visuale: anteprime grandi"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="10" rx="1.5"/><rect x="13" y="4" width="7" height="5" rx="1.5"/><rect x="4" y="16" width="7" height="4" rx="1.5"/><rect x="13" y="11" width="7" height="9" rx="1.5"/></svg><span class="vl">Visuale</span></button>
       <button data-view="densa" aria-pressed="false" aria-label="Griglia densa" title="Griglia densa: più schede compatte"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="5" height="5" rx="1"/><rect x="9.5" y="3.5" width="5" height="5" rx="1"/><rect x="15.5" y="3.5" width="5" height="5" rx="1"/><rect x="3.5" y="9.5" width="5" height="5" rx="1"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><rect x="15.5" y="9.5" width="5" height="5" rx="1"/><rect x="3.5" y="15.5" width="5" height="5" rx="1"/><rect x="9.5" y="15.5" width="5" height="5" rx="1"/><rect x="15.5" y="15.5" width="5" height="5" rx="1"/></svg><span class="vl">Densa</span></button>
@@ -362,7 +369,7 @@ button,a,.card,.acard,.pg{touch-action:manipulation}
   <button data-go="kit"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l7-4 7 4v8l-7 4-7-4z"/><path d="M5 8l7 4 7-4M12 12v8"/></svg>Kit <b id="kitN2">0</b></button>
   <button data-go="menu"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></svg>Menu</button>
 </nav>
-<dialog id="dlgMenu"><div class="dlg"><h2>Menu</h2><div class="menul"><div id="menuPages" class="menul"></div>
+<dialog id="dlgMenu"><div class="dlg"><h2>Menu</h2><div class="menul"><div id="menuPages" class="menul menug"></div>
   <button class="pill" data-go="#bFonti">Fonti</button><button class="pill" data-go="#bGuida">Guida</button><button class="pill" data-go="#bTheme">Cambia tema</button><button class="pill" data-go="#bScan">Aggiorna catalogo (con backup)</button>
   </div><p style="text-align:right"><button class="pill" data-close="dlgMenu">Chiudi</button></p></div></dialog>
 <div class="backdrop" id="backdrop" hidden></div>
@@ -456,12 +463,17 @@ if (!C) { document.body.insertAdjacentHTML('beforeend', '<div class="empty"><h2>
 const TAGL = {'prompt-ai':'Prompt AI',motion:'Motion','3d-webgl':'3D / WebGL',landing:'Landing',dashboard:'Dashboard',presentazioni:'Presentazioni',editoriale:'Editoriale',brutalista:'Brutalista',minimal:'Minimal',lusso:'Lusso',automotive:'Automotive',brand:'Brand',tipografia:'Tipografia',colore:'Colore',figma:'Figma','framer-webflow':'Framer / Webflow',video:'Video','immagini-ai':'Immagini AI',documenti:'Documenti',seo:'SEO',ecommerce:'E-commerce',mobile:'Mobile',wireframe:'Wireframe',portfolio:'Portfolio',gallery:'Gallery',accessibilita:'Accessibilità','analisi-sito':'Analisi sito','qualita-codice':'Qualità codice'};
 
 // macro-categorie di tag (step 3)
-const MACRO = [
+const MACRO0 = [
   { id: 'tip', nome: 'Tipologia', long: 'Tipologia / Deliverable', tags: ['landing', 'dashboard', 'presentazioni', 'editoriale', 'mobile', 'portfolio', 'ecommerce', 'wireframe'] },
   { id: 'stile', nome: 'Stile', long: 'Stile visivo', tags: ['minimal', 'brutalista', 'lusso', '3d-webgl', 'motion', 'automotive', 'brand'] },
   { id: 'fond', nome: 'Fondamentali', long: 'Fondamentali & Design', tags: ['tipografia', 'colore', 'prompt-ai', 'immagini-ai', 'video', 'figma', 'framer-webflow'] },
   { id: 'tec', nome: 'Tecnico & QA', long: 'Tecnico & QA', tags: ['accessibilita', 'analisi-sito', 'qualita-codice', 'documenti', 'seo'] }
 ];
+const TV = C.meta.tagVoc || [];
+TV.forEach(v => { TAGL[v.id] = v.nome; });
+const MACRO = (C.meta.tagGruppi || []).length ? C.meta.tagGruppi.map(g => ({ id: g.id, nome: g.nome, long: g.nome, tags: TV.filter(v => v.gruppo === g.id).map(v => v.id) })) : MACRO0;
+const normT = x => String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+const tcan = t => (C.meta.tagAlias || {})[normT(t)] || t;
 const TALIAS = { accessibilita: ['accessibilita', 'accessibilità'], '3d-webgl': ['3d-webgl', '3d'] };
 const hasTag = (i, t) => t === 'prompt-ai' ? (i.tipo === 'prompt' || i.tag.includes('prompt')) : (TALIAS[t] || [t]).some(x => i.tag.includes(x));
 const store = { get(k, d){ try { const v = localStorage.getItem('f01lib.' + k); return v ? JSON.parse(v) : d; } catch { return d; } }, set(k, v){ try { localStorage.setItem('f01lib.' + k, JSON.stringify(v)); } catch {} } };
@@ -470,7 +482,7 @@ const kb = b => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Mat
 const tl = t => C.meta.tipi[t] || t;
 const AREE = C.meta.aree || [], ARE = Object.fromEntries(AREE.map(a => [a.id, a])), STR = C.meta.strumenti || {};
 const PSHORT = { instagram: 'Instagram', brief: 'Brief', design: 'Design', web: 'Siti web', piattaforme: 'Piattaforme', 'template-framer': 'Template Framer', motion: 'Motion e 3D', media: 'Immagini AI', presentazioni: 'Documenti', controllo: 'Controllo', automazione: 'Automazione', prompt: 'Prompt', risorse: 'Altro', idee: 'Idee creative', gruppi: 'Gruppi' };
-const items = C.items.map(i => ({ ...i, tag: i.tag || [], strumenti: i.strumenti || [], _hay: [(ARE[i.area] || {}).nome, (i.strumenti || []).map(s => STR[s] || s).join(' '), i.testo, i.titolo, i.nome, i.descrizione, i.fonte, i.categoria, (i.tag || []).map(t => TAGL[t] || t).join(' '), (i.triggers || []).join(' ')].join(' ').toLowerCase() }));
+const items = C.items.map(i => ({ ...i, tag: i.tag || [], strumenti: i.strumenti || [], _hay: [(ARE[i.area] || {}).nome, (i.strumenti || []).map(s => STR[s] || s).join(' '), i.testo, i.titolo, i.nome, i.descrizione, i.fonte, i.categoria, (i.tag || []).map(t => TAGL[t] || t).join(' '), (i.tagExtra || []).join(' '), (i.triggers || []).join(' ')].join(' ').toLowerCase() }));
 const byId = Object.fromEntries(items.map(i => [i.id, i]));
 const S = { stato: '', q: '', tipo: '', tag: new Set(), fonte: '', dup: false, prev: false, incomp: false, sort: 'nome', limit: 96, kit: new Set(store.get('kit', []).filter(id => byId[id])), note: {} };
 let cur = null;
@@ -539,9 +551,9 @@ function progSave(){
 }
 
 /* --- Smista: una scheda alla volta --- */
-function smistaOpen(){
+function smistaOpen(only){
   if (!canEdit()) { toast(SOLA_LETTURA); return; }
-  const ids = list().filter(i => !(getNote(i).stato || '')).map(i => i.id);
+  const ids = (only ? only.map(id => byId[id]).filter(Boolean) : list()).filter(i => !(getNote(i).stato || '')).map(i => i.id);
   if (!ids.length) { toast('Niente da smistare: le schede visibili hanno già uno stato.'); return; }
   SM = { ids, k: 0, n: ids.length, st: { 'Da usare': 0, 'Da valutare': 0, [SCARTATO]: 0 } };
   smistaDraw();
@@ -955,7 +967,7 @@ function observe(root){ root.querySelectorAll('.thumb, .media:has(img[data-pv])'
 
 const canAdd = () => HTTP && !!SRV && !!(typeof SRV === 'object');
 function aCount(){ const c = {}; items.forEach(i => { if (!i.duplicatoDi && (!isIG(i) || i.area === 'idee')) c[i.area] = (c[i.area] || 0) + 1; }); return c; }
-function pageList(){ const c = aCount(); return [['home', 'Panoramica', null], ['obiettivi', 'Per obiettivo', null], ['tipi', 'Che cosa c\'è', null], ['tutto', 'Tutto', items.filter(i => !i.duplicatoDi && !isIG(i)).length], ...AREE.filter(a => areaShown(a, c)).map(a => [a.id, PSHORT[a.id] || a.nome, c[a.id] || 0]), ['instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length], ['preferiti', '★ Preferiti', S.fav.size], ['gruppi', 'Gruppi', GRP.length], ['progetto-brief', 'Brief progetto', null], ['pulizia', 'Pulizia', cleanCount()], ['import', 'Import', null], ['salvati', 'Link salvati', null], ['sviluppo', 'Skill e plugin', null]]; }
+function pageList(){ const c = aCount(); return [['home', 'Panoramica', null], ['obiettivi', 'Per obiettivo', null], ['tipi', 'Che cosa c\'è', null], ['tutto', 'Tutto', items.filter(i => !i.duplicatoDi && !isIG(i)).length], ...AREE.filter(a => areaShown(a, c)).map(a => [a.id, PSHORT[a.id] || a.nome, c[a.id] || 0]), ['instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length], ['preferiti', '★ Preferiti', S.fav.size], ['gruppi', 'Gruppi', GRP.length], ['progetto-brief', 'Brief progetto', null], ['import', 'Flusso', null], ['revisione', 'Da verificare', revCount()], ['pulizia', 'Pulizia', cleanCount()], ['salvati', 'Link salvati', null], ['sviluppo', 'Skill e plugin', null]]; }
 const validPage = p => pageList().some(x => x[0] === p);
 function pageHash(){ return S.page === 'home' ? location.pathname + location.search : '#/' + S.page; }
 function setPage(p, fromHash){
@@ -969,8 +981,34 @@ function setPage(p, fromHash){
 function renderPages(){
   const pl = pageList();
   $('#pages').innerHTML = pl.map(([k, l, n]) => `<button class="pg ${S.page === k ? 'on' : ''}" data-page="${k}" ${S.page === k ? 'aria-current="page"' : ''}>${esc(l)}${n == null ? '' : `<span class="n">${n}</span>`}</button>`).join('');
-  $('#menuPages').innerHTML = pl.map(([k, l, n]) => `<button class="pill" data-menupage="${k}" style="justify-content:space-between;display:flex">${esc(l)}<span class="n">${n == null ? '' : n}</span></button>`).join('');
+  const lab = Object.fromEntries(pl.map(([k, l, n]) => [k, [l, n]]));
+  const pill = k => lab[k] ? `<button class="pill" data-menupage="${k}" style="justify-content:space-between;display:flex">${esc(lab[k][0])}<span class="n">${lab[k][1] == null ? '' : lab[k][1]}</span></button>` : '';
+  const areeK = AREE.filter(a => lab[a.id]).map(a => a.id);
+  $('#menuPages').innerHTML = NAVG.map(g => `<h3 class="mh2">${esc(g.nome)}</h3>${g.voci.map(pill).join('')}`).join('') + `<h3 class="mh2">Aree d'uso</h3>${areeK.map(pill).join('')}`;
+  renderNav(lab, areeK);
 }
+const NAVG = [
+  { id: 'esplora', nome: 'Esplora', voci: ['home', 'obiettivi', 'tipi', 'tutto'], sub: { home: 'Le aree d\'uso in un colpo d\'occhio', obiettivi: 'Cosa devi fare? Percorsi a fasi', tipi: 'Cos\'è ogni tipo e come si usa', tutto: 'Ogni elemento, con filtri' } },
+  { id: 'coll', nome: 'Collezioni', voci: ['preferiti', 'gruppi', 'instagram'], sub: { preferiti: 'Gli elementi con ★', gruppi: 'Le tue cartelle di schede', instagram: 'Post e reel salvati' } },
+  { id: 'lavoro', nome: 'Lavoro', voci: ['progetto-brief', 'import', 'revisione', 'pulizia', 'salvati'], sub: { 'progetto-brief': 'Dall\'idea al percorso a step', import: 'Dal caricamento al catalogo', revisione: 'Da scartare e varie: decidi tu', pulizia: 'Doppioni da unire', salvati: 'Link dal telefono' } }
+];
+function renderNav(lab, areeK){
+  const item = (k, sub) => lab[k] ? `<button role="menuitem" data-page="${k}"${S.page === k ? ' aria-current="page"' : ''}><span>${esc(lab[k][0])}${sub ? `<small>${esc(sub)}</small>` : ''}</span>${lab[k][1] == null ? '' : `<span class="n">${lab[k][1]}</span>`}</button>` : '';
+  NAVG.forEach(g => {
+    const m = document.querySelector(`[data-ddm="${g.id}"]`); if (!m) return;
+    m.innerHTML = g.voci.map(k => item(k, g.sub[k])).join('') + (g.id === 'esplora' ? `<div class="dh">Aree d'uso</div>${areeK.map(k => item(k)).join('')}` : '');
+    const b = document.querySelector(`[data-dd="${g.id}"]`); if (b) b.classList.toggle('on', g.voci.includes(S.page) || (g.id === 'esplora' && areeK.includes(S.page)));
+  });
+  const hm = $('#nvHome'); if (hm) hm.classList.toggle('on', false);
+}
+function closeDD(){ document.querySelectorAll('.ddm').forEach(m => { m.hidden = true; }); document.querySelectorAll('[data-dd]').forEach(b => b.setAttribute('aria-expanded', 'false')); }
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-dd]');
+  if (b) { const m = document.querySelector(`[data-ddm="${b.dataset.dd}"]`), open = m.hidden; closeDD(); m.hidden = !open; b.setAttribute('aria-expanded', String(open)); return; }
+  const g = e.target.closest('[data-dd-go]'); if (g) { closeDD(); const el = $(g.dataset.ddGo); if (el) el.click(); return; }
+  if (e.target.closest('.ddm button, .ddm a') || !e.target.closest('.ddw')) closeDD();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDD(); });
 function renderHead(){
   const h = $('#phead'); if (S.page === 'home') { h.hidden = true; return; }
   const a = ARE[S.page];
@@ -990,7 +1028,7 @@ function renderHome(){
   h.innerHTML = `<div class="hhead"><h1>FRAME.01-LIBRARY</h1><p>${tot} elementi unici (le copie identiche sono nascoste) organizzati per area d'uso, non per nome. Scegli un'area, oppure cerca in alto.</p></div>${status}
   <div class="hsec">Aree d'uso</div><div class="agrid">${AREE.filter(a => areaShown(a, c)).map(acard).join('')}
   <button class="acard" data-page="preferiti"><span class="mini">${S.fav.size} elementi</span><b>★ Preferiti</b><span class="d">Gli elementi che hai segnato, di ogni area.</span></button><button class="acard" data-page="gruppi"><span class="mini">${GRP.length} gruppi</span><b>Gruppi</b><span class="d">Le tue cartelle di reference e schede, per cliente, tema o idea.</span></button></div>
-  <div class="hsec">Lavoro</div><div class="agrid"><button class="acard" data-page="progetto-brief"><span class="mini">nuovo</span><b>Brief progetto</b><span class="d">Scrivi l'idea e ricevi un percorso a step con gli elementi, le skill e i plugin giusti.</span></button><button class="acard" data-page="pulizia"><span class="mini">${cleanCount()} da rivedere</span><b>Pulizia</b><span class="d">Doppioni da unire e schede da scartare, senza cancellare nulla.</span></button><button class="acard" data-page="import"><span class="mini">3 passi</span><b>Import</b><span class="d">Cosa entra, da dove, cosa resta da analizzare.</span></button></div>
+  <div class="hsec">Lavoro</div><div class="agrid"><button class="acard" data-page="progetto-brief"><span class="mini">nuovo</span><b>Brief progetto</b><span class="d">Scrivi l'idea e ricevi un percorso a step con gli elementi, le skill e i plugin giusti.</span></button><button class="acard" data-page="pulizia"><span class="mini">${cleanCount()} da rivedere</span><b>Pulizia</b><span class="d">Doppioni da unire e schede da scartare, senza cancellare nulla.</span></button><button class="acard" data-page="import"><span class="mini">5 passi</span><b>Flusso</b><span class="d">Dal caricamento al catalogo: entra, analizza, smista, verifica.</span></button><button class="acard" data-page="revisione"><span class="mini">${revCount()} da guardare</span><b>Da verificare</b><span class="d">Da scartare e varie: decidi tu, niente si archivia da solo.</span></button></div>
   ${S.recent.length ? `<div class="hsec">Visti di recente</div><div class="grid v-var" id="recentGrid" style="--cw:230px;padding-bottom:8px">${S.recent.slice(0, 6).map(id => card(byId[id])).join('')}</div>` : ''}
   ${recentAdd.length ? `<div class="hsec">Aggiunti di recente</div><div class="grid v-var" id="addGrid" style="--cw:230px;padding-bottom:8px">${recentAdd.map(card).join('')}</div>` : ''}
   ${Object.keys(ts).length ? `<div class="hsec">Per strumento</div><div class="filters" style="padding:0 12px">${Object.entries(ts).sort((a, b) => b[1] - a[1]).map(([s, n]) => `<button class="pill" data-strumpage="${esc(s)}">${esc(STR[s] || s)}<span class="n">${n}</span></button>`).join('')}</div>` : ''}`;
@@ -1008,7 +1046,8 @@ function render0(){
   const g = $('#grid');
   if (!items.length) { g.innerHTML = '<div class="empty"><h2>La libreria è vuota</h2><p>Metti una cartella in <code>inbox/</code> e premi <b>Aggiorna</b> (o fai doppio clic su <code>Apri-FRAME01-LIBRARY.command</code>).</p></div>'; return; }
   const vuoto = ARE[S.page] && !items.some(i => i.area === S.page) ? `<div class="empty"><h2>Quest'area è vuota</h2><p>${canAdd() ? 'Aggiungi link o cartelle con «+ Aggiungi link o cartelle» qui sopra (anche da Raindrop).' : 'Aggiungi materiale dalla pagina Importa quando apri la libreria dal Mac.'}</p></div>` : '';
-  g.innerHTML = shown.length ? shown.map(card).join('') : (vuoto || (S.page === 'preferiti' ? '<div class="empty"><h2>Nessun preferito</h2><p>Premi ☆ su una scheda per metterla qui.</p></div>' : '<div class="empty"><h2>Nessun risultato</h2><p>Prova a togliere qualche filtro o a cercare una parola diversa.</p><p class="eact"><button class="pill black" data-emptyreset="1">Azzera filtri e ricerca</button>' + (S.page !== 'tutto' ? '<button class="pill" data-page="tutto">Cerca in tutto il catalogo</button>' : '') + '</p></div>'));
+  const grp = S.group && S.page !== 'instagram' && shown.length;
+  g.innerHTML = shown.length ? (grp ? renderGrouped(all, shown) : shown.map(card).join('')) : (vuoto || (S.page === 'preferiti' ? '<div class="empty"><h2>Nessun preferito</h2><p>Premi ☆ su una scheda per metterla qui.</p></div>' : '<div class="empty"><h2>Nessun risultato</h2><p>Prova a togliere qualche filtro o a cercare una parola diversa.</p><p class="eact"><button class="pill black" data-emptyreset="1">Azzera filtri e ricerca</button>' + (S.page !== 'tutto' ? '<button class="pill" data-page="tutto">Cerca in tutto il catalogo</button>' : '') + '</p></div>'));
   observe(g);
   { const kb = document.querySelector('[data-kitpage]'); if (kb) kb.textContent = all.length ? 'Aggiungi ' + (all.length > 200 ? 'i primi 200' : all.length === 1 ? 'l\'elemento' : 'i ' + all.length) + ' al kit' : 'Aggiungi al kit'; }
   $('#moreWrap').innerHTML = all.length > shown.length ? `<button class="pill more" id="more">Mostra altri ${Math.min(96, all.length - shown.length)} (${all.length - shown.length} restanti)</button>` : '';
@@ -1021,13 +1060,29 @@ function render0(){
   $('#fArea').innerHTML = `<button class="pill ${S.area ? '' : 'on'}" data-area="">Tutte</button>` + AREE.filter(a => ca[a.id] || S.area === a.id).map(a => `<button class="pill ${S.area === a.id ? 'on' : ''}" data-area="${a.id}">${esc(PSHORT[a.id] || a.nome)}<span class="n">${ca[a.id] || 0}</span></button>`).join('');
   $('#fStrum').innerHTML = `<button class="pill ${S.strum ? '' : 'on'}" data-strum="">Tutti</button>` + Object.entries(cs).sort((a, b) => b[1] - a[1]).map(([s, n]) => `<button class="pill ${S.strum === s ? 'on' : ''}" data-strum="${esc(s)}">${esc(STR[s] || s)}<span class="n">${n}</span></button>`).join('');
   renderFonti(); renderActive(); renderTags(); renderProg(); applyView();
+  { const fg = $('#fGroup'); if (fg) fg.value = S.group; const go = $('#grpOpt'); if (go) go.hidden = S.page === 'instagram'; const sec = (S.page === 'tutto' ? 'tutto il catalogo' : S.page === 'preferiti' ? 'i preferiti' : S.page === 'instagram' ? 'Instagram' : (PSHORT[S.page] || (ARE[S.page] || {}).nome || 'la libreria')); $('#q').placeholder = 'Cerca in ' + sec + '…'; }
 }
 function renderFonti(){
   const c = {}; items.forEach(i => { if (match(i, 'fonte')) c[i.fonte] = (c[i.fonte] || 0) + 1; });
   const tot = Object.values(c).reduce((a, b) => a + b, 0);
   $('#fFonteRow').innerHTML = '<button class="pill ' + (S.fonte ? '' : 'on') + '" data-fonte="">Tutte<span class="n">' + tot + '</span></button>' + C.fonti.map((s, k) => '<button class="pill src ' + (S.fonte === s.nome ? 'on' : '') + '" data-fonte="' + esc(s.nome) + '" title="' + esc(s.percorso || '') + '"><i class="dot" style="background:hsl(' + (k * 47 % 360) + ' 65% 55%)"></i>' + esc(s.nome) + '<span class="n">' + (c[s.nome] || 0) + '</span></button>').join('');
 }
-S.macro = '';
+S.macro = ''; S.group = store.get('group', '');
+function groupKey(i){
+  const g = S.group;
+  if (g === 'tipo') return tl(i.tipo);
+  if (g === 'tag') { const t = i.tag.find(x => (TV.find(v => v.id === x) || {}).gruppo === 'tema') || i.tag[0]; return t ? (TAGL[t] || t) : 'Senza tag'; }
+  if (g === 'strumento') { const s0 = (i.strumenti || [])[0]; return s0 ? (STR[s0] || s0) : 'Nessuno strumento'; }
+  if (g === 'prontezza') return i.valutazione ? prName(i.valutazione.prontezza) : 'Non valutata';
+  if (g === 'fonte') return i.collezione || i.fonte || 'Altro';
+  if (g === 'area') return (ARE[i.area] || {}).nome || 'Altro';
+  return '';
+}
+function renderGrouped(all, shown){
+  const cnt = new Map(); all.forEach(i => { const k = groupKey(i); cnt.set(k, (cnt.get(k) || 0) + 1); });
+  const by = new Map(); shown.forEach(i => { const k = groupKey(i); (by.get(k) || by.set(k, []).get(k)).push(i); });
+  return [...by.keys()].sort((a, b) => cnt.get(b) - cnt.get(a) || a.localeCompare(b)).map(k => `<h3 class="gh">${esc(k)} <span class="n">${cnt.get(k)}</span></h3>${by.get(k).map(card).join('')}`).join('');
+}
 function renderTags(){
   const base = items.filter(i => match(i)), cnt = t => { let n = 0; for (const i of base) if (hasTag(i, t)) n++; return n; };
   const chip = (t, n) => `<button class="chip ${S.tag.has(t) ? 'on' : ''}" data-tag="${esc(t)}" aria-pressed="${S.tag.has(t)}">${esc(TAGL[t] || t)} <span class="n">${n}</span></button>`;
@@ -1606,19 +1661,47 @@ function pSalvati(){
   <div class="box" id="cloudbox" style="margin:0 12px;padding:10px 14px">${cloudHtml()}</div>
   <p class="mini" style="margin:10px 12px"> · su iPhone: Condividi → «Aggiungi alla schermata Home».</p>`;
 }
+/* --- Da verificare: decidi tu, niente si archivia da solo --- */
+S.rev = store.get('revtab', 'scartare'); let revLimit = 24;
+const isVarie = i => /varie \/ non pertinente/i.test(i.categoria || '');
+function revLists(){
+  const dis = toDiscard(), set = new Set(dis.map(i => i.id));
+  const var_ = items.filter(i => !i.duplicatoDi && isVarie(i) && !gone(i) && !i.preferito && !set.has(i.id) && !(getNote(i).stato));
+  return { scartare: dis, varie: var_ };
+}
+function revCount(){ const l = revLists(); return l.scartare.length + l.varie.length; }
+function pRevisione(){
+  const l = revLists(), ok = canEdit(), tab = l[S.rev] ? S.rev : 'scartare', rows = l[tab];
+  const lock = ok ? '' : '<div class="warn">Qui puoi guardare; le decisioni si prendono aprendo la libreria dal Mac e poi si pubblicano.</div>';
+  const tabBtn = (k, t) => `<button class="pill ${tab === k ? 'black' : ''}" data-revtab="${k}" aria-pressed="${tab === k}">${t} <span class="n">${l[k].length}</span></button>`;
+  return `<div class="hhead"><h1>Da verificare</h1><p>Schede che la libreria ritiene poco utili. <b>Decidi tu</b>: non viene archiviato niente in automatico e non ci sono pulsanti «tutte». Archiviare non cancella (si annulla cambiando lo stato dalla scheda).</p></div>${lock}
+  <div class="acts" style="padding:0 12px 10px;display:flex;gap:8px;flex-wrap:wrap">${tabBtn('scartare', 'Da scartare')}${tabBtn('varie', 'Varie / non pertinenti')}${ok && rows.length ? `<button class="pill" data-flowsm="rev" title="Passa le schede una a una: tieni, da valutare o scarta">Smista queste ${rows.length}…</button>` : ''}</div>
+  <p class="mini" style="padding:0 12px">${tab === 'scartare' ? 'Valutate «Da scartare» dalle regole (non pertinenti o solo promozione).' : 'Post e reel senza un contenuto riconoscibile (didascalia vuota o generica). Aprili per capire se c\'è qualcosa da salvare.'}</p>
+  ${rows.length ? rows.slice(0, revLimit).map(i => `<div class="box vpair">${miniCard(i)}${ok ? `<div class="vact"><button class="pill" data-disc="${esc(i.id)}">Archivia</button><button class="pill" data-tieni="${esc(i.id)}">Tieni</button><button class="pill" data-revuse="${esc(i.id)}">È utile: Da usare</button></div>` : ''}</div>`).join('') : '<div class="empty"><h2>Niente da verificare qui</h2><p>Le schede di questa lista sono state tutte decise.</p></div>'}
+  ${rows.length > revLimit ? `<p style="padding:0 12px"><button class="pill more" data-revmore="1">Mostra altre ${Math.min(24, rows.length - revLimit)} (${rows.length - revLimit} restanti)</button></p>` : ''}`;
+}
+/* --- Flusso: dal caricamento al catalogo --- */
 function pImport(){
   const all = items.filter(i => !i.duplicatoDi), por = {}, st = {};
   all.forEach(i => { por[i.origine || 'Cartella'] = (por[i.origine || 'Cartella'] || 0) + 1; });
   items.filter(i => i.tipo === 'risorsa').forEach(i => { st[i.stato || 'da-analizzare'] = (st[i.stato || 'da-analizzare'] || 0) + 1; });
   const coda = st['da-analizzare'] || 0, log = (C.meta.importLog || []).slice().reverse();
-  const richiesta = 'Analizza le risorse in coda della libreria e aggiornala con tipo, tag, guida all\'uso, valutazione di prontezza e anteprima.';
-  const step = (n, t, d, body) => `<article class="acard"><span class="mini">Passo ${n}</span><b>${t}</b><span class="d" style="display:block;flex:none">${d}</span>${body}</article>`;
-  return `<div class="hhead"><h1>Import</h1><p>Come entra il materiale nella libreria, in tre passi. <b>Origine</b> = da dove arriva (Raindrop, link incollato, cartella). <b>Collezione</b> = il tema (es. «UX», «Brand & tipografia»).</p></div>
-  <div class="agrid">
-  ${step(1, 'Entra', 'Aggiungi link (anche da Raindrop) o cartelle in inbox/. Gli originali non si toccano: restano copie.', `<span class="tags">${Object.entries(por).sort((a, b) => b[1] - a[1]).map(([k, n]) => `<button class="chip" data-origine="${esc(k)}">${esc(k)} <span class="n">${n}</span></button>`).join('')}</span>${canAdd() ? '<p></p>' : '<p class="mini">L\'import si fa dal Mac.</p>'}`)}
-  ${step(2, 'Analizza', coda ? `${coda} risorse in coda: da analizzare.` : 'Nessuna risorsa in coda: tutte analizzate.', `<p class="mini">Stato: ${Object.entries(st).map(([k, n]) => `${esc(k)} ${n}`).join(' · ') || '—'}</p><p><button class="pill black" data-copyreq="1">Copia la richiesta per Claude</button></p><p class="mini">Incollala in questa chat: Claude legge titolo, didascalia e pagina, e compila tipo, tag, guida, valutazione.</p>`)}
-  ${step(3, 'Catalogo', `${all.length} elementi unici${(C.meta.pulizia || {}).uniti ? `, ${C.meta.pulizia.uniti} doppioni uniti` : ''}.`, `<p class="mini">${cleanCount()} voci in <button class="link" data-page="pulizia">Pulizia</button> · valutate: ${Object.entries((VAL.conteggi || {})).map(([k, n]) => `${esc(prName(k))} ${n}`).join(', ')}</p><p class="mini">Instagram sta in un catalogo a parte.</p>`)}
+  const act = all.filter(i => !isScart(i)), unsorted = act.filter(i => !(getNote(i).stato)), sorted = act.length - unsorted.length;
+  const usare = act.filter(i => getNote(i).stato === 'Da usare').length, valut = act.filter(i => getNote(i).stato === 'Da valutare').length, scart = all.length - act.length;
+  const povere = act.filter(i => i.qualita && i.qualita.punti <= 2).length;
+  const unsIG = unsorted.filter(isIG).length, unsMain = unsorted.length - unsIG;
+  const pct = act.length ? Math.round(sorted / act.length * 100) : 0, ok = canEdit();
+  const rev = revCount(), ult = log[0];
+  const step = (n, t, d, body, todo) => `<article class="fst${todo ? ' todo' : ''}"><span class="no">${n} · ${t}</span>${d}${body}</article>`;
+  return `<div class="hhead"><h1>Flusso</h1><p>Come una cosa arriva dal caricamento al catalogo, in cinque passi. <b>Origine</b> = da dove arriva (Raindrop, Instagram, link, cartella); <b>Collezione</b> = il tema. Ogni passo mostra quanto resta da fare.</p></div>
+  <div class="flow">
+  ${step(1, 'Entra', `<b class="big">${all.length}</b><span class="mini">elementi unici${ult ? ' · ultimo ingresso ' + esc(new Date(ult.data).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })) : ''}</span>`, `<span class="tags">${Object.entries(por).sort((a, b) => b[1] - a[1]).map(([k, n]) => `<button class="chip" data-origine="${esc(k)}">${esc(k)} <span class="n">${n}</span></button>`).join('')}</span>${canAdd() ? '<a class="pill" href="#igibox">Da Instagram ↓</a>' : '<span class="mini">L\'import si fa dal Mac.</span>'}<button class="pill" data-page="salvati">Link salvati</button>`, false)}
+  ${step(2, 'Analizza', `<b class="big">${coda + povere}</b><span class="mini">${coda} in coda · ${povere} schede povere</span>`, `<button class="pill black" data-copyreq="1">Copia la richiesta per Claude</button><button class="pill" data-flowpov="1">Vedi le schede povere</button><span class="mini">Claude compila tipo, tag, guida e valutazione.</span>`, coda + povere > 0)}
+  ${step(3, 'Smista', `<b class="big">${unsorted.length}</b><span class="mini">senza stato · ${pct}% smistato</span><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:${pct}%"></i></div>`, ok ? `<button class="pill black" data-flowsm="main"${unsMain ? '' : ' disabled'}>Smista il catalogo (${unsMain})</button><button class="pill" data-flowsm="ig"${unsIG ? '' : ' disabled'}>Smista Instagram (${unsIG})</button>` : '<span class="mini">Si smista dal Mac.</span>', unsorted.length > 0)}
+  ${step(4, 'Verifica', `<b class="big">${rev}</b><span class="mini">da guardare tu</span>`, `<button class="pill black" data-page="revisione">Da verificare</button><button class="pill" data-page="pulizia">Doppioni (${pairs().length})</button><span class="mini">Niente si archivia da solo.</span>`, rev > 0)}
+  ${step(5, 'Catalogo', `<b class="big">${usare}</b><span class="mini">Da usare · ${valut} da valutare · ${scart} scartate</span>`, `<button class="pill black" data-page="tutto">Apri il catalogo</button><button class="pill" data-flowfav="1">Da usare</button>`, false)}
   </div>
+  <p class="mini" style="margin:0 12px 6px">Dopo ogni giro: <b>Riscansiona</b> (Home) per aggiornare il catalogo, poi <b>Pubblica online</b> dal Mac per portarlo anche su iPhone e iPad.</p>
   <div class="hsec">Link dal cloud (account)</div>
   <div class="box" id="cloudbox" style="margin:0 12px;padding:10px 14px">${cloudHtml()}</div>${(setTimeout(cloudInit, 0), '')}
   <div class="hsec">Da Instagram (salvati)</div>
@@ -1761,7 +1844,7 @@ function pBrief(){
   <p class="vact"><button class="pill black" data-bgen="1">Genera percorso</button><button class="pill" data-bcopy="1">Copia brief per Claude</button><button class="pill" data-breset="1">Azzera</button></p>
   <details class="vimp"><summary class="mini">Importa il piano di Claude</summary><textarea id="b_imp" placeholder="Incolla qui il JSON che ti ha dato Claude" style="min-height:90px"></textarea><p><button class="pill" data-bimp="1">Importa piano</button></p></details></div>${plan}`;
 }
-function renderSpecialNew(){ const p = S.page; return p === 'pulizia' ? pPulizia() : p === 'import' ? pImport() : p === 'salvati' ? pSalvati() : p === 'progetto-brief' ? pBrief() : p === 'gruppi' ? pGruppi() : null; }
+function renderSpecialNew(){ const p = S.page; return p === 'pulizia' ? pPulizia() : p === 'revisione' ? pRevisione() : p === 'import' ? pImport() : p === 'salvati' ? pSalvati() : p === 'progetto-brief' ? pBrief() : p === 'gruppi' ? pGruppi() : null; }
 document.addEventListener('input', e => {
   const t = e.target, k = t.dataset && t.dataset.bf; if (!k) return; BRIEF[k] = t.value; store.set('brief', BRIEF);
 });
@@ -1781,6 +1864,12 @@ document.addEventListener('click', e => {
   if (d.discall) { const di = toDiscard(); if (!canEdit() || !di.length) return; if (!confirm(`Archiviare ${di.length} schede? Si può annullare cambiando lo stato dalla scheda.`)) return; di.forEach(i => persistNote(i.id, { stato: 'Scartato' }, true)); toast(di.length + ' archiviate.'); refresh(); return; }
   if (d.discmore) { discLimit += 30; render(); return; }
   if (d.split) { if (!canEdit()) return; persistNote(d.split, { tieniDoppio: true }, true); byId[d.split].duplicatoDi = null; toast('Unione annullata dopo la prossima scansione (ora è visibile).'); refresh(); return; }
+  if (d.revtab) { S.rev = d.revtab; store.set('revtab', S.rev); revLimit = 24; render(); return; }
+  if (d.revmore) { revLimit += 24; render(); return; }
+  if (d.revuse) { if (!canEdit()) return; persistNote(d.revuse, { stato: 'Da usare' }, true); toast('Segnata «Da usare».'); refresh(); return; }
+  if (d.flowsm) { const k = d.flowsm; const act = items.filter(i => !i.duplicatoDi && !isScart(i) && !(getNote(i).stato)); const ids = k === 'rev' ? revLists()[S.rev === 'varie' ? 'varie' : 'scartare'].map(i => i.id) : act.filter(i => (k === 'ig') === isIG(i)).map(i => i.id); smistaOpen(ids); return; }
+  if (d.flowpov) { clearFilters(); setPage('tutto'); S.incomp = true; render(); return; }
+  if (d.flowfav) { clearFilters(); setPage('tutto'); S.stato = 'Da usare'; const f = $('#fStato'); if (f) f.value = 'Da usare'; render(); return; }
   if (d.copyreq) { copy('Analizza le risorse in coda della libreria e aggiornala con tipo, tag, guida all\'uso, valutazione di prontezza e anteprima.', 'Richiesta copiata: incollala nella chat con Claude.'); return; }
   if (d.bgen) { PIANO = genPiano(BRIEF); savePiano(); toast('Percorso generato.'); render(); return; }
   if (d.bcopy) { copy(claudeRequest(BRIEF), 'Brief copiato: incollalo nella chat con Claude.'); return; }
@@ -1790,7 +1879,7 @@ document.addEventListener('click', e => {
   if (d.pkit && PIANO) { const ids = [...new Set(PIANO.steps.flatMap(s => s.items))].filter(id => byId[id]).slice(0, 200); ids.forEach(id => S.kit.add(id)); store.set('kit', [...S.kit]); toast(ids.length + ' elementi nel kit.'); render(); return; }
 }, true);
 
-const SPECIAL = new Set(['obiettivi', 'tipi', 'sviluppo', 'pulizia', 'import', 'salvati', 'progetto-brief']);
+const SPECIAL = new Set(['obiettivi', 'tipi', 'sviluppo', 'pulizia', 'import', 'salvati', 'progetto-brief', 'revisione']);
 S.ids = null; S.idsLabel = ''; S.goalId = '';
 const GOALS = [
   { id: 'sito-lusso', t: 'Sito web per un brand di lusso', d: 'Hotel, auto, ristorazione: identità forte, motion misurato, tempi di caricamento bassi.', ob: 'sito web per un brand di lusso (hotel, automotive, ristorazione)', fasi: [
@@ -2080,7 +2169,7 @@ function resolve(spec){
     if (i.duplicatoDi || GSTATO(i) === 'Scartato') return false;
     if (spec.area && i.area !== spec.area) return false;
     if (spec.tipo && !spec.tipo.includes(i.tipo)) return false;
-    if (spec.tag || re) { const a = spec.tag && (i.tag || []).some(t => spec.tag.includes(t)), b = re && re.test(`${i.titolo} ${i.nome} ${i.descrizione}`); if (!(a || b)) return false; }
+    if (spec.tag || re) { const a = spec.tag && (i.tag || []).some(t => spec.tag.map(tcan).includes(t)), b = re && re.test(`${i.titolo} ${i.nome} ${i.descrizione}`); if (!(a || b)) return false; }
     return true;
   });
   const sc = i => (i.thumb ? 3 : i.preview ? 2 : 0) + (S.fav.has(i.id) ? 3 : 0) + (GSTATO(i) === 'Da usare' ? 2 : 0) + ((i.descrizione || '').length > 60 ? 1 : 0);
@@ -2144,7 +2233,7 @@ function renderSide(){
   el.innerHTML = `<div class="sg"><h2>Esplora</h2>${it('home', 'Panoramica', null)}${it('obiettivi', 'Per obiettivo', null, 'Cosa devi fare?')}${it('tipi', 'Che cosa c\'è', null, 'Cos\'è ogni tipo e come si usa')}${it('tutto', 'Tutto', tot)}${it('preferiti', '★ Preferiti', S.fav.size)}${it('gruppi', 'Gruppi', GRP.length, 'Le tue cartelle')}${it('instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length, 'Catalogo a parte')}</div>
   <div class="sg"><h2>Per area d'uso</h2>${AREE.filter(a => areaShown(a, c)).map(a => `<button class="si${S.page === a.id ? ' on" aria-current="page' : ''}" data-page="${a.id}" title="${esc(a.desc)}"><span>${esc(PSHORT[a.id] || a.nome)}</span><span class="n">${c[a.id] || 0}</span></button>`).join('')}</div>
   <div class="sg"><h2>Per tipo</h2>${Object.keys(C.meta.tipi).filter(t => ct[t]).map(t => `<button class="si${S.tipo === t && !SPECIAL.has(S.page) ? ' on" aria-current="true' : ''}" data-tipopage="${esc(t)}" title="${esc((TIPO_INFO[t] || {}).cos || '')}"><span>${esc(tl(t))}</span><span class="n">${ct[t]}</span></button>`).join('')}</div>
-  <div class="sg"><h2>Lavoro</h2>${it('progetto-brief', 'Brief progetto', null, 'Dal punto zero all\'output')}${it('pulizia', 'Pulizia', cleanCount(), 'Doppioni e schede da scartare')}${it('import', 'Import', null, 'Cosa entra e da dove')}${it('salvati', 'Link salvati', null, 'Salvati dal telefono o dal Mac')}</div>
+  <div class="sg"><h2>Lavoro</h2>${it('progetto-brief', 'Brief progetto', null, 'Dal punto zero all\'output')}${it('pulizia', 'Pulizia', cleanCount(), 'Doppioni e schede da scartare')}${it('import', 'Flusso', null, 'Dal caricamento al catalogo')}${it('revisione', 'Da verificare', revCount(), 'Da scartare e varie: decidi tu')}${it('salvati', 'Link salvati', null, 'Salvati dal telefono o dal Mac')}</div>
   <div class="sg"><h2>Strumenti</h2>${it('sviluppo', 'Creare skill e plugin', null)}<button class="si" data-sidego="#bFonti"><span>Fonti</span></button><button class="si" data-sidego="#bGuida"><span>Guida</span></button><button class="si" data-sidego="#bKit"><span>Kit</span><span class="n">${S.kit.size}</span></button></div>`;
 }
 /* filtri rapidi sempre visibili (desktop) e spiegazione del tipo */
@@ -2157,7 +2246,9 @@ function renderQuick(){
   const str = Object.entries(cs).sort((a, b) => b[1] - a[1]).slice(0, 14).map(([s, n]) => `<button class="chip${S.strum === s ? ' on' : ''}" data-strum="${S.strum === s ? '' : esc(s)}" aria-pressed="${S.strum === s}">${esc(STR[s] || s)} <span class="n">${n}</span></button>`).join('');
   const cp = {}; items.forEach(i => { if (i.valutazione && match(i, 'pront')) cp[i.valutazione.prontezza] = (cp[i.valutazione.prontezza] || 0) + 1; });
   const prr = Object.keys(VAL.prontezza).filter(k => cp[k] || S.pront === k).map(k => `<button class="chip${S.pront === k ? ' on' : ''}" data-pront="${S.pront === k ? '' : k}" aria-pressed="${S.pront === k}">${esc(prName(k))} <span class="n">${cp[k] || 0}</span></button>`).join('');
-  q.innerHTML = row('Tipo', tipi) + row('Prontezza', prr) + row('Strumento', str) + `<div class="qrow"><span class="ql">Altro</span><div class="qc"><button class="chip${S.favOnly ? ' on' : ''}" data-quick="fav" aria-pressed="${!!S.favOnly}">★ Preferiti</button><button class="chip${S.prev ? ' on' : ''}" data-quick="prev" aria-pressed="${!!S.prev}">Con anteprima</button><button class="chip${S.incomp ? ' on' : ''}" data-quick="incomp" aria-pressed="${!!S.incomp}" title="Schede con poche informazioni: pochi tag, nessuna anteprima o licenza">Da completare <span class="n">${nInc}</span></button><button class="chip" data-quick="more">Tutti i filtri…</button><button class="chip" data-quick="reset">Azzera</button></div></div>`;
+  const tgc = {}; items.forEach(i => { if (match(i)) i.tag.forEach(t => { tgc[t] = (tgc[t] || 0) + 1; }); });
+  const tagRow = g => TV.filter(v => v.gruppo === g && (tgc[v.id] || S.tag.has(v.id))).sort((a, b) => (tgc[b.id] || 0) - (tgc[a.id] || 0)).slice(0, 12).map(v => `<button class="chip${S.tag.has(v.id) ? ' on' : ''}" data-tag="${esc(v.id)}" aria-pressed="${S.tag.has(v.id)}">${esc(v.nome)} <span class="n">${tgc[v.id] || 0}</span></button>`).join('');
+  q.innerHTML = row('Tipo', tipi) + row('Tema', tagRow('tema')) + row('Stile', tagRow('stile')) + row('Formato', tagRow('formato')) + row('Prontezza', prr) + row('Strumento', str) + `<div class="qrow"><span class="ql">Altro</span><div class="qc"><button class="chip${S.favOnly ? ' on' : ''}" data-quick="fav" aria-pressed="${!!S.favOnly}">★ Preferiti</button><button class="chip${S.prev ? ' on' : ''}" data-quick="prev" aria-pressed="${!!S.prev}">Con anteprima</button><button class="chip${S.incomp ? ' on' : ''}" data-quick="incomp" aria-pressed="${!!S.incomp}" title="Schede con poche informazioni: pochi tag, nessuna anteprima o licenza">Da completare <span class="n">${nInc}</span></button><button class="chip" data-quick="more">Tutti i filtri…</button><button class="chip" data-quick="reset">Azzera</button></div></div>`;
 }
 function renderTBanner(){
   const b = $('#tbanner'); if (!b) return; const ti = S.tipo && TIPO_INFO[S.tipo];
@@ -2246,6 +2337,7 @@ document.addEventListener('change', e => {
   if (id === 'nStato' && cur) { if (persistNote(cur.id, { stato: e.target.value }, true)) { if (canEdit()) render(); } else e.target.value = noteOf(byId[cur.id]).stato || ''; }
   else if (id === 'fStato') { S.stato = e.target.value; S.limit = 96; render(); }
   else if (id === 'fSort') { S.sort = e.target.value; render(); }
+  else if (id === 'fGroup') { S.group = e.target.value; store.set('group', S.group); S.limit = 96; render(); }
   else if (id === 'fPrev') { S.prev = e.target.checked; render(); }
   else if (id === 'fFav') { S.favOnly = e.target.checked; S.limit = 96; render(); }
   else if (id === 'kitCode') { store.set('kitCode', e.target.checked); }
