@@ -1621,6 +1621,8 @@ function pImport(){
   </div>
   <div class="hsec">Link dal cloud (account)</div>
   <div class="box" id="cloudbox" style="margin:0 12px;padding:10px 14px">${cloudHtml()}</div>${(setTimeout(cloudInit, 0), '')}
+  <div class="hsec">Da Instagram (salvati)</div>
+  <div class="box" id="igibox" style="margin:0 12px;padding:10px 14px">${igiHtml()}</div>
   <div class="hsec">Cosa è entrato e quando</div>
   ${log.length ? `<div class="box" style="margin:0 12px;padding:8px 14px">${log.map(l => `<div class="vlog"><b>${esc(new Date(l.data).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }))}</b> <span>${l.primoRegistro ? 'Primo registro: ' + l.totale + ' elementi' : '+' + (l.nuove || 0) + ' nuovi (' + Object.entries(l.perOrigine || {}).map(([k, n]) => k + ' ' + n).join(', ') + ')'}</span> <span class="mini">${l.daAnalizzare ? l.daAnalizzare + ' da analizzare' : ''}</span></div>`).join('')}</div>` : '<div class="empty"><p>Il registro parte dalla prossima scansione.</p></div>'}`;
 }
@@ -1962,6 +1964,92 @@ document.addEventListener('click', e => {
   if (t.closest('[data-grpback]')) { e.stopPropagation(); S.grp = ''; selMode(false); render(); return; }
   if ((x = t.closest('[data-grpren]'))) { e.stopPropagation(); const g = GRP.find(y => y.id === x.dataset.grpren), n = g && prompt('Nuovo nome del gruppo', g.nome); if (g && n && n.trim()) { g.nome = n.trim().slice(0, 60); grpSave(); render(); } return; }
   if ((x = t.closest('[data-grpdel]'))) { e.stopPropagation(); const g = GRP.find(y => y.id === x.dataset.grpdel); if (g && confirm('Eliminare il gruppo «' + g.nome + '»? Le schede restano nel catalogo.')) { GRP = GRP.filter(y => y.id !== g.id); items.forEach(i => { if ((i.gruppi || []).includes(g.id)) { i.gruppi = i.gruppi.filter(y => y !== g.id); persistNote(i.id, { gruppi: i.gruppi }, true); } }); grpSave(); render(); } return; }
+}, true);
+
+/* ===== Importa da Instagram (file «Scarica le tue informazioni» → Salvati) ===== */
+const IGI = { rows: [], files: [], msg: '', busy: false };
+const igCode = u => { const m = /instagram\.com\/(?:[\w.]+\/)?(p|reels?|tv)\/([\w-]+)/i.exec(String(u || '')); return m ? m[2] : null; };
+const igUrl = u => { const m = /instagram\.com\/(?:[\w.]+\/)?(p|reels?|tv)\/([\w-]+)/i.exec(String(u || '')); return m ? 'https://www.instagram.com/' + (m[1].toLowerCase().startsWith('reel') ? 'reel' : m[1].toLowerCase()) + '/' + m[2] + '/' : null; };
+const igiFix = v => { if (typeof v !== 'string') return v; try { const u = decodeURIComponent(escape(v)); return u; } catch { return v; } }; // Instagram esporta il testo UTF-8 letto come latin1
+function igiWalk(o, ctx, out){
+  if (typeof o === 'string') { if (igCode(o)) out.push({ url: o, coll: ctx.coll, cap: '' }); return; }
+  if (Array.isArray(o)) { o.forEach(x => igiWalk(x, ctx, out)); return; }
+  if (!o || typeof o !== 'object') return;
+  const lv = Array.isArray(o.label_values) ? o.label_values : null;
+  if (lv) {
+    const get = l => { const x = lv.find(v => v && v.label === l); return x ? x.value : undefined; };
+    const url = get('URL') || (lv.find(v => v && igCode(v.href)) || {}).href;
+    if (url && igCode(url)) { out.push({ url, coll: ctx.coll, cap: igiFix(get('Didascalia') || get('Titolo') || '') || '' }); return; }
+    const nome = get('Nome'); const sub = { coll: typeof nome === 'string' && nome.trim() ? igiFix(nome).trim() : ctx.coll };
+    for (const v of lv) if (v && (v.dict || v.vec)) igiWalk(v.dict || v.vec, sub, out);
+    return;
+  }
+  const smd = o.string_map_data;
+  if (smd && typeof smd === 'object') {
+    const href = Object.values(smd).map(v => v && v.href).find(h => igCode(h));
+    if (href) { out.push({ url: href, coll: ctx.coll, cap: '' }); return; }
+    const nm = smd.Name && smd.Name.value; if (nm && typeof nm === 'string') { ctx.coll = igiFix(nm).trim(); return; }
+  }
+  for (const v of Object.values(o)) igiWalk(v, ctx, out);
+}
+function igiParse(text){
+  const out = []; text = String(text || '');
+  if (/^\s*[\[{]/.test(text)) { try { igiWalk(JSON.parse(text), { coll: null }, out); return out; } catch {} }
+  let coll = null;
+  for (const line of text.split(/\r?\n/)) {
+    const h = /^\s*(?:#+|collezione:|raccolta:)\s*(.+?)\s*$/i.exec(line); if (h && !igCode(line)) { coll = h[1]; continue; }
+    for (const m of line.matchAll(/https?:\/\/(?:www\.)?instagram\.com\/[^\s"'<>)]+/gi)) if (igCode(m[0])) out.push({ url: m[0], coll, cap: '' });
+  }
+  return out;
+}
+const igiHave = new Set();
+function igiPrepare(rows){
+  igiHave.clear(); items.forEach(i => { const c = igCode(i.link || i.url); if (c) igiHave.add(c); });
+  const seen = new Map();
+  rows.forEach(r => { const c = igCode(r.url); if (!c) return; const o = seen.get(c); if (!o) seen.set(c, { code: c, url: igUrl(r.url), coll: (r.coll || '').trim(), cap: r.cap || '', nuovo: !igiHave.has(c) }); else { if (!o.coll && r.coll) o.coll = String(r.coll).trim(); if (!o.cap && r.cap) o.cap = r.cap; } });
+  return [...seen.values()];
+}
+function igiGroups(){ const g = new Map(); IGI.rows.forEach(r => { const k = r.coll || ''; if (!g.has(k)) g.set(k, []); g.get(k).push(r); }); return [...g.entries()]; }
+function igiHtml(){
+  if (!canAdd()) return `<p class="mini">L'importazione dei salvati si fa dal Mac (apri la libreria con «FRAME.01 LIBRARY.app»). Online è di sola consultazione.</p>`;
+  const g = igiGroups(), nuovi = IGI.rows.filter(r => r.nuovo).length;
+  return `<ol class="mini" style="margin:0 0 10px 18px;line-height:1.55"><li>Instagram → Impostazioni → <b>Centro gestione account</b> → Le tue informazioni e autorizzazioni → <b>Scarica le tue informazioni</b>.</li><li>Scegli <b>Alcune delle tue informazioni</b> → solo <b>Salvati</b> → formato <b>JSON</b> → intervallo «Sempre».</li><li>Quando arriva l'email scarica lo zip, aprilo e trascina qui <code>saved_collections.json</code> (raccolte) e <code>saved_posts.json</code> (tutti i salvati): puoi sceglierli insieme, anche di più esportazioni. Puoi anche incollare i link, uno per riga (con «# Nome raccolta» per raggruppare).</li></ol>
+  <div class="acts" style="gap:8px;display:flex;flex-wrap:wrap;align-items:center"><label class="pill black" style="cursor:pointer">Scegli file…<input type="file" id="igiFile" accept=".json,.html,.txt,application/json" multiple hidden></label><span class="mini">${IGI.files.length ? esc(IGI.files.join(', ')) : 'nessun file'}</span></div>
+  <textarea id="igiText" rows="3" placeholder="Oppure incolla qui i link (https://www.instagram.com/reel/…)" style="width:100%;margin-top:8px;padding:8px 12px"></textarea>
+  <div class="acts" style="margin-top:8px"><button class="pill" data-igiread="1">Leggi i link incollati</button></div>
+  ${IGI.msg ? `<p class="mini" role="status">${esc(IGI.msg)}</p>` : ''}
+  ${IGI.rows.length ? `<div class="hsec" style="padding-left:0">Anteprima: ${IGI.rows.length} post · <b>${nuovi} nuovi</b> · ${IGI.rows.length - nuovi} già nel catalogo</div>
+  <div class="igigrp">${g.map(([k, rows], n) => `<div class="an-row" style="grid-template-columns:1fr auto auto;align-items:center"><input type="text" data-igicoll="${n}" value="${esc(k)}" placeholder="Senza raccolta" aria-label="Nome della raccolta" maxlength="60"><span class="mini">${rows.filter(r => r.nuovo).length} nuovi / ${rows.length}</span><button class="pill" data-igiskip="${n}" aria-label="Escludi questa raccolta" title="Escludi">✕</button></div>`).join('')}</div>
+  <div class="acts" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="pill black" data-igigo="1" ${nuovi && !IGI.busy ? '' : 'disabled'}>${IGI.busy ? 'Un attimo…' : `Importa ${nuovi} nuovi nel catalogo`}</button><button class="pill" data-igireset="1">Annulla</button></div>` : ''}
+  ${IGI.done ? `<div class="acts" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="pill black" data-igiembed="1" ${IGI.busy ? 'disabled' : ''}>Leggi didascalie e immagini</button><button class="pill" data-scanbtn="1" ${IGI.busy ? 'disabled' : ''}>Aggiorna il catalogo</button></div><p class="mini">Le raccolte diventano Gruppi. Le didascalie arrivano dall'esportazione; «Leggi didascalie e immagini» (facoltativo, lento) aggiunge anche autore e immagine.</p>` : ''}`;
+}
+function igiRedraw(){ const el = document.getElementById('igibox'); if (el) el.innerHTML = igiHtml(); }
+function igiAdd(rows, nome){ IGI.rows = igiPrepare([...IGI.rows, ...rows]); if (nome) IGI.files.push(nome); IGI.msg = rows.length ? '' : 'Nessun link Instagram trovato in ' + (nome || 'quello che hai incollato') + '.'; IGI.done = false; igiRedraw(); }
+document.addEventListener('change', async e => {
+  const f = e.target.closest && e.target.closest('#igiFile'); if (!f) return;
+  for (const file of [...f.files]) { try { igiAdd(igiParse(await file.text()), file.name); } catch { IGI.msg = 'File non leggibile: ' + file.name; igiRedraw(); } }
+}, true);
+document.addEventListener('click', async e => {
+  const t = e.target; let x;
+  if (t.closest('[data-igiread]')) { e.stopPropagation(); const el = document.getElementById('igiText'); igiAdd(igiParse(el && el.value), 'link incollati'); return; }
+  if (t.closest('[data-igireset]')) { e.stopPropagation(); IGI.rows = []; IGI.files = []; IGI.msg = ''; IGI.done = false; igiRedraw(); return; }
+  if ((x = t.closest('[data-igiskip]'))) { e.stopPropagation(); const k = igiGroups()[+x.dataset.igiskip]; if (k) IGI.rows = IGI.rows.filter(r => (r.coll || '') !== k[0]); igiRedraw(); return; }
+  if (t.closest('[data-igigo]')) {
+    e.stopPropagation();
+    document.querySelectorAll('[data-igicoll]').forEach(inp => { const k = igiGroups()[+inp.dataset.igicoll]; if (k) k[1].forEach(r => { r.coll = inp.value.trim(); }); });
+    const nuovi = IGI.rows.filter(r => r.nuovo); if (!nuovi.length) return;
+    IGI.busy = true; igiRedraw();
+    const r = await api('instagram-export', { items: IGI.rows.map(x => ({ url: x.url, cap: x.cap, coll: x.coll })) });
+    IGI.busy = false;
+    if (r && !r.errore && r.aggiunte !== undefined) { IGI.msg = `Importati ${r.aggiunte} post nuovi (${r.doppie || 0} già presenti)${r.gruppi ? ' · ' + r.gruppi + ' inserimenti nei Gruppi' : ''}. Le didascalie sono già salvate: premi «Aggiorna il catalogo».`; IGI.rows = []; IGI.files = []; IGI.done = true; } else IGI.msg = (r && r.errore) || 'Importazione non riuscita.';
+    igiRedraw(); return;
+  }
+  if (t.closest('[data-igiembed]')) {
+    e.stopPropagation(); IGI.busy = true; IGI.msg = 'Leggo i post da Instagram (circa 1 minuto ogni 30 post)…'; igiRedraw();
+    const r = await api('instagram-leggi', {}); IGI.busy = false;
+    IGI.msg = r && !r.errore && r.ok !== false ? 'Fatto. ' + String(r.out || '').split('\n').pop() + ' Premi «Aggiorna il catalogo».' : ((r && r.errore) || 'Lettura non riuscita: riprova più tardi.'); igiRedraw(); return;
+  }
+  if (t.closest('[data-scanbtn]')) { e.stopPropagation(); IGI.busy = true; IGI.msg = 'Aggiorno il catalogo…'; igiRedraw(); const r = await api('scansiona'); IGI.busy = false; if (r && r.ok) { IGI.msg = 'Catalogo aggiornato: ricarico…'; igiRedraw(); setTimeout(() => location.reload(), 600); } else { IGI.msg = (r && r.errore) || 'Aggiornamento non riuscito.'; igiRedraw(); } return; }
 }, true);
 
 const GSTATO = i => (getNote(i).stato || '');
