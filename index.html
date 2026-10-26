@@ -1920,8 +1920,28 @@ GOALS.unshift(
     { t: '2 · Scrivi e impagina', d: 'Prompt e skill per didascalie, caroselli e storie.', spec: { tipo: ['prompt', 'skill'], q: 'caption|didascalia|carousel|social|instagram|copy' } },
     { t: '3 · Video e motion', d: 'Strumenti per montare, animare e rifinire i reel.', spec: { tag: ['motion', 'animazioni', 'video'] } }] }
 );
+const igGrpItems = () => items.filter(i => (i.gruppi || []).includes(S.grp) && /instagram\.com\/(?:p|reel|tv)\//.test(i.link || ''));
+function igGrpPrompt(){
+  const l = igGrpItems();
+  return `Analisi visiva dei contenuti Instagram del gruppo «${grpName(S.grp)}» (FRAME.01-LIBRARY).
+
+Usa Claude in Chrome nel mio Chrome (sono già loggato a Instagram). Per ciascun link: aprilo in una nuova scheda, aspetta 3 s, fai 3 schermate a intervalli di circa 6 s e leggi il testo della pagina (didascalia). Poi chiudi la scheda. Non mettere mi piace, non commentare, non seguire nessuno.
+
+Per ogni post scrivi, in italiano:
+- layout (come è composta l'inquadratura / le slide)
+- tipografia (font, sottotitoli, titoli)
+- colore (palette dominante)
+- movimento (tagli, animazioni, ritmo)
+- tono (come parla, a chi)
+- «cosa guardare» (cosa vale la pena imitare) e limiti (cosa manca o è solo promozione)
+
+Restituisci un JSON: [{"codice":"<codice del post>","osserva":{"layout":"","tipografia":"","colore":"","movimento":"","tono":""},"utilita":"","limiti":"","uso":[{"t":"","d":""}]}]
+
+Post da guardare (${l.length}):
+${l.map((i, n) => `${n + 1}. ${i.link}${i.autore ? ' — ' + i.autore : ''}`).join('\n')}`;
+}
 const crumbOf = t => S.page === 'gruppi' && S.grp
-  ? `<div class="crumb"><button data-page="home">Panoramica</button> › <button data-grpback="1">Gruppi</button> › <span>${esc(grpName(S.grp))}</span></div>`
+  ? `<div class="crumb"><button data-page="home">Panoramica</button> › <button data-grpback="1">Gruppi</button> › <span>${esc(grpName(S.grp))}</span>${igGrpItems().length ? ` <button class="pill" data-grpvis="1" style="margin-left:10px" title="Copia la richiesta per far guardare i reel a Claude in Chrome">Prepara analisi visiva</button>` : ''}</div>`
   : `<div class="crumb"><button data-page="home">Panoramica</button> › <span>${esc(S.page === 'tutto' || S.page === 'preferiti' ? t[0] : (PSHORT[S.page] || t[0]))}</span></div>`;
 function igBar(){
   let b = document.getElementById('igbar');
@@ -1954,6 +1974,7 @@ document.addEventListener('click', e => {
   if (t.closest('[data-selgrp]')) { e.stopPropagation(); grpDlg(); return; }
   if (t.closest('[data-selall]')) { e.stopPropagation(); list().slice(0, 300).forEach(i => S.sel.add(i.id)); document.querySelectorAll('#grid .card').forEach(c => c.classList.toggle('sel', S.sel.has(c.dataset.id))); selBar(); return; }
   if (t.closest('[data-selkit]')) { e.stopPropagation(); S.sel.forEach(id => S.kit.add(id)); store.set('kit', [...S.kit]); toast(S.sel.size + ' nel kit.'); S.sel.clear(); render(); selBar(); return; }
+  if (t.closest('[data-grpvis]')) { e.stopPropagation(); copy(igGrpPrompt(), 'Richiesta copiata: incollala in Claude con Claude in Chrome attivo.'); return; }
   if (t.closest('[data-selrem]')) { e.stopPropagation(); const n = grpApply(S.grp, [...S.sel], true); toast(n + ' tolte dal gruppo.'); S.sel.clear(); render(); selBar(); return; }
   if (t.closest('[data-grpclose]') || t.id === 'grpdlg') { document.getElementById('grpdlg')?.remove(); return; }
   const pick = (gid) => { const n = grpApply(gid, [...S.sel]); document.getElementById('grpdlg')?.remove(); toast(n + ' aggiunte a «' + grpName(gid) + '».'); S.selMode = false; S.sel.clear(); selBar(); render(); };
