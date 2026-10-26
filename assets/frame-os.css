@@ -479,3 +479,74 @@ html[data-boot=reveal] body>:not(.pl-screen):not(script):not(style):not(#gate){t
 @media(max-width:760px){html body .crumb button,html body .lnk{min-height:44px;display:inline-flex;align-items:center}html body #q,html body .icon,html body #bTheme{min-height:44px}html body .topbar .icon,html body #bTheme{min-width:44px}}
 /* Completezza delle schede */
 .box.qual{margin-bottom:12px}.box.qual ul{margin:6px 0 4px;padding-left:18px}
+
+/* ===== v9 (26/10/2026): copertine generate, Instagram stile Albo, gruppi, selezione, mobile e iPad ===== */
+.art{position:relative;height:100%;min-height:100%;overflow:hidden;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;padding:var(--space-4);isolation:isolate}
+.art svg{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+.art .ai{position:absolute;right:12px;top:-14px;font-weight:600;font-size:120px;line-height:1;opacity:.16;pointer-events:none}
+.art .at{font:400 var(--fs-xs)/1.3 var(--mono);text-transform:uppercase;letter-spacing:.06em;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.art .ab{font-weight:600;font-size:var(--fs-lg);line-height:1.2;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;text-wrap:balance}
+.media>.art{aspect-ratio:inherit}
+/* selezione */
+.selbtn{display:none;position:absolute;left:10px;top:10px;width:28px;height:28px;border-radius:50%;place-items:center;font:600 15px/1 var(--mono);color:transparent;background:color-mix(in srgb,var(--bg) 70%,transparent);border:2px solid var(--fg);backdrop-filter:blur(6px);z-index:3}
+body.selmode .selbtn{display:grid}
+.card.sel{outline:3px solid var(--fg);outline-offset:-3px}
+.card.sel .selbtn{background:var(--fg);color:var(--bg)}
+body.selmode .card{cursor:copy}
+.selbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 20px);padding:10px 14px;border-radius:var(--radius-bar,24px);background:var(--glass-strong);border:1px solid var(--glass-border);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:var(--shadow-drawer,0 10px 40px #0006)}
+.selbar .selbtns{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}.selbar .pill{min-height:40px}
+@media(max-width:760px){.selbar{bottom:calc(78px + env(safe-area-inset-bottom));left:8px;right:8px;transform:none;max-width:none;justify-content:space-between}}
+/* Instagram stile Albo */
+.igbar{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:6px 20px 0}.igbar[hidden]{display:none}.igbar .pill{flex:none}
+.grid.ig-m{display:block;column-width:250px;column-gap:14px;padding:12px 20px 110px}
+.grid.ig-m>.card{break-inside:avoid;margin:0 0 14px;display:flex}
+.igc{background:var(--card);border-radius:18px;overflow:hidden}
+.igc .igm{aspect-ratio:1/1;height:auto;border-bottom:0;position:relative;background:var(--chip-bg)}
+.igc .igm.vid{aspect-ratio:4/5}
+.igc .igi{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.igc .igm .art{position:absolute;inset:0}
+.igp{position:absolute;left:10px;bottom:10px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#000a;color:#fff;font-size:12px;padding-left:2px;backdrop-filter:blur(6px)}
+.igf{position:absolute;right:8px;top:8px;background:color-mix(in srgb,var(--bg) 68%,transparent);backdrop-filter:blur(6px);border-radius:50%;width:36px;height:36px;display:grid;place-items:center;z-index:2}
+.igb{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px}
+.igh{display:flex;gap:8px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}.iga{font-weight:600;font-size:var(--fs-sm);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.igcap{margin:0;font-size:var(--fs-sm);line-height:1.45;color:var(--fg);display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line;word-break:break-word}
+.igt{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.igt .kitbtn{margin-left:auto}
+.v-lista .igc{display:grid}
+/* gruppi e percorsi */
+.grpgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;padding:8px var(--space-4) 110px}
+.grpc{position:relative;background:var(--card);border-radius:18px;border:1px solid var(--border);overflow:hidden}
+.grpopen{display:flex;flex-direction:column;gap:4px;width:100%;text-align:left;background:none;border:0;color:inherit;padding:0 0 14px;cursor:pointer}
+.grpopen b,.grpopen .mini{padding:0 14px}.grpopen b{margin-top:10px}
+.gmo,.gmos{display:grid;gap:2px;height:130px;aspect-ratio:auto;background:var(--chip-bg);overflow:hidden;border-bottom:1px solid var(--border)}
+.gmo img,.gmos img{width:100%;height:100%;object-fit:cover;display:block}
+.gmo.n2,.gmos.n2{grid-template-columns:1fr 1fr}.gmo.n3,.gmos.n3{grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr}.gmo.n3 img:first-child,.gmos.n3 img:first-child{grid-row:1/3}
+.gmo.n4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}.gmz{display:grid;place-items:center;font-size:34px;color:var(--mfg)}
+.gmos{height:96px;border-radius:12px;margin-bottom:8px;width:100%}
+.grpact{position:absolute;right:6px;top:6px;display:flex;gap:4px}.grpact .favbtn{background:color-mix(in srgb,var(--bg) 70%,transparent);border-radius:50%;width:36px;height:36px}
+.grpnewrow{display:flex;gap:8px;flex-wrap:wrap}.grpnewrow input{min-width:200px;padding:8px 12px}
+.grplist{display:flex;flex-direction:column;gap:6px;margin:12px 0;max-height:46vh;overflow:auto}.grpopt{justify-content:space-between;display:flex;min-height:44px}
+.gcard{align-items:stretch}.gcard .gnext{margin-top:4px}
+/* mobile e iPad: più schede per schermata, meno spazio sprecato */
+@media(max-width:760px){
+ .grid.v-visuale{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .grid.v-visuale .media{aspect-ratio:4/3}
+ .grid.v-visuale .body{padding:10px 12px 4px}.grid.v-visuale .body h3{font-size:var(--fs-md);line-height:1.25}
+ .grid.v-visuale .body p{-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;font-size:var(--fs-sm)}
+ .grid.v-visuale .tags,.grid.v-visuale .tfl-row{display:none}
+ .grid.v-visuale footer.cf>span:first-child{display:none}.grid.v-visuale footer.cf{justify-content:flex-end;padding:4px 8px 10px}
+ .art{padding:var(--space-3)}.art .ab{font-size:var(--fs-md)}.art .ai{font-size:84px}
+ .grid.ig-m{column-width:150px;column-gap:10px;padding:10px 10px 110px}.grid.ig-m>.card{margin-bottom:10px}
+ .igc{border-radius:14px}.igb{padding:10px 10px 12px;gap:6px}.igcap{-webkit-line-clamp:4;font-size:var(--fs-sm)}.igt .chip:nth-child(n+3){display:none}
+ .igbar{padding:6px 10px 0}.grpgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:8px 10px 110px}
+ .agrid.goals{grid-template-columns:1fr}.gcard .d{display:block}
+}
+@media(min-width:761px) and (max-width:1100px){
+ .grid.v-visuale{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+ .grid.ig-m{column-width:220px}
+ .agrid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+}
+@media(pointer:coarse){.favbtn,.kitbtn{min-height:40px}.igf{width:44px;height:44px}.selbtn{width:32px;height:32px}}
+
+body.pg-ig #quick,body.pg-ig #tbanner{display:none}
+.phead .acts{min-width:0}
+@media(max-width:760px){html body .phead>div>p{display:none}html body .phead .acts{width:100%;margin-left:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-10px;padding-right:10px}.phead .acts>*{flex:none}}

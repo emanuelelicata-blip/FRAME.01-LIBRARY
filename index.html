@@ -469,18 +469,19 @@ const url = p => '../' + p.split('/').map(encodeURIComponent).join('/');
 const kb = b => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
 const tl = t => C.meta.tipi[t] || t;
 const AREE = C.meta.aree || [], ARE = Object.fromEntries(AREE.map(a => [a.id, a])), STR = C.meta.strumenti || {};
-const PSHORT = { instagram: 'Instagram', brief: 'Brief', design: 'Design', web: 'Siti web', piattaforme: 'Piattaforme', 'template-framer': 'Template Framer', motion: 'Motion e 3D', media: 'Immagini AI', presentazioni: 'Documenti', controllo: 'Controllo', automazione: 'Automazione', prompt: 'Prompt', risorse: 'Altro' };
+const PSHORT = { instagram: 'Instagram', brief: 'Brief', design: 'Design', web: 'Siti web', piattaforme: 'Piattaforme', 'template-framer': 'Template Framer', motion: 'Motion e 3D', media: 'Immagini AI', presentazioni: 'Documenti', controllo: 'Controllo', automazione: 'Automazione', prompt: 'Prompt', risorse: 'Altro', idee: 'Idee creative', gruppi: 'Gruppi' };
 const items = C.items.map(i => ({ ...i, tag: i.tag || [], strumenti: i.strumenti || [], _hay: [(ARE[i.area] || {}).nome, (i.strumenti || []).map(s => STR[s] || s).join(' '), i.testo, i.titolo, i.nome, i.descrizione, i.fonte, i.categoria, (i.tag || []).map(t => TAGL[t] || t).join(' '), (i.triggers || []).join(' ')].join(' ').toLowerCase() }));
 const byId = Object.fromEntries(items.map(i => [i.id, i]));
 const S = { stato: '', q: '', tipo: '', tag: new Set(), fonte: '', dup: false, prev: false, incomp: false, sort: 'nome', limit: 96, kit: new Set(store.get('kit', []).filter(id => byId[id])), note: {} };
 let cur = null;
-S.prog = '';
+S.prog = ''; S.grp = ''; S.sel = new Set(); S.selMode = false;
 /* ====== 26/10/2026: aree allargate, progetti, scarto rapido, Smista e tab Analisi ====== */
 const SCARTATO = 'Scartato';
 const NEWA = new Set(['automotive', 'hospitality', 'interior', 'tipografia', 'fotografia', 'arte', 'ux', 'social', 'ai', 'business', 'cultura']);
 Object.assign(PSHORT, { automotive: 'Automotive', hospitality: 'Hospitality', interior: 'Interior', tipografia: 'Tipografia', fotografia: 'Foto e video', arte: 'Arte', ux: 'UI e UX', social: 'Social', ai: 'AI', business: 'Business', cultura: 'Cultura' });
 // le aree nuove compaiono nei menu solo se hanno schede (o se sono «di base» per lo studio)
 const areaShown = (a, c) => (c[a.id] || 0) > 0 || !!a.core || S.page === a.id || (!NEWA.has(a.id) && a.id !== 'risorse');
+let GRP = (C.meta.gruppi || []).map(g => ({ id: g.id, nome: g.nome, colore: g.colore || '' }));
 let PROG = (C.meta.progetti || []).map(p => ({ id: p.id, nome: p.nome }));
 const progName = id => (PROG.find(p => p.id === id) || {}).nome || id;
 const slugC = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
@@ -512,7 +513,7 @@ function ripristina(id){
 function headExtra(){
   if (S.page === 'home' || S.page === 'obiettivi' || S.page === 'tipi' || S.page === 'sviluppo') return '';
   const base = items.filter(i => !i.duplicatoDi && inPage(i)), n = base.filter(isScart).length;
-  return (canEdit() ? '<button class="pill black" data-smista="1" title="Passa le schede una a una: tieni, da valutare o scarta">Smista…</button>' : '')
+  return (canEdit() ? `<button class="pill ${S.selMode ? 'on' : ''}" data-selmode="${S.selMode ? 0 : 1}" aria-pressed="${S.selMode}" title="Scegli più schede e aggiungile a un gruppo">${S.selMode ? 'Fine selezione' : 'Seleziona'}</button>` : '') + (canEdit() ? '<button class="pill black" data-smista="1" title="Passa le schede una a una: tieni, da valutare o scarta">Smista…</button>' : '')
     + (n || S.stato === SCARTATO ? `<button class="pill ${S.stato === SCARTATO ? 'on' : ''}" data-showscart="1">${S.stato === SCARTATO ? '← Torna alle schede attive' : 'Scartati (' + n + ')'}</button>` : '');
 }
 function renderProg(){
@@ -783,10 +784,12 @@ const ED = { ok: false, data: {} }; const edPend = {}; let edT;
 const canEdit = () => canAdd() || ED.ok;
 function applyOverlay(){
   if (ED.data.__config__ && Array.isArray(ED.data.__config__.elencoProgetti) && ED.data.__config__.elencoProgetti.length) PROG = ED.data.__config__.elencoProgetti.map(x => ({ id: x.id, nome: x.nome }));
+  if (ED.data.__config__ && Array.isArray(ED.data.__config__.elencoGruppi) && ED.data.__config__.elencoGruppi.length) GRP = ED.data.__config__.elencoGruppi.map(x => ({ id: x.id, nome: x.nome, colore: x.colore || '' }));
   Object.entries(ED.data).forEach(([id, p]) => { const i = byId[id]; if (!i || !p) return;
     if ('preferito' in p) { p.preferito === true ? S.fav.add(id) : S.fav.delete(id); i.preferito = p.preferito === true; }
     const a = { ...(i.annotazione || {}) };
-    for (const k of ['titolo', 'descrizione', 'nota', 'stato', 'tag', 'strumenti', 'area', 'prontezza', 'unitoA', 'tieniDoppio', 'progetti', 'analisiUtente']) if (k in p) { const v = p[k]; if (v === '' || (Array.isArray(v) && !v.length)) delete a[k]; else a[k] = v; }
+    if (Array.isArray(p.gruppi)) i.gruppi = p.gruppi;
+    for (const k of ['titolo', 'descrizione', 'nota', 'stato', 'tag', 'strumenti', 'area', 'prontezza', 'unitoA', 'tieniDoppio', 'progetti', 'gruppi', 'analisiUtente']) if (k in p) { const v = p[k]; if (v === '' || (Array.isArray(v) && !v.length)) delete a[k]; else a[k] = v; }
     i.annotazione = a;
     if ('stato' in p || 'nota' in p) S.note[id] = { ...(S.note[id] || {}), ...('stato' in p ? { stato: p.stato } : {}), ...('nota' in p ? { nota: p.nota } : {}) };
     if (p.titolo) i.titolo = p.titolo; if (p.descrizione) i.descrizione = p.descrizione;
@@ -825,7 +828,7 @@ const getNote = i => S.note[i.id] || i.annotazione || {};
 
 /* ---------- filtri ---------- */
 const isIG = i => i.catalogo === 'instagram';
-function inPage(i){ const p = S.page; if (p === 'instagram') return isIG(i); if (isIG(i)) return p === 'preferiti' && S.fav.has(i.id); return p === 'home' || p === 'tutto' || p === 'obiettivi' || p === 'tipi' || p === 'sviluppo' || (p === 'preferiti' ? S.fav.has(i.id) : i.area === p); }
+function inPage(i){ const p = S.page; if (p === 'instagram') return isIG(i); if (isIG(i)) return (p === 'preferiti' && S.fav.has(i.id)) || p === 'gruppi' || (p === 'idee' && i.area === 'idee'); return p === 'home' || p === 'tutto' || p === 'gruppi' || p === 'obiettivi' || p === 'tipi' || p === 'sviluppo' || (p === 'preferiti' ? S.fav.has(i.id) : i.area === p); }
 function match(i, skip){
   if (skip === 'pront') { const sv = S.pront; S.pront = ''; try { return match(i); } finally { S.pront = sv; } }
   const terms = S.q.toLowerCase().split(/\s+/).filter(Boolean);
@@ -834,6 +837,7 @@ function match(i, skip){
   if (S.ids && !S.ids.has(i.id)) return false;
   if (skip !== 'area' && S.area && i.area !== S.area) return false;
   if (skip !== 'strum' && S.strum && !i.strumenti.includes(S.strum)) return false;
+  if (S.grp && !(i.gruppi || []).includes(S.grp)) return false;
   if (skip !== 'prog' && S.prog && !(i.progetti || []).includes(S.prog)) return false;
   if (S.favOnly && !S.fav.has(i.id)) return false;
   if (skip !== 'tipo' && S.tipo && i.tipo !== S.tipo) return false;
@@ -883,11 +887,12 @@ function media(i){
     return `<div class="ds" style="background:${esc(bg)};color:${esc(fg)}"><div class="aa" style="font-family:${font ? `'${esc(font)}',` : ''}Georgia,serif">Aa</div><div class="sw">${i.palette.slice(0, 8).map(p => `<i style="background:${esc(p.hex)}" title="${esc(p.nome)} ${esc(p.hex)}"></i>`).join('')}</div></div>`;
   }
   if (i.tipo === 'prompt') return `<div class="ph pr t-prompt"><span>${esc((i.testo || i.descrizione || '').slice(0, 170))}</span></div>`;
+  if (i.disegnata && !isMN(i)) return art(i);
   if (i.thumb) return `<div class="covw">${gen(i)}${thumbImg(i)}</div>`;
   if (i.preview?.tipo === 'html') return `<div class="thumb"><iframe data-pv="${esc(i.preview.file)}" sandbox="allow-scripts" tabindex="-1" title="Anteprima di ${esc(i.titolo)}"></iframe></div>`;
   if (i.preview?.tipo === 'img') return window.__ONLINE ? `<img class="img" data-pv="${esc(i.preview.file)}" alt="">` : `<img class="img" loading="lazy" src="${esc(url(i.preview.file))}" alt="">`;
   const G = { componente: '</>', riferimento: '◧', documento: '¶', risorsa: '↗' };
-  const ph = gen(i);
+  const ph = isMN(i) ? gen(i) : art(i);
   if (i.cover && /^https:/.test(i.cover)) return `<div class="covw">${ph}<img class="img cov" loading="lazy" referrerpolicy="no-referrer" src="${esc(i.cover)}" ${hasShot(i) ? `data-fb="${esc(shot(i.link))}"` : ''} alt="" onerror="if(this.dataset.fb){this.src=this.dataset.fb;delete this.dataset.fb}else{this.remove()}"></div>`;
   if (hasShot(i)) return `<div class="covw">${ph}<img class="img cov" loading="lazy" referrerpolicy="no-referrer" src="${esc(shot(i.link))}" alt="" onerror="this.remove()"></div>`;
   return ph;
@@ -898,10 +903,11 @@ function tfLinks(i){
   return `<div class="tfl-row">${a(f.anteprima, 'Anteprima')}${a(f.scheda, 'Scheda Marketplace')}</div>`;
 }
 function card(i){
+  if (isIG(i) && S.view !== 'lista') return igCard(i);
   const on = S.kit.has(i.id), st = getNote(i).stato, fv = S.fav.has(i.id), showA = (S.page === 'tutto' || S.page === 'preferiti' || S.page === 'instagram') && PSHORT[i.area];
   const tools = i.strumenti.slice(0, 2).map(s => `<span class="chip tool">${esc(STR[s] || s)}</span>`).join('');
-  return `<article class="card" data-id="${esc(i.id)}" tabindex="0" role="button" aria-label="Apri ${esc(i.titolo)}">
-  <div class="media">${media(i)}</div>
+  return `<article class="card${S.sel.has(i.id) ? ' sel' : ''}" data-id="${esc(i.id)}" tabindex="0" role="button" aria-label="Apri ${esc(i.titolo)}">
+  <div class="media">${media(i)}<span class="selbtn" aria-hidden="true">✓</span></div>
   <div class="body"><div class="row"><span class="badge t-${esc(i.tipo)}">${esc(tl(i.tipo))}</span>${prPill(i)}${showA ? `<span class="mini">· ${esc(PSHORT[i.area])}</span>` : ''}${i.copie ? `<span class="mini">+${i.copie.length} copie</span>` : ''}${i.duplicatoDi ? '<span class="mini">copia</span>' : ''}${st ? `<span class="mini">· ${esc(st)}</span>` : ''}</div>
   <h3>${esc(i.titolo)}</h3><p>${esc(i.descrizione)}</p>
   ${tfLinks(i)}<div class="tags">${tools}${i.tag.slice(0, 3).map(t => `<span class="chip">${esc(TAGL[t] || t)}</span>`).join('')}${(i.progetti || []).slice(0, 2).map(p => `<span class="chip prj">${esc(progName(p))}</span>`).join('')}</div></div>
@@ -948,13 +954,13 @@ const ro = new ResizeObserver(es => es.forEach(e => { const f = e.target.querySe
 function observe(root){ root.querySelectorAll('.thumb, .media:has(img[data-pv])').forEach(t => { io.observe(t.classList.contains('thumb') ? t.parentElement : t); if (t.classList.contains('thumb')) ro.observe(t); }); }
 
 const canAdd = () => HTTP && !!SRV && !!(typeof SRV === 'object');
-function aCount(){ const c = {}; items.forEach(i => { if (!i.duplicatoDi && !isIG(i)) c[i.area] = (c[i.area] || 0) + 1; }); return c; }
-function pageList(){ const c = aCount(); return [['home', 'Panoramica', null], ['obiettivi', 'Per obiettivo', null], ['tipi', 'Che cosa c\'è', null], ['tutto', 'Tutto', items.filter(i => !i.duplicatoDi && !isIG(i)).length], ...AREE.filter(a => areaShown(a, c)).map(a => [a.id, PSHORT[a.id] || a.nome, c[a.id] || 0]), ['instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length], ['preferiti', '★ Preferiti', S.fav.size], ['progetto-brief', 'Brief progetto', null], ['pulizia', 'Pulizia', cleanCount()], ['import', 'Import', null], ['salvati', 'Link salvati', null], ['sviluppo', 'Skill e plugin', null]]; }
+function aCount(){ const c = {}; items.forEach(i => { if (!i.duplicatoDi && (!isIG(i) || i.area === 'idee')) c[i.area] = (c[i.area] || 0) + 1; }); return c; }
+function pageList(){ const c = aCount(); return [['home', 'Panoramica', null], ['obiettivi', 'Per obiettivo', null], ['tipi', 'Che cosa c\'è', null], ['tutto', 'Tutto', items.filter(i => !i.duplicatoDi && !isIG(i)).length], ...AREE.filter(a => areaShown(a, c)).map(a => [a.id, PSHORT[a.id] || a.nome, c[a.id] || 0]), ['instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length], ['preferiti', '★ Preferiti', S.fav.size], ['gruppi', 'Gruppi', GRP.length], ['progetto-brief', 'Brief progetto', null], ['pulizia', 'Pulizia', cleanCount()], ['import', 'Import', null], ['salvati', 'Link salvati', null], ['sviluppo', 'Skill e plugin', null]]; }
 const validPage = p => pageList().some(x => x[0] === p);
 function pageHash(){ return S.page === 'home' ? location.pathname + location.search : '#/' + S.page; }
 function setPage(p, fromHash){
   if (!validPage(p)) p = 'home';
-  S.page = p; S.limit = 96; S.area = ''; S.ids = null; if (p !== 'obiettivi') S.goalId = '';
+  S.page = p; S.limit = 96; S.area = ''; S.ids = null; if (p !== 'obiettivi') S.goalId = ''; if (p !== 'gruppi') S.grp = ''; if (S.selMode) { S.selMode = false; S.sel.clear(); selBar(); }
   if (!fromHash) { try { history.pushState(null, '', pageHash()); } catch {} }
   renderTags(); render();
   const on = $('#pages .on'); if (on) on.scrollIntoView({ inline: 'center', block: 'nearest' });
@@ -968,9 +974,9 @@ function renderPages(){
 function renderHead(){
   const h = $('#phead'); if (S.page === 'home') { h.hidden = true; return; }
   const a = ARE[S.page];
-  const t = S.page === 'tutto' ? ['Tutto il catalogo', 'Ogni elemento, filtrabile per area d\'uso, strumento, tipo e tag.'] : S.page === 'preferiti' ? ['Preferiti', 'Gli elementi segnati con ★, di tutte le aree.'] : S.page === 'instagram' ? ['Instagram', 'Post e reel salvati, in un catalogo a parte: autore, didascalia e copertina. Non sono nel catalogo principale.'] : [a ? a.nome : S.page, a ? a.desc : ''];
+  const t = S.page === 'tutto' ? ['Tutto il catalogo', 'Ogni elemento, filtrabile per area d\'uso, strumento, tipo e tag.'] : S.page === 'preferiti' ? ['Preferiti', 'Gli elementi segnati con ★, di tutte le aree.'] : S.page === 'instagram' ? ['Instagram', 'Post e reel salvati, in un catalogo a parte: autore, didascalia e copertina. Non sono nel catalogo principale.'] : S.page === 'gruppi' ? [grpName(S.grp), 'Raccolta di schede e reference scelte da te.'] : [a ? a.nome : S.page, a ? a.desc : ''];
   h.hidden = false;
-  h.innerHTML = `<div class="crumb"><button data-page="home">Panoramica</button> › <span>${esc(S.page === 'tutto' || S.page === 'preferiti' ? t[0] : (PSHORT[S.page] || t[0]))}</span></div><div><h1>${esc(t[0])}</h1><p>${esc(t[1])}</p></div><div class="acts">${headExtra()}${canAdd() && a ? `` : ''}<button class="pill" data-aidlg="1" title="Prepara una richiesta per Claude o ChatGPT con gli elementi che vedi">✦ Chiedi all'AI</button><button class="pill" data-kitpage="1" title="Aggiunge al kit tutti gli elementi che vedi (massimo 200)">Aggiungi i mostrati al kit</button></div>`;
+  h.innerHTML = `${crumbOf(t)}<div><h1>${esc(t[0])}</h1><p>${esc(t[1])}</p></div><div class="acts">${headExtra()}${canAdd() && a ? `` : ''}<button class="pill" data-aidlg="1" title="Prepara una richiesta per Claude o ChatGPT con gli elementi che vedi">✦ Chiedi all'AI</button><button class="pill" data-kitpage="1" title="Aggiunge al kit tutti gli elementi che vedi (massimo 200)">Aggiungi i mostrati al kit</button></div>`;
 }
 function renderHome(){
   const h = $('#home'); h.hidden = false;
@@ -983,7 +989,7 @@ function renderHome(){
   const ts = {}; items.forEach(i => { if (!i.duplicatoDi) i.strumenti.forEach(s => ts[s] = (ts[s] || 0) + 1); });
   h.innerHTML = `<div class="hhead"><h1>FRAME.01-LIBRARY</h1><p>${tot} elementi unici (le copie identiche sono nascoste) organizzati per area d'uso, non per nome. Scegli un'area, oppure cerca in alto.</p></div>${status}
   <div class="hsec">Aree d'uso</div><div class="agrid">${AREE.filter(a => areaShown(a, c)).map(acard).join('')}
-  <button class="acard" data-page="preferiti"><span class="mini">${S.fav.size} elementi</span><b>★ Preferiti</b><span class="d">Gli elementi che hai segnato, di ogni area.</span></button></div>
+  <button class="acard" data-page="preferiti"><span class="mini">${S.fav.size} elementi</span><b>★ Preferiti</b><span class="d">Gli elementi che hai segnato, di ogni area.</span></button><button class="acard" data-page="gruppi"><span class="mini">${GRP.length} gruppi</span><b>Gruppi</b><span class="d">Le tue cartelle di reference e schede, per cliente, tema o idea.</span></button></div>
   <div class="hsec">Lavoro</div><div class="agrid"><button class="acard" data-page="progetto-brief"><span class="mini">nuovo</span><b>Brief progetto</b><span class="d">Scrivi l'idea e ricevi un percorso a step con gli elementi, le skill e i plugin giusti.</span></button><button class="acard" data-page="pulizia"><span class="mini">${cleanCount()} da rivedere</span><b>Pulizia</b><span class="d">Doppioni da unire e schede da scartare, senza cancellare nulla.</span></button><button class="acard" data-page="import"><span class="mini">3 passi</span><b>Import</b><span class="d">Cosa entra, da dove, cosa resta da analizzare.</span></button></div>
   ${S.recent.length ? `<div class="hsec">Visti di recente</div><div class="grid v-var" id="recentGrid" style="--cw:230px;padding-bottom:8px">${S.recent.slice(0, 6).map(id => card(byId[id])).join('')}</div>` : ''}
   ${recentAdd.length ? `<div class="hsec">Aggiunti di recente</div><div class="grid v-var" id="addGrid" style="--cw:230px;padding-bottom:8px">${recentAdd.map(card).join('')}</div>` : ''}
@@ -1753,7 +1759,7 @@ function pBrief(){
   <p class="vact"><button class="pill black" data-bgen="1">Genera percorso</button><button class="pill" data-bcopy="1">Copia brief per Claude</button><button class="pill" data-breset="1">Azzera</button></p>
   <details class="vimp"><summary class="mini">Importa il piano di Claude</summary><textarea id="b_imp" placeholder="Incolla qui il JSON che ti ha dato Claude" style="min-height:90px"></textarea><p><button class="pill" data-bimp="1">Importa piano</button></p></details></div>${plan}`;
 }
-function renderSpecialNew(){ const p = S.page; return p === 'pulizia' ? pPulizia() : p === 'import' ? pImport() : p === 'salvati' ? pSalvati() : p === 'progetto-brief' ? pBrief() : null; }
+function renderSpecialNew(){ const p = S.page; return p === 'pulizia' ? pPulizia() : p === 'import' ? pImport() : p === 'salvati' ? pSalvati() : p === 'progetto-brief' ? pBrief() : p === 'gruppi' ? pGruppi() : null; }
 document.addEventListener('input', e => {
   const t = e.target, k = t.dataset && t.dataset.bf; if (!k) return; BRIEF[k] = t.value; store.set('brief', BRIEF);
 });
@@ -1830,6 +1836,134 @@ const GOALS = [
     { t: '2 · Skill di scrittura', d: 'Strumenti che migliorano o strutturano le richieste.', spec: { tipo: ['skill'], q: 'prompt|writing|copy' } },
     { t: '3 · Guide', d: 'Metodi e analisi da leggere.', spec: { tipo: ['documento', 'risorsa'], q: 'prompt' } }] }
 ];
+/* ===== v9: copertine generate, gruppi, Instagram stile Albo, nuovi percorsi ===== */
+const hsh = s => { let h = 2166136261; for (const c of String(s)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+const ART_H = { skill: 262, plugin: 288, riferimento: 196, risorsa: 28, componente: 158, template: 338, documento: 44, progetto: 124, 'modello-media': 318, prompt: 212, html: 176, 'design-system': 18 };
+function art(i){
+  const h = hsh(i.id || i.titolo), base = ART_H[i.tipo] != null ? ART_H[i.tipo] : h % 360, hue = (base + (h % 44) - 22 + 360) % 360, h2 = (hue + 28 + (h >> 4) % 40) % 360;
+  const k = (h >> 8) % 4, a = 20 + (h >> 3) % 60, b = 30 + (h >> 5) % 50;
+  const shapes = [
+    `<circle cx="${a * 4}" cy="${b * 1.6}" r="${70 + a}" fill="hsl(${h2} 80% 62% / .35)"/><circle cx="${300 - a}" cy="${220 - b}" r="${50 + b}" fill="hsl(${hue} 70% 30% / .45)"/>`,
+    `<rect x="${a}" y="${b - 30}" width="190" height="190" rx="28" transform="rotate(${(h % 30) - 15} 160 120)" fill="hsl(${h2} 75% 60% / .30)"/><rect x="${200 - a}" y="${60 + b}" width="150" height="150" rx="75" fill="hsl(${hue} 65% 28% / .5)"/>`,
+    `<path d="M0 ${150 + b / 2} Q ${80 + a} ${90 + b} 200 ${150 - b / 2} T 400 ${120 + b / 3} V260 H0Z" fill="hsl(${h2} 78% 60% / .32)"/><path d="M0 ${190 + b / 3} Q 120 ${130 + a} 240 ${180} T 400 ${170 - a / 2} V260 H0Z" fill="hsl(${hue} 70% 26% / .55)"/>`,
+    `${[0, 1, 2, 3, 4, 5].map(n => `<line x1="${-20 + n * 70 + a}" y1="260" x2="${60 + n * 70 + a}" y2="-10" stroke="hsl(${n % 2 ? h2 : hue} 80% 65% / .${2 + n % 3})" stroke-width="${10 + (n * 7) % 18}"/>`).join('')}`
+  ][k];
+  const tl_ = i.tipo === 'skill' || i.tipo === 'plugin' ? '/' + (i.nome || i.titolo) : (i.categoria || tl(i.tipo));
+  const ini = String(i.titolo || '?').replace(/^[^A-Za-z0-9À-ÿ]+/, '').charAt(0).toUpperCase();
+  return `<div class="art" style="--ah:${hue};background:linear-gradient(135deg,hsl(${hue} 55% 22%),hsl(${h2} 60% 34%))"><svg viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${shapes}</svg><span class="ai">${esc(ini)}</span><span class="at">${esc(tl_)}</span><b class="ab">${esc(i.titolo)}</b></div>`;
+}
+function igCard(i){
+  const fv = S.fav.has(i.id), on = S.kit.has(i.id), vid = i.media === 'video', cap = i.didascalia || (i.estratto ? i.estratto.replace(/https?:\/\/\S+/g, '').trim() : '') || i.descrizione || '';
+  const img = i.thumb ? (window.__ONLINE ? `<img class="igi" data-pv="${esc(i.thumb)}" alt="" onerror="this.remove()">` : `<img class="igi" loading="lazy" src="${esc(i.thumb)}" alt="" onerror="this.remove()">`) : '';
+  const au = i.autore ? '@' + String(i.autore).replace(/^@/, '') : 'Instagram';
+  const gs = (i.gruppi || []).map(g => GRP.find(x => x.id === g)).filter(Boolean).slice(0, 2);
+  return `<article class="card igc${S.sel.has(i.id) ? ' sel' : ''}" data-id="${esc(i.id)}" tabindex="0" role="button" aria-label="Apri post di ${esc(au)}">
+  <div class="media igm ${vid ? 'vid' : ''}">${art(i)}${img}<span class="selbtn" aria-hidden="true">✓</span>${vid ? '<span class="igp" aria-label="Reel">▶</span>' : ''}<button class="favbtn igf ${fv ? 'on' : ''}" data-fav="${esc(i.id)}" aria-pressed="${fv}" aria-label="${fv ? 'Togli dai preferiti' : 'Aggiungi ai preferiti'}">${fv ? '★' : '☆'}</button></div>
+  <div class="igb"><div class="igh"><span class="iga">${esc(au)}</span>${i.collezione ? `<span class="mini">${esc(i.collezione)}</span>` : ''}</div>
+  <p class="igcap">${esc(cap) || '<span class="mini">Nessuna descrizione disponibile.</span>'}</p>
+  <div class="igt">${i.categoria ? `<span class="chip">${esc(/varie|non pertinente/i.test(i.categoria) ? 'Spunto creativo' : i.categoria)}</span>` : ''}${PSHORT[i.area] && !(i.area === 'idee' && /varie|non pertinente/i.test(i.categoria || '')) ? `<span class="chip">${esc(PSHORT[i.area])}</span>` : ''}${'' && PSHORT[i.area] ? `<span class="chip">${esc(PSHORT[i.area])}</span>` : ''}${gs.map(g => `<span class="chip prj">${esc(g.nome)}</span>`).join('')}<button class="kitbtn ${on ? 'on' : ''}" data-kit="${esc(i.id)}" aria-pressed="${on}">${on ? '✓ Kit' : '+ Kit'}</button></div></div></article>`;
+}
+/* ---- gruppi ---- */
+const grpSlug = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'gruppo';
+const grpName = id => (GRP.find(g => g.id === id) || {}).nome || id;
+function grpSave(){ api('annota', { id: '__config__', patch: { elencoGruppi: GRP } }).then(r => { if (r && r.ok === false) toast(r.errore || 'Gruppi non salvati'); }); }
+function grpCreate(nome){
+  nome = String(nome || '').trim().slice(0, 60); if (!nome) return null;
+  const ex = GRP.find(g => g.nome.toLowerCase() === nome.toLowerCase()); if (ex) return ex;
+  let id = grpSlug(nome), n = 2; while (GRP.some(g => g.id === id)) id = grpSlug(nome) + '-' + n++;
+  const g = { id, nome, colore: '' }; GRP.push(g); grpSave(); return g;
+}
+function grpApply(gid, ids, remove){
+  if (!canEdit()) { toast(SOLA_LETTURA); return 0; }
+  let n = 0;
+  ids.forEach(id => { const i = byId[id]; if (!i) return; const s = new Set(i.gruppi || []); const had = s.has(gid); remove ? s.delete(gid) : s.add(gid); if (had !== s.has(gid)) n++; i.gruppi = [...s]; persistNote(id, { gruppi: i.gruppi }, true); });
+  return n;
+}
+function selBar(){
+  let b = document.getElementById('selbar');
+  if (!S.selMode) { if (b) b.remove(); document.body.classList.remove('selmode'); return; }
+  document.body.classList.add('selmode');
+  if (!b) { b = document.createElement('div'); b.id = 'selbar'; b.className = 'selbar'; b.setAttribute('role', 'region'); b.setAttribute('aria-label', 'Selezione'); document.body.appendChild(b); }
+  const n = S.sel.size;
+  b.innerHTML = `<b>${n} ${n === 1 ? 'selezionata' : 'selezionate'}</b><span class="selbtns"><button class="pill black" data-selgrp="1" ${n ? '' : 'disabled'}>Aggiungi a gruppo…</button>${S.grp ? `<button class="pill" data-selrem="1" ${n ? '' : 'disabled'}>Togli da «${esc(grpName(S.grp))}»</button>` : ''}<button class="pill" data-selkit="1" ${n ? '' : 'disabled'}>+ Kit</button><button class="pill" data-selall="1">Tutte le mostrate</button><button class="pill" data-selmode="0">Fine</button></span>`;
+}
+function selToggle(id, el){ S.sel.has(id) ? S.sel.delete(id) : S.sel.add(id); if (el) el.classList.toggle('sel', S.sel.has(id)); selBar(); }
+function selMode(on){ S.selMode = on; if (!on) S.sel.clear(); document.querySelectorAll('#grid .card.sel').forEach(c => c.classList.remove('sel')); selBar(); renderHead(); }
+function grpDlg(){
+  document.getElementById('grpdlg')?.remove();
+  const ids = [...S.sel]; const w = document.createElement('div'); w.id = 'grpdlg'; w.className = 'smwrap'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', 'Aggiungi a un gruppo');
+  const cnt = g => items.filter(i => (i.gruppi || []).includes(g.id)).length;
+  w.innerHTML = `<div class="box smbox"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>Aggiungi ${ids.length} ${ids.length === 1 ? 'scheda' : 'schede'} a un gruppo</b><button class="pill" data-grpclose="1">Chiudi ✕</button></div>
+  <div class="grplist">${GRP.map(g => `<button class="pill grpopt" data-grppick="${esc(g.id)}"><span>${esc(g.nome)}</span><span class="n">${cnt(g)}</span></button>`).join('') || '<p class="mini">Nessun gruppo: creane uno qui sotto.</p>'}</div>
+  <div class="an-row" style="grid-template-columns:1fr auto"><input type="text" id="grpnew" placeholder="Nuovo gruppo (es. Moodboard hotel)" maxlength="60"><button class="pill black" data-grpmake="1">Crea e aggiungi</button></div></div>`;
+  document.body.appendChild(w); w.querySelector('#grpnew').focus();
+}
+function pGruppi(){
+  const base = items.filter(i => !i.duplicatoDi);
+  const card_ = g => { const m = base.filter(i => (i.gruppi || []).includes(g.id)), th = m.filter(i => i.thumb && !i.disegnata).slice(0, 4);
+    return `<article class="grpc"><button class="grpopen" data-grpopen="${esc(g.id)}" aria-label="Apri il gruppo ${esc(g.nome)}"><div class="media gmo n${th.length}">${th.map(i => window.__ONLINE ? `<img data-pv="${esc(i.thumb)}" alt="" onerror="this.remove()">` : `<img loading="lazy" src="${esc(i.thumb)}" alt="" onerror="this.remove()">`).join('') || '<span class="gmz">⌗</span>'}</div><b>${esc(g.nome)}</b><span class="mini">${m.length} ${m.length === 1 ? 'elemento' : 'elementi'}</span></button>${canEdit() ? `<span class="grpact"><button class="favbtn" data-grpren="${esc(g.id)}" aria-label="Rinomina" title="Rinomina">✎</button><button class="favbtn" data-grpdel="${esc(g.id)}" aria-label="Elimina il gruppo" title="Elimina il gruppo (le schede restano)">✕</button></span>` : ''}</article>`; };
+  return `<div class="hhead"><div class="crumb"><button data-page="home">Panoramica</button> › <span>Gruppi</span></div><h1>Gruppi</h1><p>Cartelle tue: raccogli reference, post e schede per tema, cliente o idea. Usa «Seleziona» in qualunque pagina, scegli le schede e aggiungile a un gruppo.</p>
+  <div class="acts" style="margin-top:10px">${canEdit() ? `<span class="grpnewrow"><input type="text" id="grpnew2" placeholder="Nuovo gruppo" maxlength="60" aria-label="Nome del nuovo gruppo"><button class="pill black" data-grpmake2="1">Crea gruppo</button></span>` : '<span class="mini">Per creare o modificare i gruppi apri la libreria dal Mac o accedi con il tuo account.</span>'}</div></div>
+  ${GRP.length ? `<div class="grpgrid">${GRP.map(card_).join('')}</div>` : '<div class="empty"><h2>Nessun gruppo ancora</h2><p>Crea il primo qui sopra, oppure usa «Seleziona» su Instagram, Tutto o Preferiti.</p></div>'}`;
+}
+/* ---- nuovi percorsi ---- */
+GOALS.unshift(
+  { id: 'idee', t: 'Trovare idee creative', d: 'Dalle reference e dai post salvati a una direzione: raccogli, scegli, sviluppa.', ob: 'trovare idee creative e una direzione visiva per un progetto', fasi: [
+    { t: '1 · Raccogli spunti', d: 'Foto, video, interior, street culture, musica: tutto ciò che ti accende un\'idea. Sfoglia e metti ★ o aggiungi a un gruppo.', spec: { area: 'idee' } },
+    { t: '2 · Scegli lo stile', d: 'Dalle reference passa alle parole: stile, materiali, luce, ritmo. Cerca i design system e le board che lo esprimono.', spec: { tag: ['minimal', 'editoriale', 'lusso', 'brutalismo', 'cinematico'], tipo: ['design-system', 'riferimento'] } },
+    { t: '3 · Costruisci il moodboard', d: 'Raggruppa le reference migliori in un gruppo (cartella) per cliente o progetto e rivedile insieme.', spec: { q: 'moodboard|board|reference|ispirazione|inspiration' } },
+    { t: '4 · Trasforma in concept', d: 'Con prompt e skill di brief trasformi lo spunto in una proposta: titolo, tono, scene, applicazioni.', spec: { tipo: ['prompt', 'skill'], q: 'concept|brief|idea|creative|campaign' } }] },
+  { id: 'social', t: 'Contenuti social e reel', d: 'Idee, copy e formati: dai post che ti hanno colpito al tuo piano.', ob: 'pianificare contenuti social e reel per un brand', fasi: [
+    { t: '1 · Guarda cosa funziona', d: 'Le reference Instagram salvate: autore, didascalia e formato.', spec: { q: 'reel|carousel|instagram|social|hook' } },
+    { t: '2 · Scrivi e impagina', d: 'Prompt e skill per didascalie, caroselli e storie.', spec: { tipo: ['prompt', 'skill'], q: 'caption|didascalia|carousel|social|instagram|copy' } },
+    { t: '3 · Video e motion', d: 'Strumenti per montare, animare e rifinire i reel.', spec: { tag: ['motion', 'animazioni', 'video'] } }] }
+);
+const crumbOf = t => S.page === 'gruppi' && S.grp
+  ? `<div class="crumb"><button data-page="home">Panoramica</button> › <button data-grpback="1">Gruppi</button> › <span>${esc(grpName(S.grp))}</span></div>`
+  : `<div class="crumb"><button data-page="home">Panoramica</button> › <span>${esc(S.page === 'tutto' || S.page === 'preferiti' ? t[0] : (PSHORT[S.page] || t[0]))}</span></div>`;
+function igBar(){
+  let b = document.getElementById('igbar');
+  if (!b) { b = document.createElement('div'); b.id = 'igbar'; b.className = 'igbar'; b.setAttribute('role', 'group'); b.setAttribute('aria-label', 'Filtra i post per area'); const m = document.getElementById('tools'); m.parentNode.insertBefore(b, m); }
+  if (S.page !== 'instagram') { b.hidden = true; return; }
+  const ca = {}; items.forEach(i => { if (match(i, 'area')) ca[i.area] = (ca[i.area] || 0) + 1; });
+  const tot = Object.values(ca).reduce((a, c) => a + c, 0);
+  b.hidden = false;
+  b.innerHTML = `<button class="pill ${S.area ? '' : 'on'}" data-area="">Tutti<span class="n">${tot}</span></button>` + AREE.filter(a => ca[a.id]).sort((x, y) => ca[y.id] - ca[x.id]).map(a => `<button class="pill ${S.area === a.id ? 'on' : ''}" data-area="${a.id}">${esc(PSHORT[a.id] || a.nome)}<span class="n">${ca[a.id]}</span></button>`).join('');
+}
+function goalCard(g){
+  const all = new Map(); g.fasi.forEach(f => resolve(f.spec).forEach(i => all.set(i.id, i)));
+  const th = [...all.values()].filter(i => i.thumb && !i.disegnata).slice(0, 3);
+  return `<button class="acard gcard" data-goal="${g.id}"><span class="media gmos n${th.length}">${th.map(i => window.__ONLINE ? `<img data-pv="${esc(i.thumb)}" alt="" onerror="this.remove()">` : `<img loading="lazy" src="${esc(i.thumb)}" alt="" onerror="this.remove()">`).join('')}</span><span class="mini">${g.fasi.length} fasi · ${all.size} elementi</span><b>${esc(g.t)}</b><span class="d">${esc(g.d)}</span><span class="gnext mini">Inizia da: ${esc(g.fasi[0].t.replace(/^\d+ · /, ''))}</span></button>`;
+}
+function pMappa(){
+  const c = aCount(), nIG = items.filter(i => isIG(i) && !i.duplicatoDi).length, org = {};
+  items.forEach(i => { if (!i.duplicatoDi) { const o = i.origine || 'Cartella'; org[o] = (org[o] || 0) + 1; } });
+  const ac = a => `<button class="acard" data-page="${a.id}"><span class="mini">${c[a.id] || 0} elementi</span><b>${esc(a.nome)}</b><span class="d">${esc(a.desc)}</span></button>`;
+  return `<div class="hsec">Dove trovare cosa</div><div class="agrid">${AREE.filter(a => (c[a.id] || 0) > 0 || a.core).map(ac).join('')}
+  <button class="acard" data-page="instagram"><span class="mini">${nIG} post e reel</span><b>Instagram</b><span class="d">Reference salvate con autore e didascalia: spunti, guide, strumenti e idee da sviluppare.</span></button>
+  <button class="acard" data-page="gruppi"><span class="mini">${GRP.length} gruppi</span><b>Gruppi</b><span class="d">Le tue cartelle: raccogli reference e schede per cliente, tema o idea.</span></button>
+  <button class="acard" data-page="preferiti"><span class="mini">${S.fav.size} elementi</span><b>★ Preferiti</b><span class="d">Quello che hai segnato, di ogni area.</span></button></div>
+  <div class="hsec">Da dove arrivano</div><div class="filters" style="padding:0 12px">${Object.entries(org).sort((a, b) => b[1] - a[1]).map(([o, n]) => `<span class="chip">${esc(o)} <span class="n">${n}</span></span>`).join('')}</div>
+  <div class="hsec">Come si usa, in 3 passi</div><div class="agrid"><div class="acard"><span class="mini">1</span><b>Cerca o scegli un obiettivo</b><span class="d">«Per obiettivo» ti guida fase per fase; la ricerca trova titoli, tag e didascalie.</span></div><div class="acard"><span class="mini">2</span><b>Seleziona e raggruppa</b><span class="d">Premi «Seleziona», scegli le schede e aggiungile a un gruppo o al kit.</span></div><div class="acard"><span class="mini">3</span><b>Passa a Claude o a un progetto</b><span class="d">Dal kit o dal gruppo copi il brief con le schede scelte.</span></div></div>`;
+}
+document.addEventListener('click', e => {
+  const t = e.target; let x;
+  if ((x = t.closest('[data-selmode]'))) { e.stopPropagation(); selMode(x.dataset.selmode === '1'); render(); return; }
+  if (t.closest('[data-selgrp]')) { e.stopPropagation(); grpDlg(); return; }
+  if (t.closest('[data-selall]')) { e.stopPropagation(); list().slice(0, 300).forEach(i => S.sel.add(i.id)); document.querySelectorAll('#grid .card').forEach(c => c.classList.toggle('sel', S.sel.has(c.dataset.id))); selBar(); return; }
+  if (t.closest('[data-selkit]')) { e.stopPropagation(); S.sel.forEach(id => S.kit.add(id)); store.set('kit', [...S.kit]); toast(S.sel.size + ' nel kit.'); S.sel.clear(); render(); selBar(); return; }
+  if (t.closest('[data-selrem]')) { e.stopPropagation(); const n = grpApply(S.grp, [...S.sel], true); toast(n + ' tolte dal gruppo.'); S.sel.clear(); render(); selBar(); return; }
+  if (t.closest('[data-grpclose]') || t.id === 'grpdlg') { document.getElementById('grpdlg')?.remove(); return; }
+  const pick = (gid) => { const n = grpApply(gid, [...S.sel]); document.getElementById('grpdlg')?.remove(); toast(n + ' aggiunte a «' + grpName(gid) + '».'); S.selMode = false; S.sel.clear(); selBar(); render(); };
+  if ((x = t.closest('[data-grppick]'))) { e.stopPropagation(); pick(x.dataset.grppick); return; }
+  if (t.closest('[data-grpmake]')) { e.stopPropagation(); const g = grpCreate(document.getElementById('grpnew').value); if (g) pick(g.id); return; }
+  if (t.closest('[data-grpmake2]')) { e.stopPropagation(); const el = document.getElementById('grpnew2'), g = grpCreate(el && el.value); if (g) { toast('Gruppo «' + g.nome + '» creato.'); render(); } return; }
+  if ((x = t.closest('[data-grpopen]'))) { e.stopPropagation(); S.grp = x.dataset.grpopen; S.limit = 96; render(); scrollTo({ top: 0 }); return; }
+  if (t.closest('[data-grpback]')) { e.stopPropagation(); S.grp = ''; selMode(false); render(); return; }
+  if ((x = t.closest('[data-grpren]'))) { e.stopPropagation(); const g = GRP.find(y => y.id === x.dataset.grpren), n = g && prompt('Nuovo nome del gruppo', g.nome); if (g && n && n.trim()) { g.nome = n.trim().slice(0, 60); grpSave(); render(); } return; }
+  if ((x = t.closest('[data-grpdel]'))) { e.stopPropagation(); const g = GRP.find(y => y.id === x.dataset.grpdel); if (g && confirm('Eliminare il gruppo «' + g.nome + '»? Le schede restano nel catalogo.')) { GRP = GRP.filter(y => y.id !== g.id); items.forEach(i => { if ((i.gruppi || []).includes(g.id)) { i.gruppi = i.gruppi.filter(y => y !== g.id); persistNote(i.id, { gruppi: i.gruppi }, true); } }); grpSave(); render(); } return; }
+}, true);
+
 const GSTATO = i => (getNote(i).stato || '');
 function resolve(spec){
   const re = spec.q ? new RegExp(spec.q, 'i') : null;
@@ -1853,10 +1987,11 @@ function pObiettivi(){
       <div class="acts"><button class="pill" data-phaseall="${g.id}:${k}" ${r.length ? '' : 'disabled'}>Vedi tutti (${r.length})</button><button class="pill" data-phaseai="${g.id}:${k}" ${r.length ? '' : 'disabled'}>✦ Chiedi all'AI</button></div></section>`; }).join('')}`;
   }
   return `<div class="hhead"><h1>Per obiettivo</h1><p>Dimmi che cosa devi fare: ti mostro in che ordine usare gli strumenti della libreria, fase per fase.</p></div>
-  <div class="agrid">${GOALS.map(g => `<button class="acard" data-goal="${g.id}"><span class="mini">${g.fasi.length} fasi</span><b>${esc(g.t)}</b><span class="d">${esc(g.d)}</span></button>`).join('')}
+  <div class="agrid goals">${GOALS.map(goalCard).join('')}
   <button class="acard" data-page="sviluppo"><span class="mini">guida</span><b>Creare le mie skill e plugin</b><span class="d">Come trasformare un metodo di lavoro in una skill o in un plugin, partendo dai modelli della libreria.</span></button></div>`;
 }
-function pTipi(){
+function pTipi(){ return pTipi0() + pMappa(); }
+function pTipi0(){
   const cnt = {}; items.forEach(i => { if (!i.duplicatoDi) cnt[i.tipo] = (cnt[i.tipo] || 0) + 1; });
   return `<div class="hhead"><h1>Che cosa c'è in libreria</h1><p>Ogni tipo di elemento si usa in modo diverso. Qui trovi che cos'è, dove si mette e un esempio di richiesta.</p></div>
   <div class="agrid tgrid">${Object.keys(C.meta.tipi).filter(t => cnt[t]).map(t => { const ti = TIPO_INFO[t] || {}; return `<article class="acard tcard t-${esc(t)}"><span class="badge t-${esc(t)}">${esc(tl(t))}</span><span class="mini">${cnt[t]} elementi</span><b>${esc(ti.cos ? ti.cos.charAt(0).toUpperCase() + ti.cos.slice(1) : tl(t))}</b><span class="d" style="display:block;flex:none">${esc(ti.uso || '')}</span><span class="mini">Esempio: ${esc(ti.esempio || '')}</span><span class="acts"><button class="pill black" data-tipopage="${esc(t)}">Vedi i ${cnt[t]}</button></span></article>`; }).join('')}</div>`;
@@ -1897,7 +2032,7 @@ function renderSide(){
   const c = aCount(), tot = items.filter(i => !i.duplicatoDi && !isIG(i)).length, ct = {}; items.forEach(i => { if (!i.duplicatoDi && !isIG(i)) ct[i.tipo] = (ct[i.tipo] || 0) + 1; });
   const on = (k) => S.page === k && !S.tipo ? ' on" aria-current="page' : '';
   const it = (k, l, n, sub) => `<button class="si${S.page === k ? ' on" aria-current="page' : ''}" data-page="${k}"><span>${esc(l)}${sub ? `<small>${esc(sub)}</small>` : ''}</span>${n == null ? '' : `<span class="n">${n}</span>`}</button>`;
-  el.innerHTML = `<div class="sg"><h2>Esplora</h2>${it('home', 'Panoramica', null)}${it('obiettivi', 'Per obiettivo', null, 'Cosa devi fare?')}${it('tipi', 'Che cosa c\'è', null, 'Cos\'è ogni tipo e come si usa')}${it('tutto', 'Tutto', tot)}${it('preferiti', '★ Preferiti', S.fav.size)}${it('instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length, 'Catalogo a parte')}</div>
+  el.innerHTML = `<div class="sg"><h2>Esplora</h2>${it('home', 'Panoramica', null)}${it('obiettivi', 'Per obiettivo', null, 'Cosa devi fare?')}${it('tipi', 'Che cosa c\'è', null, 'Cos\'è ogni tipo e come si usa')}${it('tutto', 'Tutto', tot)}${it('preferiti', '★ Preferiti', S.fav.size)}${it('gruppi', 'Gruppi', GRP.length, 'Le tue cartelle')}${it('instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length, 'Catalogo a parte')}</div>
   <div class="sg"><h2>Per area d'uso</h2>${AREE.filter(a => areaShown(a, c)).map(a => `<button class="si${S.page === a.id ? ' on" aria-current="page' : ''}" data-page="${a.id}" title="${esc(a.desc)}"><span>${esc(PSHORT[a.id] || a.nome)}</span><span class="n">${c[a.id] || 0}</span></button>`).join('')}</div>
   <div class="sg"><h2>Per tipo</h2>${Object.keys(C.meta.tipi).filter(t => ct[t]).map(t => `<button class="si${S.tipo === t && !SPECIAL.has(S.page) ? ' on" aria-current="true' : ''}" data-tipopage="${esc(t)}" title="${esc((TIPO_INFO[t] || {}).cos || '')}"><span>${esc(tl(t))}</span><span class="n">${ct[t]}</span></button>`).join('')}</div>
   <div class="sg"><h2>Lavoro</h2>${it('progetto-brief', 'Brief progetto', null, 'Dal punto zero all\'output')}${it('pulizia', 'Pulizia', cleanCount(), 'Doppioni e schede da scartare')}${it('import', 'Import', null, 'Cosa entra e da dove')}${it('salvati', 'Link salvati', null, 'Salvati dal telefono o dal Mac')}</div>
@@ -1923,7 +2058,7 @@ function renderTBanner(){
 
 function clearFilters(){ S.ids = null; S.area = ''; S.strum = ''; S.favOnly = false; $('#fFav').checked = false; S.q = ''; $('#q').value = ''; S.tipo = ''; S.tag.clear(); S.fonte = ''; S.prog = ''; S.stato = ''; $('#fStato').value = ''; S.prev = false; S.incomp = false; S.pront = ''; S.origine = ''; S.dup = false; $('#fPrev').checked = false; $('#fDup').checked = false; }
 function render(){
-  const home = S.page === 'home', sp = SPECIAL.has(S.page);
+  const home = S.page === 'home', sp = SPECIAL.has(S.page) || (S.page === 'gruppi' && !S.grp);
   const q = $('#quick'), tb = $('#tbanner');
   if (sp) {
     ['#tools', '#countRow', '#main'].forEach(s => $(s).hidden = true); $('#fpanel').hidden = true; $('#tbFiltri').classList.remove('on');
@@ -1983,7 +2118,7 @@ document.addEventListener('click', e => {
   const ar = t.closest('[data-arch]'); if (ar) { api('fonte', { azione: ar.dataset.az, nome: ar.dataset.arch }).then(r => { if (r.ok) { toast('Fatto: ora premi Aggiorna'); fontiRender(); SRV.archivio = r.archiviata ? [...(SRV.archivio || []), r.archiviata] : (SRV.archivio || []).filter(x => x !== r.ripristinata); fontiRender(); } else toast(r.errore); }); return; }
   if (t.closest('[data-pubblica]')) { pubblica(); return; }
   if (t.closest('#bScan')) { scan(); return; }
-  const c = t.closest('.card'); if (c) openItem(c.dataset.id);
+  const c = t.closest('.card'); if (c) { if (S.selMode) { selToggle(c.dataset.id, c); return; } openItem(c.dataset.id); }
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { if (cur) closeItem(); }
@@ -2041,6 +2176,7 @@ function renderActive(){
 }
 function applyView(){
   const g = $('#grid'); g.className = 'grid v-' + S.view + (S.view === 'densa' ? ' dense' : ''); g.style.removeProperty('--cw'); g.style.removeProperty('--cols');
+  document.body.classList.toggle('pg-ig', S.page === 'instagram'); g.classList.toggle('ig-m', S.page === 'instagram' && S.view !== 'lista'); igBar();
   const lh = $('#lhead'); if (lh) lh.hidden = S.view !== 'lista';
   document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === S.view));
 }
