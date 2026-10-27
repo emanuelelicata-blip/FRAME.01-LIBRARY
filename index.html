@@ -257,7 +257,15 @@ dialog::backdrop{background:var(--scrim)}
 .vpair{margin:8px 12px;padding:12px 14px}
 .vcols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .vmini{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:start}
-.vthumb .media{height:80px;border-radius:8px;overflow:hidden}
+.vmini>*{min-width:0}
+.vthumb{position:relative;width:100%;overflow:hidden;border-radius:8px}
+.vthumb .media{position:relative;width:100%;height:80px;aspect-ratio:auto;border-radius:8px;overflow:hidden;margin:0}
+.vthumb .media .covw,.vthumb .media img,.vthumb .media .cov,.vthumb .media iframe,.vthumb .media>*{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none}
+.vdesc{margin:4px 0;overflow-wrap:anywhere}
+.vlinks a.pill{display:inline-flex;align-items:center;text-decoration:none}
+.vlinks{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.vlinks .pill.sm,.vact .pill{min-height:36px;padding:6px 14px;font-size:13px}
+@media(pointer:coarse),(max-width:760px){.vlinks .pill.sm,.vact .pill{min-height:44px}}
 .vact{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .vlog{display:flex;gap:10px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--glass-border)}
 .vform{margin:0 12px;padding:14px 16px;max-width:760px}
@@ -840,7 +848,7 @@ const getNote = i => S.note[i.id] || i.annotazione || {};
 
 /* ---------- filtri ---------- */
 const isIG = i => i.catalogo === 'instagram';
-function inPage(i){ const p = S.page; if (p === 'instagram') return isIG(i); if (isIG(i)) return (p === 'preferiti' && S.fav.has(i.id)) || p === 'gruppi' || (p === 'idee' && i.area === 'idee'); return p === 'home' || p === 'tutto' || p === 'gruppi' || p === 'obiettivi' || p === 'tipi' || p === 'sviluppo' || (p === 'preferiti' ? S.fav.has(i.id) : i.area === p); }
+function inPage(i){ const p = S.page; if (p === 'instagram') return isIG(i); if (isIG(i)) return (p === 'preferiti' && S.fav.has(i.id)) || p === 'gruppi' || (!!ARE[p] && i.area === p); return p === 'home' || p === 'tutto' || p === 'gruppi' || p === 'obiettivi' || p === 'tipi' || p === 'sviluppo' || (p === 'preferiti' ? S.fav.has(i.id) : i.area === p); }
 function match(i, skip){
   if (skip === 'pront') { const sv = S.pront; S.pront = ''; try { return match(i); } finally { S.pront = sv; } }
   const terms = S.q.toLowerCase().split(/\s+/).filter(Boolean);
@@ -966,7 +974,7 @@ const ro = new ResizeObserver(es => es.forEach(e => { const f = e.target.querySe
 function observe(root){ root.querySelectorAll('.thumb, .media:has(img[data-pv])').forEach(t => { io.observe(t.classList.contains('thumb') ? t.parentElement : t); if (t.classList.contains('thumb')) ro.observe(t); }); }
 
 const canAdd = () => HTTP && !!SRV && !!(typeof SRV === 'object');
-function aCount(){ const c = {}; items.forEach(i => { if (!i.duplicatoDi && (!isIG(i) || i.area === 'idee')) c[i.area] = (c[i.area] || 0) + 1; }); return c; }
+function aCount(){ const c = {}; items.forEach(i => { if (!i.duplicatoDi) c[i.area] = (c[i.area] || 0) + 1; }); return c; }
 function pageList(){ const c = aCount(); return [['home', 'Panoramica', null], ['obiettivi', 'Per obiettivo', null], ['tipi', 'Che cosa c\'è', null], ['tutto', 'Tutto', items.filter(i => !i.duplicatoDi && !isIG(i)).length], ...AREE.filter(a => areaShown(a, c)).map(a => [a.id, PSHORT[a.id] || a.nome, c[a.id] || 0]), ['instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length], ['preferiti', '★ Preferiti', S.fav.size], ['gruppi', 'Gruppi', GRP.length], ['progetto-brief', 'Brief progetto', null], ['import', 'Flusso', null], ['revisione', 'Da verificare', revCount()], ['pulizia', 'Pulizia', cleanCount()], ['salvati', 'Link salvati', null], ['sviluppo', 'Skill e plugin', null]]; }
 const validPage = p => pageList().some(x => x[0] === p);
 function pageHash(){ return S.page === 'home' ? location.pathname + location.search : '#/' + S.page; }
@@ -1043,11 +1051,13 @@ function render0(){
   $('#home').hidden = true; $('#home').innerHTML = '';
   $('[data-acc="area"]').hidden = !(S.page === 'tutto' || S.page === 'preferiti' || S.page === 'instagram');
   const all = list(), shown = all.slice(0, S.limit);
+  renderMeta(all);
   const g = $('#grid');
   if (!items.length) { g.innerHTML = '<div class="empty"><h2>La libreria è vuota</h2><p>Metti una cartella in <code>inbox/</code> e premi <b>Aggiorna</b> (o fai doppio clic su <code>Apri-FRAME01-LIBRARY.command</code>).</p></div>'; return; }
   const vuoto = ARE[S.page] && !items.some(i => i.area === S.page) ? `<div class="empty"><h2>Quest'area è vuota</h2><p>${canAdd() ? 'Aggiungi link o cartelle con «+ Aggiungi link o cartelle» qui sopra (anche da Raindrop).' : 'Aggiungi materiale dalla pagina Importa quando apri la libreria dal Mac.'}</p></div>` : '';
   const grp = S.group && S.page !== 'instagram' && shown.length;
-  g.innerHTML = shown.length ? (grp ? renderGrouped(all, shown) : shown.map(card).join('')) : (vuoto || (S.page === 'preferiti' ? '<div class="empty"><h2>Nessun preferito</h2><p>Premi ☆ su una scheda per metterla qui.</p></div>' : '<div class="empty"><h2>Nessun risultato</h2><p>Prova a togliere qualche filtro o a cercare una parola diversa.</p><p class="eact"><button class="pill black" data-emptyreset="1">Azzera filtri e ricerca</button>' + (S.page !== 'tutto' ? '<button class="pill" data-page="tutto">Cerca in tutto il catalogo</button>' : '') + '</p></div>'));
+  const nIGa = ARE[S.page] ? all.filter(isIG).length : 0, areaNote = nIGa ? `<div class="areanote">Include <b>${nIGa}</b> ${nIGa === 1 ? 'post' : 'post e reel'} dal catalogo Instagram di quest'area (con l'icona del post). <button class="lnk" data-page="instagram">Apri solo Instagram</button></div>` : '';
+  g.innerHTML = shown.length ? areaNote + (grp ? renderGrouped(all, shown) : shown.map(card).join('')) : (vuoto || (S.page === 'preferiti' ? '<div class="empty"><h2>Nessun preferito</h2><p>Premi ☆ su una scheda per metterla qui.</p></div>' : '<div class="empty"><h2>Nessun risultato</h2><p>Prova a togliere qualche filtro o a cercare una parola diversa.</p><p class="eact"><button class="pill black" data-emptyreset="1">Azzera filtri e ricerca</button>' + (S.page !== 'tutto' ? '<button class="pill" data-page="tutto">Cerca in tutto il catalogo</button>' : '') + '</p></div>'));
   observe(g);
   { const kb = document.querySelector('[data-kitpage]'); if (kb) kb.textContent = all.length ? 'Aggiungi ' + (all.length > 200 ? 'i primi 200' : all.length === 1 ? 'l\'elemento' : 'i ' + all.length) + ' al kit' : 'Aggiungi al kit'; }
   $('#moreWrap').innerHTML = all.length > shown.length ? `<button class="pill more" id="more">Mostra altri ${Math.min(96, all.length - shown.length)} (${all.length - shown.length} restanti)</button>` : '';
@@ -1637,7 +1647,7 @@ function pairs(){ return ((C.meta.pulizia || {}).probabili || []).filter(p => by
 function toDiscard(){ return items.filter(i => i.valutazione && i.valutazione.prontezza === 'scartare' && !gone(i) && !i.preferito); }
 function cleanCount(){ return pairs().length + toDiscard().length; }
 function miniCard(i, extra){
-  return `<div class="vmini"><div class="vthumb"><div class="media">${media(i)}</div></div><div><b>${esc(i.titolo)}</b><div class="mini">${esc(i.autore ? '@' + i.autore + ' · ' : '')}${esc(i.categoria || tl(i.tipo))}</div><p class="mini" style="margin:4px 0">${esc((i.descrizione || '').slice(0, 130))}</p>${i.link && /^https:/.test(i.link) ? `<a class="mini" target="_blank" rel="noopener noreferrer" href="${esc(i.link)}">Apri ↗</a> · ` : ''}<button class="link" data-open="${esc(i.id)}">Scheda</button>${extra || ''}</div></div>`;
+  return `<div class="vmini"><div class="vthumb"><div class="media">${media(i)}</div></div><div><b>${esc(i.titolo)}</b><div class="mini">${esc(i.autore ? '@' + i.autore + ' · ' : '')}${esc(i.categoria || tl(i.tipo))}</div><p class="mini vdesc">${esc((i.descrizione || '').slice(0, 130))}</p><div class="vlinks">${i.link && /^https:/.test(i.link) ? `<a class="pill sm" target="_blank" rel="noopener noreferrer" href="${esc(i.link)}">Apri ↗</a>` : ''}<button class="pill sm" data-open="${esc(i.id)}">Scheda</button>${extra || ''}</div></div></div>`;
 }
 let discLimit = 30;
 function pPulizia(){
@@ -1649,7 +1659,7 @@ function pPulizia(){
   <div class="hsec">Da scartare? · ${di.length}</div>
   <p class="mini" style="padding:0 12px">Schede valutate «Da scartare» (non pertinenti o solo promozione). Le ★ non compaiono. «Archivia» le nasconde (stato Scartato); «Tieni» le rimette in gioco.</p>
   ${ok && di.length ? `<p style="padding:0 12px"><button class="pill" data-discall="1">Archivia tutte le ${di.length}</button></p>` : ''}
-  ${di.slice(0, discLimit).map(i => `<div class="box vpair">${miniCard(i)}${ok ? `<div class="vact"><button class="pill" data-disc="${esc(i.id)}">Archivia</button><button class="pill" data-tieni="${esc(i.id)}">Tieni</button></div>` : ''}</div>`).join('')}
+  ${di.slice(0, discLimit).map(i => `<div class="box vpair">${miniCard(i)}${ok ? `<div class="vact"><button class="pill" data-disc="${esc(i.id)}" title="Segna come scartata: non si cancella nulla, si può ripristinare">Archivia</button><button class="pill" data-tieni="${esc(i.id)}" title="Resta nel catalogo con prontezza «Da verificare»">Tieni da valutare</button></div>` : ''}</div>`).join('')}
   ${di.length > discLimit ? `<p style="padding:0 12px"><button class="pill more" data-discmore="1">Mostra altre ${Math.min(30, di.length - discLimit)}</button></p>` : ''}
   <div class="hsec">Unite in automatico · ${uniti.length}</div>
   ${uniti.length ? uniti.map(i => `<div class="box vpair">${miniCard(i, ` <span class="mini">· ${esc(i.uniMotivo)} · unita a</span> <button class="link" data-open="${esc(i.duplicatoDi)}">${esc((byId[i.duplicatoDi] || {}).titolo || '')}</button>`)}${ok ? `<div class="vact"><button class="pill" data-split="${esc(i.id)}">Annulla unione</button></div>` : ''}</div>`).join('') : '<div class="empty"><p>Nessuna unione automatica.</p></div>'}`;
@@ -1676,8 +1686,9 @@ function pRevisione(){
   const tabBtn = (k, t) => `<button class="pill ${tab === k ? 'black' : ''}" data-revtab="${k}" aria-pressed="${tab === k}">${t} <span class="n">${l[k].length}</span></button>`;
   return `<div class="hhead"><h1>Da verificare</h1><p>Schede che la libreria ritiene poco utili. <b>Decidi tu</b>: non viene archiviato niente in automatico e non ci sono pulsanti «tutte». Archiviare non cancella (si annulla cambiando lo stato dalla scheda).</p></div>${lock}
   <div class="acts" style="padding:0 12px 10px;display:flex;gap:8px;flex-wrap:wrap">${tabBtn('scartare', 'Da scartare')}${tabBtn('varie', 'Varie / non pertinenti')}${ok && rows.length ? `<button class="pill" data-flowsm="rev" title="Passa le schede una a una: tieni, da valutare o scarta">Smista queste ${rows.length}…</button>` : ''}</div>
+  <p class="mini" style="padding:0 12px"><b>Archivia</b> = scartata (si può ripristinare) · <b>Tieni da valutare</b> = resta nel catalogo · <b>Utile · Da usare</b> = diventa «Da usare».</p>
   <p class="mini" style="padding:0 12px">${tab === 'scartare' ? 'Valutate «Da scartare» dalle regole (non pertinenti o solo promozione).' : 'Post e reel senza un contenuto riconoscibile (didascalia vuota o generica). Aprili per capire se c\'è qualcosa da salvare.'}</p>
-  ${rows.length ? rows.slice(0, revLimit).map(i => `<div class="box vpair">${miniCard(i)}${ok ? `<div class="vact"><button class="pill" data-disc="${esc(i.id)}">Archivia</button><button class="pill" data-tieni="${esc(i.id)}">Tieni</button><button class="pill" data-revuse="${esc(i.id)}">È utile: Da usare</button></div>` : ''}</div>`).join('') : '<div class="empty"><h2>Niente da verificare qui</h2><p>Le schede di questa lista sono state tutte decise.</p></div>'}
+  ${rows.length ? rows.slice(0, revLimit).map(i => `<div class="box vpair">${miniCard(i)}${ok ? `<div class="vact"><button class="pill" data-disc="${esc(i.id)}" title="Segna come scartata: non si cancella nulla, si può ripristinare">Archivia</button><button class="pill" data-tieni="${esc(i.id)}" title="Resta nel catalogo con prontezza «Da verificare»">Tieni da valutare</button><button class="pill" data-revuse="${esc(i.id)}">Utile · Da usare</button></div>` : ''}</div>`).join('') : '<div class="empty"><h2>Niente da verificare qui</h2><p>Le schede di questa lista sono state tutte decise.</p></div>'}
   ${rows.length > revLimit ? `<p style="padding:0 12px"><button class="pill more" data-revmore="1">Mostra altre ${Math.min(24, rows.length - revLimit)} (${rows.length - revLimit} restanti)</button></p>` : ''}`;
 }
 /* --- Flusso: dal caricamento al catalogo --- */
@@ -2240,7 +2251,7 @@ function renderSide(){
 function renderQuick(){
   const q = $('#quick'); if (!q) return; const ct = {}, cs = {};
   items.forEach(i => { if (match(i, 'tipo')) ct[i.tipo] = (ct[i.tipo] || 0) + 1; if (match(i, 'strum')) i.strumenti.forEach(s => cs[s] = (cs[s] || 0) + 1); });
-  const nInc = items.filter(i => !i.duplicatoDi && i.qualita && i.qualita.punti <= 2).length;
+  const svI = S.incomp; S.incomp = false; let nInc = 0; try { nInc = items.filter(i => match(i) && i.qualita && i.qualita.punti <= 2).length; } finally { S.incomp = svI; }
   const row = (lab, html) => html ? `<div class="qrow"><span class="ql">${lab}</span><div class="qc">${html}</div></div>` : '';
   const tipi = Object.keys(C.meta.tipi).filter(t => ct[t] || S.tipo === t).map(t => `<button class="chip${S.tipo === t ? ' on' : ''}" data-tipo="${S.tipo === t ? '' : esc(t)}" aria-pressed="${S.tipo === t}">${esc(tl(t))} <span class="n">${ct[t] || 0}</span></button>`).join('');
   const str = Object.entries(cs).sort((a, b) => b[1] - a[1]).slice(0, 14).map(([s, n]) => `<button class="chip${S.strum === s ? ' on' : ''}" data-strum="${S.strum === s ? '' : esc(s)}" aria-pressed="${S.strum === s}">${esc(STR[s] || s)} <span class="n">${n}</span></button>`).join('');
@@ -2257,6 +2268,14 @@ function renderTBanner(){
 }
 
 function clearFilters(){ S.ids = null; S.area = ''; S.strum = ''; S.favOnly = false; $('#fFav').checked = false; S.q = ''; $('#q').value = ''; S.tipo = ''; S.tag.clear(); S.fonte = ''; S.prog = ''; S.stato = ''; $('#fStato').value = ''; S.prev = false; S.incomp = false; S.pront = ''; S.origine = ''; S.dup = false; $('#fPrev').checked = false; $('#fDup').checked = false; }
+function renderMeta(all){
+  // contatori della VISTA corrente; i totali globali stanno nel suggerimento
+  const nd = items.filter(i => i.duplicatoDi), nIG = items.filter(i => isIG(i) && !i.duplicatoDi).length, nMain = items.filter(i => !isIG(i) && !i.duplicatoDi).length;
+  const dv = nd.filter(i => { const sv = S.dup; S.dup = true; try { return match(i); } finally { S.dup = sv; } }).length;
+  const cop = S.dup ? all.filter(i => i.duplicatoDi).length : dv;
+  const tip = `Catalogo principale ${nMain} · Instagram ${nIG} · copie nascoste in tutto il catalogo ${nd.length} · ${C.meta.fonti} fonti`;
+  $('#meta').innerHTML = `<span title="${esc(tip)}"><b>${all.filter(i => !i.duplicatoDi).length}</b> in questa vista</span>${cop ? ` · <button class="lnk" data-dupt="1" title="Le copie identiche sono nascoste per non ripetere le schede">${S.dup ? cop + (cop === 1 ? ' copia mostrata' : ' copie mostrate') : cop + (cop === 1 ? ' copia nascosta qui' : ' copie nascoste qui')}</button>` : ''} · <span title="${esc(tip)}">totale ${nMain + nIG} (${nMain} catalogo + ${nIG} Instagram)</span>`;
+}
 function render(){
   const home = S.page === 'home', sp = SPECIAL.has(S.page) || (S.page === 'gruppi' && !S.grp);
   const q = $('#quick'), tb = $('#tbanner');
@@ -2448,7 +2467,6 @@ if (window.__ONLINE && /iPhone|iPad|iPod/.test(navigator.userAgent) || (window._
 
 /* ---------- avvio ---------- */
 const th = store.get('theme', null); if (th) document.documentElement.dataset.theme = th;
-{ const nd = items.filter(i => i.duplicatoDi).length, nt = items.length - nd; $('#meta').innerHTML = `${nt} elementi${nd ? ` · <button class="lnk" data-dupt="1" title="Le copie identiche sono nascoste per non ripetere le schede">${nd} copie nascoste</button>` : ''} · ${C.meta.fonti} ${C.meta.fonti === 1 ? 'fonte' : 'fonti'}`; }
 { const h0 = decodeURIComponent(location.hash.slice(1)); if (h0.startsWith('/') && validPage(h0.slice(1))) S.page = h0.slice(1); else if (h0 && byId[h0]) S.page = ARE[byId[h0].area] ? byId[h0].area : 'tutto'; }
 renderTags(); render(); syncBadge();
 if (HTTP) { api('stato').then(r => { if (r && r.ok) {

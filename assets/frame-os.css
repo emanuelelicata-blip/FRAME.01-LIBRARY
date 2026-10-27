@@ -593,3 +593,15 @@ html body .ddw:last-child .ddm{left:auto;right:0}
 html body .top{z-index:50}
 @media(min-width:761px) and (max-width:980px){html body .nav{margin-left:4px;gap:0}html body .nav .navi{padding:0 8px;font-size:12px}html body .nav .navi .dc{display:none}html body .search{min-width:0}}
 @media(max-width:760px){html body .ddm{display:none!important}}
+
+/* nota area con post Instagram */
+.areanote{grid-column:1/-1;column-span:all;width:100%;margin:0 0 10px;padding:8px 12px;border-radius:var(--radius-control,10px);background:var(--chip);color:var(--muted);font-size:var(--fs-md,13px)}
+.areanote b{color:var(--fg,inherit)}
+
+/* campi del riquadro cloud (login, link) e dei moduli: stesso stile degli altri campi */
+#cloudbox input,#cloudbox textarea,.vform input:not([type=checkbox]):not([type=radio]),.vform textarea,.vform select,input[type=email],input[type=url]{background:var(--glass-strong);border:1px solid var(--input);border-radius:var(--radius-control);color:var(--fg);padding:10px 14px;min-height:44px;font:400 14px/1.4 var(--sans,inherit)}
+#cloudbox textarea{min-height:90px;resize:vertical}
+#cloudbox input::placeholder,#cloudbox textarea::placeholder{color:var(--mfg);opacity:.85}
+#cloudbox input:focus,#cloudbox textarea:focus,.vform input:focus,.vform textarea:focus,.vform select:focus{outline:none;border-color:var(--ring);box-shadow:0 0 0 3px color-mix(in srgb,var(--ring) 28%,transparent)}
+#cloudbox p{margin:8px 0}#cloudbox .pill{min-height:44px}
+@media(max-width:760px){#cloudbox input,#cloudbox textarea{font-size:16px}}
