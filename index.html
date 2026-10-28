@@ -314,7 +314,7 @@ button,a,.card,.acard,.pg{touch-action:manipulation}
   <div class="bar">
     <a class="brandlogo" href="./" aria-label="FRAME.01-LIBRARY"><svg viewBox="0 0 720 111" aria-hidden="true" focusable="false"><use href="#f01"/></svg></a>
     <nav class="nav" aria-label="Navigazione principale">
-      <a class="navi on" href="./" aria-current="page" id="nvHome"><i>01</i>Libreria</a>
+      <a class="navi on" href="#/home" id="nvHome" data-page="home"><i>01</i>Libreria</a>
       <div class="ddw"><button class="navi" data-dd="esplora" aria-haspopup="true" aria-expanded="false"><i>02</i>Esplora<svg class="ic dc" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddm" role="menu" data-ddm="esplora" hidden></div></div>
       <div class="ddw"><button class="navi" data-dd="coll" aria-haspopup="true" aria-expanded="false"><i>03</i>Collezioni<svg class="ic dc" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddm" role="menu" data-ddm="coll" hidden></div></div>
       <div class="ddw"><button class="navi" data-dd="lavoro" aria-haspopup="true" aria-expanded="false"><i>04</i>Lavoro<svg class="ic dc" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddm" role="menu" data-ddm="lavoro" hidden></div></div>
@@ -1007,7 +1007,7 @@ function renderNav(lab, areeK){
     m.innerHTML = g.voci.map(k => item(k, g.sub[k])).join('') + (g.id === 'esplora' ? `<div class="dh">Aree d'uso</div>${areeK.map(k => item(k)).join('')}` : '');
     const b = document.querySelector(`[data-dd="${g.id}"]`); if (b) b.classList.toggle('on', g.voci.includes(S.page) || (g.id === 'esplora' && areeK.includes(S.page)));
   });
-  const hm = $('#nvHome'); if (hm) hm.classList.toggle('on', false);
+  const hm = $('#nvHome'); if (hm) { hm.classList.toggle('on', S.page === 'home'); if (S.page === 'home') hm.setAttribute('aria-current', 'page'); else hm.removeAttribute('aria-current'); }
 }
 function closeDD(){ document.querySelectorAll('.ddm').forEach(m => { m.hidden = true; }); document.querySelectorAll('[data-dd]').forEach(b => b.setAttribute('aria-expanded', 'false')); }
 document.addEventListener('click', e => {
@@ -2427,7 +2427,7 @@ window.addEventListener('resize', applyView);
 /* ---------- v3: pagine, area, strumento, kit di pagina, aggiorna ---------- */
 document.addEventListener('click', e => {
   const t = e.target;
-  const pg = t.closest('[data-page]'); if (pg) { setPage(pg.dataset.page); return; }
+  const pg = t.closest('[data-page]'); if (pg) { if (pg.tagName === 'A') e.preventDefault(); setPage(pg.dataset.page); return; }
   const mp = t.closest('[data-menupage]'); if (mp) { $('#dlgMenu').close(); setPage(mp.dataset.menupage); return; }
   const sp = t.closest('[data-strumpage]'); if (sp) { S.strum = ''; setPage('tutto'); S.strum = sp.dataset.strumpage; render(); return; }
   const ar = t.closest('[data-area]'); if (ar) { S.area = ar.dataset.area; S.limit = 96; render(); return; }
