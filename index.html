@@ -1070,7 +1070,7 @@ function render0(){
   $('#fArea').innerHTML = `<button class="pill ${S.area ? '' : 'on'}" data-area="">Tutte</button>` + AREE.filter(a => ca[a.id] || S.area === a.id).map(a => `<button class="pill ${S.area === a.id ? 'on' : ''}" data-area="${a.id}">${esc(PSHORT[a.id] || a.nome)}<span class="n">${ca[a.id] || 0}</span></button>`).join('');
   $('#fStrum').innerHTML = `<button class="pill ${S.strum ? '' : 'on'}" data-strum="">Tutti</button>` + Object.entries(cs).sort((a, b) => b[1] - a[1]).map(([s, n]) => `<button class="pill ${S.strum === s ? 'on' : ''}" data-strum="${esc(s)}">${esc(STR[s] || s)}<span class="n">${n}</span></button>`).join('');
   renderFonti(); renderActive(); renderTags(); renderProg(); applyView();
-  { const fg = $('#fGroup'); if (fg) fg.value = S.group; const go = $('#grpOpt'); if (go) go.hidden = S.page === 'instagram'; const sec = (S.page === 'tutto' ? 'tutto il catalogo' : S.page === 'preferiti' ? 'i preferiti' : S.page === 'instagram' ? 'Instagram' : (PSHORT[S.page] || (ARE[S.page] || {}).nome || 'la libreria')); $('#q').placeholder = 'Cerca in ' + sec + '…'; }
+  { const fg = $('#fGroup'); if (fg) fg.value = S.group; const go = $('#grpOpt'); if (go) go.hidden = S.page === 'instagram'; const sec = (S.page === 'tutto' ? 'tutto il catalogo' : S.page === 'preferiti' ? 'i preferiti' : S.page === 'instagram' ? 'Instagram' : (PSHORT[S.page] || (ARE[S.page] || {}).nome || 'la libreria')); $('#q').placeholder = (window.innerWidth < 900 ? 'Cerca…' : 'Cerca in ' + sec + '…'); }
 }
 function renderFonti(){
   const c = {}; items.forEach(i => { if (match(i, 'fonte')) c[i.fonte] = (c[i.fonte] || 0) + 1; });
