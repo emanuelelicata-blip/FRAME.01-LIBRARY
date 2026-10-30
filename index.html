@@ -1006,7 +1006,7 @@ function renderNav(lab, areeK){
   const item = (k, sub) => lab[k] ? `<button role="menuitem" data-page="${k}"${S.page === k ? ' aria-current="page"' : ''}><span>${esc(lab[k][0])}${sub ? `<small>${esc(sub)}</small>` : ''}</span>${lab[k][1] == null ? '' : `<span class="n">${lab[k][1]}</span>`}</button>` : '';
   NAVG.forEach(g => {
     const m = document.querySelector(`[data-ddm="${g.id}"]`); if (!m) return;
-    m.innerHTML = g.voci.map(k => item(k, g.sub[k])).join('') + (g.id === 'esplora' ? `<div class="dh">Aree d'uso</div>${areeK.map(k => item(k)).join('')}` : '');
+    m.innerHTML = g.voci.map(k => item(k, g.sub[k])).join('') + (g.id === 'esplora' ? `<div class="dh dda">Aree d'uso</div>${areeK.map(k => item(k).replace('<button ', '<button class="dda" ')).join('')}` : '');
     const b = document.querySelector(`[data-dd="${g.id}"]`); if (b) b.classList.toggle('on', g.voci.includes(S.page) || (g.id === 'esplora' && areeK.includes(S.page)));
   });
   const hm = $('#nvHome'); if (hm) { hm.classList.toggle('on', S.page === 'home'); if (S.page === 'home') hm.setAttribute('aria-current', 'page'); else hm.removeAttribute('aria-current'); }
@@ -2256,14 +2256,15 @@ function phaseOf(v){ const [gid, k] = v.split(':'); const g = GOALS.find(x => x.
 /* barra laterale (desktop) */
 function renderSide(){
   const el = $('#side'); if (!el) return;
-  const c = aCount(), tot = items.filter(i => !i.duplicatoDi && !isIG(i)).length, ct = {}; items.forEach(i => { if (!i.duplicatoDi && !isIG(i)) ct[i.tipo] = (ct[i.tipo] || 0) + 1; });
-  const on = (k) => S.page === k && !S.tipo ? ' on" aria-current="page' : '';
-  const it = (k, l, n, sub) => `<button class="si${S.page === k ? ' on" aria-current="page' : ''}" data-page="${k}"><span>${esc(l)}${sub ? `<small>${esc(sub)}</small>` : ''}</span>${n == null ? '' : `<span class="n">${n}</span>`}</button>`;
-  el.innerHTML = `<div class="sg"><h2>Esplora</h2>${it('home', 'Panoramica', null)}${it('obiettivi', 'Per obiettivo', null, 'Cosa devi fare?')}${it('step', 'Per step', null, 'Step 0–8 del lavoro')}${it('tipi', 'Che cosa c\'è', null, 'Cos\'è ogni tipo e come si usa')}${it('tutto', 'Tutto', tot)}${it('preferiti', '★ Preferiti', S.fav.size)}${it('gruppi', 'Gruppi', GRP.length, 'Le tue cartelle')}${it('instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length, 'Catalogo a parte')}</div>
-  <div class="sg"><h2>Per area d'uso</h2>${AREE.filter(a => areaShown(a, c)).map(a => `<button class="si${S.page === a.id ? ' on" aria-current="page' : ''}" data-page="${a.id}" title="${esc(a.desc)}"><span>${esc(PSHORT[a.id] || a.nome)}</span><span class="n">${c[a.id] || 0}</span></button>`).join('')}</div>
-  <div class="sg"><h2>Per tipo</h2>${Object.keys(C.meta.tipi).filter(t => ct[t]).map(t => `<button class="si${S.tipo === t && !SPECIAL.has(S.page) ? ' on" aria-current="true' : ''}" data-tipopage="${esc(t)}" title="${esc((TIPO_INFO[t] || {}).cos || '')}"><span>${esc(tl(t))}</span><span class="n">${ct[t]}</span></button>`).join('')}</div>
-  <div class="sg"><h2>Lavoro</h2>${it('progetto-brief', 'Brief progetto', null, 'Dal punto zero all\'output')}${it('pulizia', 'Pulizia', cleanCount(), 'Doppioni e schede da scartare')}${it('import', 'Flusso', null, 'Dal caricamento al catalogo')}${it('revisione', 'Da verificare', revCount(), 'Da scartare e varie: decidi tu')}${it('salvati', 'Link salvati', null, 'Salvati dal telefono o dal Mac')}</div>
-  <div class="sg"><h2>Strumenti</h2>${it('sviluppo', 'Creare skill e plugin', null)}<button class="si" data-sidego="#bFonti"><span>Fonti</span></button><button class="si" data-sidego="#bGuida"><span>Guida</span></button><button class="si" data-sidego="#bKit"><span>Kit</span><span class="n">${S.kit.size}</span></button></div>`;
+  const c = aCount(), base = items.filter(i => !i.duplicatoDi && !isIG(i) && i.valutazione), ct = {}, cf = {}, cp = {};
+  base.forEach(i => { ct[i.tipo] = (ct[i.tipo] || 0) + 1; const f0 = i.valutazione.fasi[0]; cf[f0] = (cf[f0] || 0) + 1; cp[i.valutazione.prontezza] = (cp[i.valutazione.prontezza] || 0) + 1; });
+  const row = (attr, val, l, n, on, title) => `<button class="si${on ? ' on" aria-current="true' : ''}" ${attr}="${esc(val)}"${title ? ` title="${esc(title)}"` : ''}><span>${esc(l)}</span><span class="n">${n}</span></button>`;
+  const filt = S.tipo || S.fase || S.pront;
+  el.innerHTML = `<div class="sg"><h2>Per area d'uso</h2>${AREE.filter(a => areaShown(a, c)).map(a => `<button class="si${S.page === a.id ? ' on" aria-current="page' : ''}" data-page="${a.id}" title="${esc(a.desc)}"><span>${esc(PSHORT[a.id] || a.nome)}</span><span class="n">${c[a.id] || 0}</span></button>`).join('')}</div>
+  <div class="sg"><h2>Per tipo</h2>${Object.keys(C.meta.tipi).filter(t => ct[t]).map(t => row('data-tipopage', t, tl(t), ct[t], S.tipo === t && !SPECIAL.has(S.page), (TIPO_INFO[t] || {}).cos)).join('')}</div>
+  <div class="sg"><h2>Per step</h2>${VAL.fasi.filter(f => cf[f.id]).map(f => row('data-sfase', f.id, f.n + ' · ' + f.nome.split(':')[0], cf[f.id], S.fase === f.id && !SPECIAL.has(S.page), f.ob)).join('')}</div>
+  <div class="sg"><h2>Per prontezza</h2>${Object.keys(VAL.prontezza).filter(k => cp[k]).map(k => row('data-spront', k, prName(k), cp[k], S.pront === k && !SPECIAL.has(S.page))).join('')}</div>
+  ${filt && !SPECIAL.has(S.page) ? '<div class="sg"><button class="si" data-sreset="1"><span>Azzera i filtri</span></button></div>' : ''}`;
 }
 /* filtri rapidi sempre visibili (desktop) e spiegazione del tipo */
 function renderQuick(){
@@ -2280,7 +2281,7 @@ function renderQuick(){
   const fc = {}; items.forEach(i => { if (i.valutazione && match(i, 'fase')) { const f0 = i.valutazione.fasi[0]; fc[f0] = (fc[f0] || 0) + 1; } });
   const fsr = VAL.fasi.filter(f => fc[f.id] || S.fase === f.id).map(f => `<button class="chip${S.fase === f.id ? ' on' : ''}" data-fase="${S.fase === f.id ? '' : f.id}" aria-pressed="${S.fase === f.id}" title="${esc(f.ob || '')}">${f.n} · ${esc(f.nome.split(':')[0])} <span class="n">${fc[f.id] || 0}</span></button>`).join('');
   const rx = (lab, html) => row(lab, html).replace('class="qrow"', 'class="qrow qx"');
-  q.innerHTML = row('Tipo', tipi) + row('Step', fsr) + rx('Tema', tagRow('tema')) + rx('Stile', tagRow('stile')) + rx('Formato', tagRow('formato')) + rx('Prontezza', prr) + rx('Strumento', str) + `<div class="qrow"><span class="ql">Altro</span><div class="qc"><button class="chip${S.favOnly ? ' on' : ''}" data-quick="fav" aria-pressed="${!!S.favOnly}">★ Preferiti</button><button class="chip${S.prev ? ' on' : ''}" data-quick="prev" aria-pressed="${!!S.prev}">Con anteprima</button><button class="chip${S.incomp ? ' on' : ''}" data-quick="incomp" aria-pressed="${!!S.incomp}" title="Schede con poche informazioni: pochi tag, nessuna anteprima o licenza">Da completare <span class="n">${nInc}</span></button><button class="chip" data-quick="expand" aria-expanded="false" id="qExp">Più filtri ▾</button><button class="chip" data-quick="more">Tutti i filtri…</button><button class="chip" data-quick="reset">Azzera</button></div></div>`;
+  q.innerHTML = row('Tipo', tipi).replace('class="qrow"', 'class="qrow qdup"') + row('Step', fsr).replace('class="qrow"', 'class="qrow qdup"') + rx('Tema', tagRow('tema')) + rx('Stile', tagRow('stile')) + rx('Formato', tagRow('formato')) + rx('Prontezza', prr) + rx('Strumento', str) + `<div class="qrow"><span class="ql">Altro</span><div class="qc"><button class="chip${S.favOnly ? ' on' : ''}" data-quick="fav" aria-pressed="${!!S.favOnly}">★ Preferiti</button><button class="chip${S.prev ? ' on' : ''}" data-quick="prev" aria-pressed="${!!S.prev}">Con anteprima</button><button class="chip${S.incomp ? ' on' : ''}" data-quick="incomp" aria-pressed="${!!S.incomp}" title="Schede con poche informazioni: pochi tag, nessuna anteprima o licenza">Da completare <span class="n">${nInc}</span></button><button class="chip" data-quick="expand" aria-expanded="false" id="qExp">Più filtri ▾</button><button class="chip" data-quick="more">Tutti i filtri…</button><button class="chip" data-quick="reset">Azzera</button></div></div>`;
   { let open = false; try { open = localStorage.getItem('f01lib.quickOpen') === '1'; } catch (e) {} if (q.querySelector('.qx .chip.on')) open = true; q.classList.toggle('open', open); const eb = $('#qExp'); if (eb) { eb.textContent = open ? 'Meno filtri ▴' : 'Più filtri ▾'; eb.setAttribute('aria-expanded', String(open)); } }
 }
 function renderTBanner(){
@@ -2317,6 +2318,9 @@ document.addEventListener('click', e => {
     AI.goal = g.ob; store.set('goal', AI.goal); openAI({ list: l, label: g.t }); return; }
   if ((x = t.closest('[data-phaseall]'))) { const { g, f } = phaseOf(x.dataset.phaseall); applyIds(resolve(f.spec).map(i => i.id), g.t + ' · ' + f.t); return; }
   if ((x = t.closest('[data-phaseai]'))) { const { g, f } = phaseOf(x.dataset.phaseai); AI.goal = g.ob + ' — fase: ' + f.t; store.set('goal', AI.goal); openAI({ list: resolve(f.spec).slice(0, 20), label: g.t + ' · ' + f.t }); return; }
+  if ((x = t.closest('[data-sfase]'))) { const v = x.dataset.sfase; const same = S.fase === v && !SPECIAL.has(S.page); clearFilters(); setPage('tutto'); S.fase = same ? '' : v; renderTags(); render(); return; }
+  if ((x = t.closest('[data-spront]'))) { const v = x.dataset.spront; const same = S.pront === v && !SPECIAL.has(S.page); clearFilters(); setPage('tutto'); S.pront = same ? '' : v; renderTags(); render(); return; }
+  if (t.closest('[data-sreset]')) { clearFilters(); renderTags(); render(); return; }
   if ((x = t.closest('[data-tipopage]'))) { const tp = x.dataset.tipopage; clearFilters(); setPage('tutto'); S.tipo = tp; renderTags(); render(); return; }
   if ((x = t.closest('[data-sidego]'))) { const el = $(x.dataset.sidego); if (el) el.click(); return; }
   if ((x = t.closest('[data-quick]'))) { const k = x.dataset.quick;
