@@ -1805,7 +1805,7 @@ function scoreFor(i, fase, B){
   const hits = Math.min(3, ws.filter(w => hay.includes(w)).length);
   const ov = (B.output || []).filter(o => v.output.includes(o)).length;
   const ig = isIG(i) ? (fase === 'ricerca' ? 0 : -9) : 0;
-  return 3 * (v.stili.includes(B.stile) ? 1 : 0) + 2 * ov + hits + (PES[v.prontezza] || 0) + (i.qualita ? i.qualita.punti * .3 : 0) + (S.fav.has(i.id) ? 2 : 0) + (fase === 'ricerca' && v.prontezza === 'ispirazione' ? 2 : 0) + ig;
+  return 3 * (v.stili.includes(B.stile) ? 1 : 0) + 2 * ov + hits + (PES[v.prontezza] || 0) + (i.qualita ? i.qualita.punti * .3 : 0) + ((v.voto || 3) - 3) * 1.2 + (v.fasi[0] === fase ? 1.5 : 0) + (S.fav.has(i.id) ? 2 : 0) + (fase === 'ricerca' && v.prontezza === 'ispirazione' ? 2 : 0) + ig;
 }
 function genPiano(B){
   const steps = VAL.fasi.map(f => {
@@ -1845,7 +1845,7 @@ function pBrief(){
   <p style="padding:0 12px"><button class="pill" data-pkit="1">Aggiungi tutti gli elementi al kit</button> <button class="pill" data-pcopy="1">Copia il piano</button></p>
   <div class="vsteps">${PIANO.steps.map((s, n) => `<article class="box vstep${s.fatto ? ' done' : ''}"><div class="vsh"><span class="vnum">${n}</span><div><b>${esc(s.titolo)}</b>${s.facoltativa ? ' <span class="mini">· facoltativa</span>' : ''}<div class="mini">${esc(s.obiettivo)}</div></div><label class="vo vchk"><input type="checkbox" data-pdone="${n}" ${s.fatto ? 'checked' : ''}> Fatto</label></div>
     <p class="mini" style="margin:6px 0"><b>Output:</b> ${esc(s.output)}</p>
-    ${s.items.length ? `<div class="vitems">${s.items.map(id => { const i = byId[id]; if (!i) return ''; const c0 = i.valutazione && i.valutazione.come[0]; return `<div class="vit"><button class="link" data-open="${esc(id)}">${esc(i.titolo)}</button> ${prPill(i)}<div class="mini">${esc(c0 ? c0.t + ' — ' + c0.d : '')}</div></div>`; }).join('')}</div>` : '<p class="mini">Nessun elemento adatto in libreria per questo step.</p>'}
+    ${s.items.length ? `<div class="vitems">${s.items.map(id => { const i = byId[id]; if (!i) return ''; const c0 = i.valutazione && i.valutazione.come[0]; return `<div class="vit"><button class="link" data-open="${esc(id)}">${esc(i.titolo)}</button> ${prPill(i)} <span class="vvoto" title="Voto">${votoDots(i.valutazione.voto || 3)}</span><div class="mini">${esc(i.valutazione.giudizio === 'scritto' && i.valutazione.quando ? i.valutazione.quando : (c0 ? c0.t + ' — ' + c0.d : ''))}</div></div>`; }).join('')}</div>` : '<p class="mini">Nessun elemento adatto in libreria per questo step.</p>'}
     ${s.strumenti.length ? `<div class="vrow"><span class="mini">Skill e plugin</span>${s.strumenti.map(x => `<span class="chip" title="${esc(x.come)}">${esc(x.nome)}</span>`).join('')}</div>${s.strumenti.some(x => x.come) ? `<ul class="gl">${s.strumenti.filter(x => x.come).map(x => `<li><b>${esc(x.nome)}</b> — ${esc(x.come)}</li>`).join('')}</ul>` : ''}` : ''}
     ${s.evitare ? `<p class="mini"><b>Evita:</b> ${esc(s.evitare)}</p>` : ''}</article>`).join('')}</div>` : '';
   return `<div class="hhead"><h1>Brief progetto</h1><p>Scrivi l'idea. «Genera percorso» sceglie gli elementi della libreria per ogni step, dal punto zero all'output. Per un piano più fine copia il brief e dallo a Claude, poi reimporta la risposta.</p></div>
