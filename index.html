@@ -531,7 +531,7 @@ function ripristina(id){
   toast('Ripristinata.'); render(); if (cur && cur.id === id) drawRender();
 }
 function headExtra(){
-  if (S.page === 'home' || S.page === 'obiettivi' || S.page === 'tipi' || S.page === 'sviluppo') return '';
+  if (S.page === 'home' || S.page === 'obiettivi' || S.page === 'step' || S.page === 'tipi' || S.page === 'sviluppo') return '';
   const base = items.filter(i => !i.duplicatoDi && inPage(i)), n = base.filter(isScart).length;
   return (canEdit() ? `<button class="pill ${S.selMode ? 'on' : ''}" data-selmode="${S.selMode ? 0 : 1}" aria-pressed="${S.selMode}" title="Scegli più schede e aggiungile a un gruppo">${S.selMode ? 'Fine selezione' : 'Seleziona'}</button>` : '') + (canEdit() ? '<button class="pill black" data-smista="1" title="Passa le schede una a una: tieni, da valutare o scarta">Smista…</button>' : '')
     + (n || S.stato === SCARTATO ? `<button class="pill ${S.stato === SCARTATO ? 'on' : ''}" data-showscart="1">${S.stato === SCARTATO ? '← Torna alle schede attive' : 'Scartati (' + n + ')'}</button>` : '');
@@ -850,6 +850,7 @@ const getNote = i => S.note[i.id] || i.annotazione || {};
 const isIG = i => i.catalogo === 'instagram';
 function inPage(i){ const p = S.page; if (p === 'instagram') return isIG(i); if (isIG(i)) return (p === 'preferiti' && S.fav.has(i.id)) || p === 'gruppi' || (!!ARE[p] && i.area === p); return p === 'home' || p === 'tutto' || p === 'gruppi' || p === 'obiettivi' || p === 'tipi' || p === 'sviluppo' || (p === 'preferiti' ? S.fav.has(i.id) : i.area === p); }
 function match(i, skip){
+  if (skip === 'fase') { const sv = S.fase; S.fase = ''; try { return match(i); } finally { S.fase = sv; } }
   if (skip === 'pront') { const sv = S.pront; S.pront = ''; try { return match(i); } finally { S.pront = sv; } }
   const terms = S.q.toLowerCase().split(/\s+/).filter(Boolean);
   if (!S.dup && i.duplicatoDi) return false;
@@ -865,6 +866,7 @@ function match(i, skip){
   { const st = getNote(i).stato || ''; if (S.stato === '') { if (st === 'Scartato') return false; } else if (S.stato === '-') { if (st) return false; } else if (S.stato !== '*' && st !== S.stato) return false; }
   if (S.prev && !i.preview && !(i.tipo === 'design-system' && i.palette?.length)) return false;
   if (S.incomp && !(i.qualita && i.qualita.punti <= 2)) return false;
+  if (skip !== 'fase' && S.fase && !(i.valutazione && i.valutazione.fasi.includes(S.fase))) return false;
   if (S.pront && !(i.valutazione && i.valutazione.prontezza === S.pront)) return false;
   if (S.origine && (i.origine || 'Cartella') !== S.origine) return false;
   for (const t of S.tag) if (!hasTag(i, t)) return false;
@@ -928,7 +930,7 @@ function card(i){
   const tools = i.strumenti.slice(0, 2).map(s => `<span class="chip tool">${esc(STR[s] || s)}</span>`).join('');
   return `<article class="card${S.sel.has(i.id) ? ' sel' : ''}" data-id="${esc(i.id)}" tabindex="0" role="button" aria-label="Apri ${esc(i.titolo)}">
   <div class="media">${media(i)}<span class="selbtn" aria-hidden="true">✓</span></div>
-  <div class="body"><div class="row"><span class="badge t-${esc(i.tipo)}">${esc(tl(i.tipo))}</span>${prPill(i)}${showA ? `<span class="mini">· ${esc(PSHORT[i.area])}</span>` : ''}${i.copie ? `<span class="mini">+${i.copie.length} copie</span>` : ''}${i.duplicatoDi ? '<span class="mini">copia</span>' : ''}${st ? `<span class="mini">· ${esc(st)}</span>` : ''}</div>
+  <div class="body"><div class="row"><span class="badge t-${esc(i.tipo)}">${esc(tl(i.tipo))}</span>${prPill(i)}${stPill(i)}${showA ? `<span class="mini">· ${esc(PSHORT[i.area])}</span>` : ''}${i.copie ? `<span class="mini">+${i.copie.length} copie</span>` : ''}${i.duplicatoDi ? '<span class="mini">copia</span>' : ''}${st ? `<span class="mini">· ${esc(st)}</span>` : ''}</div>
   <h3>${esc(i.titolo)}</h3><p>${esc(i.descrizione)}</p>
   ${tfLinks(i)}<div class="tags">${tools}${i.tag.slice(0, 3).map(t => `<span class="chip">${esc(TAGL[t] || t)}</span>`).join('')}${(i.progetti || []).slice(0, 2).map(p => `<span class="chip prj">${esc(progName(p))}</span>`).join('')}</div></div>
   <footer class="cf"><span>${i.tipo === 'prompt' ? esc(i.categoria || 'prompt') : esc(i.fonte) + (i.contenuti.file ? ' · ' + i.contenuti.file + ' file' : '')}</span><span class="cfb"><button class="favbtn eyebtn" data-ql="${esc(i.id)}" aria-label="Anteprima rapida" title="Anteprima rapida (Spazio)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="favbtn ${fv ? 'on' : ''}" data-fav="${esc(i.id)}" aria-pressed="${fv}" aria-label="${fv ? 'Togli dai preferiti' : 'Aggiungi ai preferiti'}" title="Preferito">${fv ? '★' : '☆'}</button>${i.tipo === 'prompt' ? `<button class="kitbtn" data-cprompt="${esc(i.id)}">Copia</button>` : ''}${canEdit() ? (st === 'Scartato' ? `<button class="favbtn" data-ripr="${esc(i.id)}" aria-label="Ripristina" title="Ripristina">↺</button>` : `<button class="favbtn" data-scarta="${esc(i.id)}" aria-label="Scarta" title="Scarta (si può ripristinare)">✕</button>`) : ''}<button class="kitbtn ${on ? 'on' : ''}" data-kit="${esc(i.id)}" aria-pressed="${on}">${on ? 'Nel kit ✓' : '+ Kit'}</button></span></footer></article>`;
@@ -975,7 +977,7 @@ function observe(root){ root.querySelectorAll('.thumb, .media:has(img[data-pv])'
 
 const canAdd = () => HTTP && !!SRV && !!(typeof SRV === 'object');
 function aCount(){ const c = {}; items.forEach(i => { if (!i.duplicatoDi) c[i.area] = (c[i.area] || 0) + 1; }); return c; }
-function pageList(){ const c = aCount(); return [['home', 'Panoramica', null], ['obiettivi', 'Per obiettivo', null], ['tipi', 'Che cosa c\'è', null], ['tutto', 'Tutto', items.filter(i => !i.duplicatoDi && !isIG(i)).length], ...AREE.filter(a => areaShown(a, c)).map(a => [a.id, PSHORT[a.id] || a.nome, c[a.id] || 0]), ['instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length], ['preferiti', '★ Preferiti', S.fav.size], ['gruppi', 'Gruppi', GRP.length], ['progetto-brief', 'Brief progetto', null], ['import', 'Flusso', null], ['revisione', 'Da verificare', revCount()], ['pulizia', 'Pulizia', cleanCount()], ['salvati', 'Link salvati', null], ['sviluppo', 'Skill e plugin', null]]; }
+function pageList(){ const c = aCount(); return [['home', 'Panoramica', null], ['obiettivi', 'Per obiettivo', null], ['step', 'Per step', null], ['tipi', 'Che cosa c\'è', null], ['tutto', 'Tutto', items.filter(i => !i.duplicatoDi && !isIG(i)).length], ...AREE.filter(a => areaShown(a, c)).map(a => [a.id, PSHORT[a.id] || a.nome, c[a.id] || 0]), ['instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length], ['preferiti', '★ Preferiti', S.fav.size], ['gruppi', 'Gruppi', GRP.length], ['progetto-brief', 'Brief progetto', null], ['import', 'Flusso', null], ['revisione', 'Da verificare', revCount()], ['pulizia', 'Pulizia', cleanCount()], ['salvati', 'Link salvati', null], ['sviluppo', 'Skill e plugin', null]]; }
 const validPage = p => pageList().some(x => x[0] === p);
 function pageHash(){ return S.page === 'home' ? location.pathname + location.search : '#/' + S.page; }
 function setPage(p, fromHash){
@@ -996,7 +998,7 @@ function renderPages(){
   renderNav(lab, areeK);
 }
 const NAVG = [
-  { id: 'esplora', nome: 'Esplora', voci: ['home', 'obiettivi', 'tipi', 'tutto'], sub: { home: 'Le aree d\'uso in un colpo d\'occhio', obiettivi: 'Cosa devi fare? Percorsi a fasi', tipi: 'Cos\'è ogni tipo e come si usa', tutto: 'Ogni elemento, con filtri' } },
+  { id: 'esplora', nome: 'Esplora', voci: ['home', 'obiettivi', 'step', 'tipi', 'tutto'], sub: { step: 'Dalla pianificazione alla consegna: step 0–8', home: 'Le aree d\'uso in un colpo d\'occhio', obiettivi: 'Cosa devi fare? Percorsi a fasi', tipi: 'Cos\'è ogni tipo e come si usa', tutto: 'Ogni elemento, con filtri' } },
   { id: 'coll', nome: 'Collezioni', voci: ['preferiti', 'gruppi', 'instagram'], sub: { preferiti: 'Gli elementi con ★', gruppi: 'Le tue cartelle di schede', instagram: 'Post e reel salvati' } },
   { id: 'lavoro', nome: 'Lavoro', voci: ['progetto-brief', 'import', 'revisione', 'pulizia', 'salvati'], sub: { 'progetto-brief': 'Dall\'idea al percorso a step', import: 'Dal caricamento al catalogo', revisione: 'Da scartare e varie: decidi tu', pulizia: 'Doppioni da unire', salvati: 'Link dal telefono' } }
 ];
@@ -1627,17 +1629,22 @@ const PR_COL = { pronta: 'var(--status-green)', adattare: 'var(--status-blue)', 
 const prName = k => (VAL.prontezza[k] || {}).nome || k;
 const stName = k => VAL.stili[k] || k;
 const faName = k => (VAL.fasi.find(f => f.id === k) || {}).nome || k;
+const faN = k => { const f = VAL.fasi.find(x => x.id === k); return f && f.n != null ? f.n : ''; };
+const faLab = k => 'Step ' + faN(k) + ' · ' + faName(k);
+const votoDots = n => '●'.repeat(n) + '○'.repeat(5 - n);
 const ouName = k => VAL.output[k] || k;
-S.pront = ''; S.origine = '';
+S.pront = ''; S.origine = ''; S.fase = '';
 const prPill = i => i.valutazione ? `<span class="vpill" style="--vc:${PR_COL[i.valutazione.prontezza] || 'var(--mfg)'}" title="${esc((VAL.prontezza[i.valutazione.prontezza] || {}).d || '')}">${esc(prName(i.valutazione.prontezza))}</span>` : '';
+const stPill = i => i.valutazione && i.valutazione.fasi[0] ? `<span class="spill" title="${esc(faLab(i.valutazione.fasi[0]))}">Step ${faN(i.valutazione.fasi[0])}</span>` : '';
 function valBox(i){
   const v = i.valutazione; if (!v) return '';
   const chips = (arr, f) => arr.map(x => `<span class="chip">${esc(f(x))}</span>`).join('');
-  return `<div class="box vbox" style="--vc:${PR_COL[v.prontezza] || 'var(--mfg)'}"><div class="vtop">${prPill(i)}<span class="mini">Affidabilità ${esc(v.affidabilita)} · valutazione ${v.origine === 'manuale' ? 'tua' : 'automatica'}</span></div>
+  return `<div class="box vbox" style="--vc:${PR_COL[v.prontezza] || 'var(--mfg)'}"><div class="vtop">${prPill(i)}<span class="vvoto" title="Voto da 1 a 5" aria-label="Voto ${v.voto} su 5">${votoDots(v.voto || 3)} <b>${v.voto || 3}/5</b></span><span class="mini">Affidabilità ${esc(v.affidabilita)} · ${v.origine === 'manuale' ? 'prontezza tua' : v.giudizio === 'scritto' ? 'giudizio scritto' : 'valutazione automatica'}</span></div>
   <p class="ptxt" style="margin:6px 0">${esc(v.perche)}</p>
+  ${v.quando ? `<h4>Quando usarla</h4><p class="ptxt" style="margin:0 0 6px">${esc(v.quando)}</p>` : ''}
   <h4>Come usarla</h4><ol class="gl">${v.come.map(c => `<li><b>${esc(c.t)}</b> — ${esc(c.d)}</li>`).join('')}</ol>
   <div class="vrow"><span class="mini">Stili di progetto</span>${chips(v.stili, stName)}</div>
-  <div class="vrow"><span class="mini">Fase</span>${chips(v.fasi, faName)}</div>
+  <div class="vrow"><span class="mini">Step</span>${v.fasi.map(f => `<button class="chip" data-fase="${esc(f)}" title="Mostra tutto lo step">${esc(faLab(f))}</button>`).join('')}</div>
   ${v.output.length ? `<div class="vrow"><span class="mini">Output</span>${chips(v.output, ouName)}</div>` : ''}</div>`;
 }
 /* --- Pulizia --- */
@@ -1777,6 +1784,7 @@ document.addEventListener('click', async e => {
 const BRIEF0 = { nome: '', cliente: '', stile: 'brand-identity', obiettivo: '', pubblico: '', output: [], scadenza: '', vincoli: '', riferimenti: '', note: '' };
 let BRIEF = { ...BRIEF0, ...store.get('brief', {}) }; let PIANO = store.get('piano', null);
 const FASE_INFO = {
+  pianificare: { ob: 'Fissare ambito, tempi, compiti e responsabilità prima di iniziare.', out: 'Piano con tappe, scadenze e responsabilità', sk: ['zizi-skills:planning', 'product-management:sprint-planning', 'product-management:write-spec'], ev: 'Iniziare a disegnare senza date né responsabili.' },
   brief: { ob: 'Chiarire scopo, pubblico, vincoli e criteri di successo.', out: 'Brief di una pagina + domande aperte', sk: ['zizi-skills:planning', 'product-management:write-spec'], ev: 'Partire dal design senza obiettivi misurabili.' },
   ricerca: { ob: 'Raccogliere 8-12 riferimenti e capire cosa funziona.', out: 'Moodboard + 3 scelte da riusare', sk: ['design:user-research', 'anthropic-skills:deep-research'], ev: 'Copiare un riferimento: serve a orientare, non a riprodurre.' },
   concept: { ob: 'Scegliere una direzione: tono, immagini, struttura.', out: '2-3 direzioni, una scelta motivata', sk: ['zizi-skills:idea-refine', 'design:design-critique'], ev: 'Più di tre direzioni: disperdono il lavoro.' },
@@ -1790,7 +1798,7 @@ const PES = { pronta: 3, adattare: 2, ispirazione: 1.5, verificare: .5, scartare
 const toks = s => [...new Set(String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/[^a-z0-9]+/).filter(w => w.length >= 4))];
 function scoreFor(i, fase, B){
   const v = i.valutazione; if (!v || v.prontezza === 'scartare' || !v.fasi.includes(fase)) return -1;
-  if (fase === 'brief' && v.fasi[0] !== 'brief') return -1;
+  if ((fase === 'brief' || fase === 'pianificare') && v.fasi[0] !== fase) return -1;
   if (i.duplicatoDi || getNote(i).stato === 'Scartato') return -1;
   const ws = toks([B.nome, B.obiettivo, B.pubblico, B.riferimenti, B.note, B.vincoli].join(' '));
   const hay = i._hay || '';
@@ -1814,7 +1822,7 @@ function claudeRequest(B){
   const cand = new Map();
   VAL.fasi.forEach(f => items.map(i => [i, scoreFor(i, f.id, B)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 18).forEach(([i]) => cand.set(i.id, i)));
   const rows = [...cand.values()].map(i => `${i.id} | ${i.titolo.slice(0, 70)} | ${prName(i.valutazione.prontezza)} | ${i.valutazione.stili.map(stName).join('/')} | ${i.valutazione.fasi.join('/')} | ${i.valutazione.output.join('/')}`).join('\n');
-  return `Sei il mio art director e project planner. Ti do il brief di un progetto e una selezione di schede della mia libreria FRAME.01-LIBRARY.\nCrea un percorso a step dal punto zero all'output, con gli elementi utili per ogni step, le skill e i plugin da usare, cosa evitare. Usa SOLO gli id della lista. Rispondi in italiano con UN SOLO blocco JSON (nessun altro testo) di questo schema:\n{"schema":"frame01.piano.v1","steps":[{"fase":"brief|ricerca|concept|sistema|design|build|controllo|consegna","titolo":"","obiettivo":"","output":"","items":["id"],"strumenti":[{"nome":"skill o plugin","come":"come usarlo in questo step"}],"evitare":"","facoltativa":false}]}\nOrdine delle fasi: ${VAL.fasi.map(f => f.id).join(' → ')}. Salta una fase solo se inutile (facoltativa:true).\n\nBRIEF\n${briefText(B)}\n\nSCHEDE (id | titolo | prontezza | stili | fasi | output)\n${rows}`;
+  return `Sei il mio art director e project planner. Ti do il brief di un progetto e una selezione di schede della mia libreria FRAME.01-LIBRARY.\nCrea un percorso a step dal punto zero all'output, con gli elementi utili per ogni step, le skill e i plugin da usare, cosa evitare. Usa SOLO gli id della lista. Rispondi in italiano con UN SOLO blocco JSON (nessun altro testo) di questo schema:\n{"schema":"frame01.piano.v1","steps":[{"fase":"pianificare|brief|ricerca|concept|sistema|design|build|controllo|consegna","titolo":"","obiettivo":"","output":"","items":["id"],"strumenti":[{"nome":"skill o plugin","come":"come usarlo in questo step"}],"evitare":"","facoltativa":false}]}\nOrdine delle fasi: ${VAL.fasi.map(f => f.id).join(' → ')}. Salta una fase solo se inutile (facoltativa:true).\n\nBRIEF\n${briefText(B)}\n\nSCHEDE (id | titolo | prontezza | stili | fasi | output)\n${rows}`;
 }
 function importPiano(txt){
   let t = String(txt || '').trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim(); let j; try { j = JSON.parse(t); } catch { const m = /\{[\s\S]*\}/.exec(t); try { j = m && JSON.parse(m[0]); } catch {} }
@@ -1855,7 +1863,7 @@ function pBrief(){
   <p class="vact"><button class="pill black" data-bgen="1">Genera percorso</button><button class="pill" data-bcopy="1">Copia brief per Claude</button><button class="pill" data-breset="1">Azzera</button></p>
   <details class="vimp"><summary class="mini">Importa il piano di Claude</summary><textarea id="b_imp" placeholder="Incolla qui il JSON che ti ha dato Claude" style="min-height:90px"></textarea><p><button class="pill" data-bimp="1">Importa piano</button></p></details></div>${plan}`;
 }
-function renderSpecialNew(){ const p = S.page; return p === 'pulizia' ? pPulizia() : p === 'revisione' ? pRevisione() : p === 'import' ? pImport() : p === 'salvati' ? pSalvati() : p === 'progetto-brief' ? pBrief() : p === 'gruppi' ? pGruppi() : null; }
+function renderSpecialNew(){ const p = S.page; return p === 'pulizia' ? pPulizia() : p === 'revisione' ? pRevisione() : p === 'import' ? pImport() : p === 'salvati' ? pSalvati() : p === 'progetto-brief' ? pBrief() : p === 'gruppi' ? pGruppi() : p === 'step' ? pStep() : null; }
 document.addEventListener('input', e => {
   const t = e.target, k = t.dataset && t.dataset.bf; if (!k) return; BRIEF[k] = t.value; store.set('brief', BRIEF);
 });
@@ -1866,6 +1874,7 @@ document.addEventListener('change', e => {
 document.addEventListener('click', e => {
   const t = e.target.closest('button,a'); if (!t) return; const d = t.dataset;
   const refresh = () => { renderPages(); render(); };
+  if (d.fase !== undefined) { if (S.page === 'step') setPage('tutto'); S.fase = d.fase; S.limit = 96; renderTags(); render(); return; }
   if (d.pront !== undefined) { S.pront = d.pront; S.limit = 96; render(); return; }
   if (d.origine !== undefined) { S.origine = d.origine; setPage('tutto'); S.origine = d.origine; render(); return; }
   if (d.un) { const [dupId, keepId, ka, kb2] = d.un.split('|'); const key = ka + '|' + kb2; if (!canEdit()) return; persistNote(dupId, { unitoA: keepId }, true); byId[dupId].duplicatoDi = keepId; cleanDone.add(key); store.set('cleanDone', [...cleanDone]); toast('Unite. L\'altra scheda resta nascosta tra le copie.'); refresh(); return; }
@@ -1890,7 +1899,7 @@ document.addEventListener('click', e => {
   if (d.pkit && PIANO) { const ids = [...new Set(PIANO.steps.flatMap(s => s.items))].filter(id => byId[id]).slice(0, 200); ids.forEach(id => S.kit.add(id)); store.set('kit', [...S.kit]); toast(ids.length + ' elementi nel kit.'); render(); return; }
 }, true);
 
-const SPECIAL = new Set(['obiettivi', 'tipi', 'sviluppo', 'pulizia', 'import', 'salvati', 'progetto-brief', 'revisione']);
+const SPECIAL = new Set(['obiettivi', 'step', 'tipi', 'sviluppo', 'pulizia', 'import', 'salvati', 'progetto-brief', 'revisione']);
 S.ids = null; S.idsLabel = ''; S.goalId = '';
 const GOALS = [
   { id: 'sito-lusso', t: 'Sito web per un brand di lusso', d: 'Hotel, auto, ristorazione: identità forte, motion misurato, tempi di caricamento bassi.', ob: 'sito web per un brand di lusso (hotel, automotive, ristorazione)', fasi: [
@@ -2187,6 +2196,15 @@ function resolve(spec){
   return out.sort((a, b) => sc(b) - sc(a) || a.titolo.localeCompare(b.titolo, 'it'));
 }
 const gridMini = ids => `<div class="grid v-var gmini" style="--cw:230px">${ids.map(i => card(i)).join('')}</div>`;
+const VOTO_ORD = i => (i.valutazione ? i.valutazione.voto || 3 : 0) * 10 + ({ pronta: 4, adattare: 3, ispirazione: 2, verificare: 1, scartare: 0 }[i.valutazione && i.valutazione.prontezza] || 0) + (S.fav.has(i.id) ? 5 : 0);
+function pStep(){
+  const base = items.filter(i => !i.duplicatoDi && !isIG(i) && i.valutazione && getNote(i).stato !== 'Scartato' && i.valutazione.prontezza !== 'scartare');
+  return `<div class="hhead"><h1>Per step di lavoro</h1><p>Ogni elemento è collocato nello step in cui serve: da 0 (pianificare) a 8 (consegnare). Apri uno step per vedere i migliori e tutto il resto, ordinati per voto.</p></div>
+  <div class="stepmap" role="list">${VAL.fasi.map(f => { const principali = base.filter(i => i.valutazione.fasi[0] === f.id), tutti = base.filter(i => i.valutazione.fasi.includes(f.id)); return `<button class="spnode" role="listitem" data-fase="${f.id}"><b>${f.n}</b><span>${esc(f.nome.split(':')[0])}</span><i>${principali.length}</i></button>`; }).join('')}</div>
+  ${VAL.fasi.map(f => { const tutti = base.filter(i => i.valutazione.fasi.includes(f.id)).sort((a, b) => VOTO_ORD(b) - VOTO_ORD(a) || a.titolo.localeCompare(b.titolo)); const top = tutti.filter(i => i.valutazione.prontezza === 'pronta' || i.valutazione.prontezza === 'adattare').slice(0, 4);
+    return `<section class="fase" id="stp-${f.id}"><div class="fh"><h2><span class="stn">Step ${f.n}</span> ${esc(f.nome)}</h2><span class="mini">${tutti.length} elementi</span></div><p class="fd">${esc(f.ob || '')}</p>${top.length ? gridMini(top) : '<p class="mini">Nessun elemento pronto per questo step: apri lo step per vedere cosa c\'è.</p>'}
+    <div class="acts"><button class="pill" data-fase="${f.id}"${tutti.length ? '' : ' disabled'}>Vedi tutti (${tutti.length})</button></div></section>`; }).join('')}`;
+}
 function pObiettivi(){
   if (S.goalId) {
     const g = GOALS.find(x => x.id === S.goalId); if (!g) { S.goalId = ''; return pObiettivi(); }
@@ -2241,7 +2259,7 @@ function renderSide(){
   const c = aCount(), tot = items.filter(i => !i.duplicatoDi && !isIG(i)).length, ct = {}; items.forEach(i => { if (!i.duplicatoDi && !isIG(i)) ct[i.tipo] = (ct[i.tipo] || 0) + 1; });
   const on = (k) => S.page === k && !S.tipo ? ' on" aria-current="page' : '';
   const it = (k, l, n, sub) => `<button class="si${S.page === k ? ' on" aria-current="page' : ''}" data-page="${k}"><span>${esc(l)}${sub ? `<small>${esc(sub)}</small>` : ''}</span>${n == null ? '' : `<span class="n">${n}</span>`}</button>`;
-  el.innerHTML = `<div class="sg"><h2>Esplora</h2>${it('home', 'Panoramica', null)}${it('obiettivi', 'Per obiettivo', null, 'Cosa devi fare?')}${it('tipi', 'Che cosa c\'è', null, 'Cos\'è ogni tipo e come si usa')}${it('tutto', 'Tutto', tot)}${it('preferiti', '★ Preferiti', S.fav.size)}${it('gruppi', 'Gruppi', GRP.length, 'Le tue cartelle')}${it('instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length, 'Catalogo a parte')}</div>
+  el.innerHTML = `<div class="sg"><h2>Esplora</h2>${it('home', 'Panoramica', null)}${it('obiettivi', 'Per obiettivo', null, 'Cosa devi fare?')}${it('step', 'Per step', null, 'Step 0–8 del lavoro')}${it('tipi', 'Che cosa c\'è', null, 'Cos\'è ogni tipo e come si usa')}${it('tutto', 'Tutto', tot)}${it('preferiti', '★ Preferiti', S.fav.size)}${it('gruppi', 'Gruppi', GRP.length, 'Le tue cartelle')}${it('instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length, 'Catalogo a parte')}</div>
   <div class="sg"><h2>Per area d'uso</h2>${AREE.filter(a => areaShown(a, c)).map(a => `<button class="si${S.page === a.id ? ' on" aria-current="page' : ''}" data-page="${a.id}" title="${esc(a.desc)}"><span>${esc(PSHORT[a.id] || a.nome)}</span><span class="n">${c[a.id] || 0}</span></button>`).join('')}</div>
   <div class="sg"><h2>Per tipo</h2>${Object.keys(C.meta.tipi).filter(t => ct[t]).map(t => `<button class="si${S.tipo === t && !SPECIAL.has(S.page) ? ' on" aria-current="true' : ''}" data-tipopage="${esc(t)}" title="${esc((TIPO_INFO[t] || {}).cos || '')}"><span>${esc(tl(t))}</span><span class="n">${ct[t]}</span></button>`).join('')}</div>
   <div class="sg"><h2>Lavoro</h2>${it('progetto-brief', 'Brief progetto', null, 'Dal punto zero all\'output')}${it('pulizia', 'Pulizia', cleanCount(), 'Doppioni e schede da scartare')}${it('import', 'Flusso', null, 'Dal caricamento al catalogo')}${it('revisione', 'Da verificare', revCount(), 'Da scartare e varie: decidi tu')}${it('salvati', 'Link salvati', null, 'Salvati dal telefono o dal Mac')}</div>
@@ -2259,8 +2277,10 @@ function renderQuick(){
   const prr = Object.keys(VAL.prontezza).filter(k => cp[k] || S.pront === k).map(k => `<button class="chip${S.pront === k ? ' on' : ''}" data-pront="${S.pront === k ? '' : k}" aria-pressed="${S.pront === k}">${esc(prName(k))} <span class="n">${cp[k] || 0}</span></button>`).join('');
   const tgc = {}; items.forEach(i => { if (match(i)) i.tag.forEach(t => { tgc[t] = (tgc[t] || 0) + 1; }); });
   const tagRow = g => TV.filter(v => v.gruppo === g && (tgc[v.id] || S.tag.has(v.id))).sort((a, b) => (tgc[b.id] || 0) - (tgc[a.id] || 0)).slice(0, 12).map(v => `<button class="chip${S.tag.has(v.id) ? ' on' : ''}" data-tag="${esc(v.id)}" aria-pressed="${S.tag.has(v.id)}">${esc(v.nome)} <span class="n">${tgc[v.id] || 0}</span></button>`).join('');
+  const fc = {}; items.forEach(i => { if (i.valutazione && match(i, 'fase')) { const f0 = i.valutazione.fasi[0]; fc[f0] = (fc[f0] || 0) + 1; } });
+  const fsr = VAL.fasi.filter(f => fc[f.id] || S.fase === f.id).map(f => `<button class="chip${S.fase === f.id ? ' on' : ''}" data-fase="${S.fase === f.id ? '' : f.id}" aria-pressed="${S.fase === f.id}" title="${esc(f.ob || '')}">${f.n} · ${esc(f.nome.split(':')[0])} <span class="n">${fc[f.id] || 0}</span></button>`).join('');
   const rx = (lab, html) => row(lab, html).replace('class="qrow"', 'class="qrow qx"');
-  q.innerHTML = row('Tipo', tipi) + rx('Tema', tagRow('tema')) + rx('Stile', tagRow('stile')) + rx('Formato', tagRow('formato')) + rx('Prontezza', prr) + rx('Strumento', str) + `<div class="qrow"><span class="ql">Altro</span><div class="qc"><button class="chip${S.favOnly ? ' on' : ''}" data-quick="fav" aria-pressed="${!!S.favOnly}">★ Preferiti</button><button class="chip${S.prev ? ' on' : ''}" data-quick="prev" aria-pressed="${!!S.prev}">Con anteprima</button><button class="chip${S.incomp ? ' on' : ''}" data-quick="incomp" aria-pressed="${!!S.incomp}" title="Schede con poche informazioni: pochi tag, nessuna anteprima o licenza">Da completare <span class="n">${nInc}</span></button><button class="chip" data-quick="expand" aria-expanded="false" id="qExp">Più filtri ▾</button><button class="chip" data-quick="more">Tutti i filtri…</button><button class="chip" data-quick="reset">Azzera</button></div></div>`;
+  q.innerHTML = row('Tipo', tipi) + row('Step', fsr) + rx('Tema', tagRow('tema')) + rx('Stile', tagRow('stile')) + rx('Formato', tagRow('formato')) + rx('Prontezza', prr) + rx('Strumento', str) + `<div class="qrow"><span class="ql">Altro</span><div class="qc"><button class="chip${S.favOnly ? ' on' : ''}" data-quick="fav" aria-pressed="${!!S.favOnly}">★ Preferiti</button><button class="chip${S.prev ? ' on' : ''}" data-quick="prev" aria-pressed="${!!S.prev}">Con anteprima</button><button class="chip${S.incomp ? ' on' : ''}" data-quick="incomp" aria-pressed="${!!S.incomp}" title="Schede con poche informazioni: pochi tag, nessuna anteprima o licenza">Da completare <span class="n">${nInc}</span></button><button class="chip" data-quick="expand" aria-expanded="false" id="qExp">Più filtri ▾</button><button class="chip" data-quick="more">Tutti i filtri…</button><button class="chip" data-quick="reset">Azzera</button></div></div>`;
   { let open = false; try { open = localStorage.getItem('f01lib.quickOpen') === '1'; } catch (e) {} if (q.querySelector('.qx .chip.on')) open = true; q.classList.toggle('open', open); const eb = $('#qExp'); if (eb) { eb.textContent = open ? 'Meno filtri ▴' : 'Più filtri ▾'; eb.setAttribute('aria-expanded', String(open)); } }
 }
 function renderTBanner(){
@@ -2269,7 +2289,7 @@ function renderTBanner(){
   b.innerHTML = `<div class="box tinfo"><b>${esc(tl(S.tipo))}</b>: ${esc(ti.cos)}.<br><span class="mini">Come si usa: ${esc(ti.uso)} Esempio: ${esc(ti.esempio)}</span></div>`;
 }
 
-function clearFilters(){ S.ids = null; S.area = ''; S.strum = ''; S.favOnly = false; $('#fFav').checked = false; S.q = ''; $('#q').value = ''; S.tipo = ''; S.tag.clear(); S.fonte = ''; S.prog = ''; S.stato = ''; $('#fStato').value = ''; S.prev = false; S.incomp = false; S.pront = ''; S.origine = ''; S.dup = false; $('#fPrev').checked = false; $('#fDup').checked = false; }
+function clearFilters(){ S.ids = null; S.area = ''; S.strum = ''; S.favOnly = false; $('#fFav').checked = false; S.q = ''; $('#q').value = ''; S.tipo = ''; S.tag.clear(); S.fonte = ''; S.prog = ''; S.stato = ''; $('#fStato').value = ''; S.prev = false; S.incomp = false; S.pront = ''; S.fase = ''; S.origine = ''; S.dup = false; $('#fPrev').checked = false; $('#fDup').checked = false; }
 function renderMeta(all){
   // contatori della VISTA corrente; i totali globali stanno nel suggerimento
   const nd = items.filter(i => i.duplicatoDi), nIG = items.filter(i => isIG(i) && !i.duplicatoDi).length, nMain = items.filter(i => !isIG(i) && !i.duplicatoDi).length;
@@ -2366,7 +2386,7 @@ document.addEventListener('change', e => {
   else if (id === 'fDup') { S.dup = e.target.checked; render(); }
   else if (id === 'pgSel' && cur) { cur.page = +e.target.value; drawRender(); }
 });
-$('#bReset').onclick = () => { S.ids = null; S.area = ''; S.strum = ''; S.favOnly = false; $('#fFav').checked = false; S.q = ''; S.tipo = ''; S.tag.clear(); S.fonte = ''; S.prog = ''; S.stato = ''; $('#fStato').value = ''; S.prev = false; S.incomp = false; S.pront = ''; S.origine = ''; S.dup = false; $('#q').value = ''; $('#fPrev').checked = false; $('#fDup').checked = false; renderTags(); render(); };
+$('#bReset').onclick = () => { S.ids = null; S.area = ''; S.strum = ''; S.favOnly = false; $('#fFav').checked = false; S.q = ''; S.tipo = ''; S.tag.clear(); S.fonte = ''; S.prog = ''; S.stato = ''; $('#fStato').value = ''; S.prev = false; S.incomp = false; S.fase = ''; S.pront = ''; S.origine = ''; S.dup = false; $('#q').value = ''; $('#fPrev').checked = false; $('#fDup').checked = false; renderTags(); render(); };
 $('#bKit').onclick = () => { kitRender(); $('#dlgKit').showModal(); };
 $('#bGuida').onclick = () => { guidaRender(); $('#dlgGuida').showModal(); };
 document.addEventListener('click', e => { const b = e.target.closest('[data-fonte]'); if (b) { S.fonte = b.dataset.fonte; S.limit = 96; render(); } });
@@ -2386,7 +2406,7 @@ function activeList(){
   S.tag.forEach(t => a.push(['tag:' + t, TAGL[t] || t]));
   if (S.stato) a.push(['stato', 'Stato: ' + (S.stato === '*' ? 'tutti' : S.stato === '-' ? 'senza stato' : S.stato)]);
   if (S.ids) a.push(['ids', S.idsLabel || 'Selezione']);
-  if (S.pront) a.push(['pront', 'Prontezza: ' + prName(S.pront)]); if (S.origine) a.push(['origine', 'Origine: ' + S.origine]); if (S.prev) a.push(['prev', 'Con anteprima']); if (S.incomp) a.push(['incomp', 'Da completare']); if (S.dup) a.push(['dup', 'Con copie']);
+  if (S.fase) a.push(['fase', faLab(S.fase)]); if (S.pront) a.push(['pront', 'Prontezza: ' + prName(S.pront)]); if (S.origine) a.push(['origine', 'Origine: ' + S.origine]); if (S.prev) a.push(['prev', 'Con anteprima']); if (S.incomp) a.push(['incomp', 'Da completare']); if (S.dup) a.push(['dup', 'Con copie']);
   return a;
 }
 function renderActive(){
@@ -2413,7 +2433,7 @@ document.addEventListener('click', e => {
   const cl = t.closest('[data-clear]'); if (cl) { const k = cl.dataset.clear;
     if (k === 'q') { S.q = ''; $('#q').value = ''; } else if (k === 'area') S.area = ''; else if (k === 'strum') S.strum = ''; else if (k === 'fav') { S.favOnly = false; $('#fFav').checked = false; } else if (k === 'fonte') S.fonte = ''; else if (k === 'tipo') S.tipo = '';
     else if (k.startsWith('tag:')) { S.tag.delete(k.slice(4)); renderTags(); } else if (k === 'stato') { S.stato = ''; $('#fStato').value = ''; }
-    else if (k === 'ids') S.ids = null; else if (k === 'prev') { S.prev = false; $('#fPrev').checked = false; } else if (k === 'incomp') { S.incomp = false; } else if (k === 'pront') { S.pront = ''; } else if (k === 'origine') { S.origine = ''; } else if (k === 'dup') { S.dup = false; $('#fDup').checked = false; }
+    else if (k === 'ids') S.ids = null; else if (k === 'prev') { S.prev = false; $('#fPrev').checked = false; } else if (k === 'incomp') { S.incomp = false; } else if (k === 'fase') { S.fase = ''; } else if (k === 'pront') { S.pront = ''; } else if (k === 'origine') { S.origine = ''; } else if (k === 'dup') { S.dup = false; $('#fDup').checked = false; }
     S.limit = 96; render(); return; }
   if (t.closest('#bAzzera')) { clearFilters(); S.macro = ''; S.limit = 96; renderTags(); render(); return; }
   const mc = t.closest('[data-macro]'); if (mc) { S.macro = S.macro === mc.dataset.macro ? '' : mc.dataset.macro; renderTags(); const nb = document.querySelector('[data-macro="' + mc.dataset.macro + '"]'); if (nb) nb.focus(); return; }
