@@ -353,7 +353,7 @@ html body .seg .vl{font:400 12px/1 var(--sans)}
  .lhead span:nth-child(5),.v-lista footer.cf>span:first-child{display:none}
 }
 @media(max-width:900px){
- .seg .vl{display:none}
+ .seg .vl{display:inline}
  .lhead{display:none}
  .v-lista .card{grid-template-columns:72px minmax(0,1fr) auto;column-gap:8px}
  .v-lista .body .row,.v-lista .body .tags{display:none}
