@@ -492,6 +492,7 @@ const AREE = C.meta.aree || [], ARE = Object.fromEntries(AREE.map(a => [a.id, a]
 const PSHORT = { instagram: 'Instagram', brief: 'Brief', design: 'Design', web: 'Siti web', piattaforme: 'Piattaforme', 'template-framer': 'Template Framer', motion: 'Motion e 3D', media: 'Immagini AI', presentazioni: 'Documenti', controllo: 'Controllo', automazione: 'Automazione', prompt: 'Prompt', risorse: 'Altro', idee: 'Idee creative', gruppi: 'Gruppi' };
 const items = C.items.map(i => ({ ...i, tag: i.tag || [], strumenti: i.strumenti || [], _hay: [(ARE[i.area] || {}).nome, (i.strumenti || []).map(s => STR[s] || s).join(' '), i.testo, i.titolo, i.nome, i.descrizione, i.fonte, i.categoria, (i.tag || []).map(t => TAGL[t] || t).join(' '), (i.tagExtra || []).join(' '), (i.triggers || []).join(' ')].join(' ').toLowerCase() }));
 const byId = Object.fromEntries(items.map(i => [i.id, i]));
+const LASTV = (() => { let prev = 0; try { prev = +sessionStorage.getItem('f01lib:lastv') || 0; if (!prev) { prev = +localStorage.getItem('f01lib.lastVisit') || 0; sessionStorage.setItem('f01lib:lastv', String(prev)); localStorage.setItem('f01lib.lastVisit', String(Date.now())); } } catch {} return prev; })();
 const S = { stato: '', q: '', tipo: '', tag: new Set(), fonte: '', dup: false, prev: false, incomp: false, sort: 'nome', limit: 96, kit: new Set(store.get('kit', []).filter(id => byId[id])), note: {} };
 let cur = null;
 S.prog = ''; S.grp = ''; S.sel = new Set(); S.selMode = false;
@@ -531,7 +532,7 @@ function ripristina(id){
   toast('Ripristinata.'); render(); if (cur && cur.id === id) drawRender();
 }
 function headExtra(){
-  if (S.page === 'home' || S.page === 'obiettivi' || S.page === 'step' || S.page === 'tipi' || S.page === 'sviluppo') return '';
+  if (S.page === 'home' || S.page === 'obiettivi' || S.page === 'step' || S.page === 'indice' || S.page === 'salute' || S.page === 'tipi' || S.page === 'sviluppo') return '';
   const base = items.filter(i => !i.duplicatoDi && inPage(i)), n = base.filter(isScart).length;
   return (canEdit() ? `<button class="pill ${S.selMode ? 'on' : ''}" data-selmode="${S.selMode ? 0 : 1}" aria-pressed="${S.selMode}" title="Scegli più schede e aggiungile a un gruppo">${S.selMode ? 'Fine selezione' : 'Seleziona'}</button>` : '') + (canEdit() ? '<button class="pill black" data-smista="1" title="Passa le schede una a una: tieni, da valutare o scarta">Smista…</button>' : '')
     + (n || S.stato === SCARTATO ? `<button class="pill ${S.stato === SCARTATO ? 'on' : ''}" data-showscart="1">${S.stato === SCARTATO ? '← Torna alle schede attive' : 'Scartati (' + n + ')'}</button>` : '');
@@ -977,7 +978,7 @@ function observe(root){ root.querySelectorAll('.thumb, .media:has(img[data-pv])'
 
 const canAdd = () => HTTP && !!SRV && !!(typeof SRV === 'object');
 function aCount(){ const c = {}; items.forEach(i => { if (!i.duplicatoDi) c[i.area] = (c[i.area] || 0) + 1; }); return c; }
-function pageList(){ const c = aCount(); return [['home', 'Panoramica', null], ['obiettivi', 'Per obiettivo', null], ['step', 'Per step', null], ['tipi', 'Che cosa c\'è', null], ['tutto', 'Tutto', items.filter(i => !i.duplicatoDi && !isIG(i)).length], ...AREE.filter(a => areaShown(a, c)).map(a => [a.id, PSHORT[a.id] || a.nome, c[a.id] || 0]), ['instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length], ['preferiti', '★ Preferiti', S.fav.size], ['gruppi', 'Gruppi', GRP.length], ['progetto-brief', 'Brief progetto', null], ['import', 'Flusso', null], ['revisione', 'Da verificare', revCount()], ['pulizia', 'Pulizia', cleanCount()], ['salvati', 'Link salvati', null], ['sviluppo', 'Skill e plugin', null]]; }
+function pageList(){ const c = aCount(); return [['home', 'Panoramica', null], ['obiettivi', 'Per obiettivo', null], ['step', 'Per step', null], ['indice', 'Indice A–Z', null], ['tipi', 'Che cosa c\'è', null], ['tutto', 'Tutto', items.filter(i => !i.duplicatoDi && !isIG(i)).length], ...AREE.filter(a => areaShown(a, c)).map(a => [a.id, PSHORT[a.id] || a.nome, c[a.id] || 0]), ['instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length], ['preferiti', '★ Preferiti', S.fav.size], ['gruppi', 'Gruppi', GRP.length], ['progetto-brief', 'Brief progetto', null], ['import', 'Flusso', null], ['salute', 'Salute', null], ['revisione', 'Da verificare', revCount()], ['pulizia', 'Pulizia', cleanCount()], ['salvati', 'Link salvati', null], ['sviluppo', 'Skill e plugin', null]]; }
 const validPage = p => pageList().some(x => x[0] === p);
 function pageHash(){ return S.page === 'home' ? location.pathname + location.search : '#/' + S.page; }
 function setPage(p, fromHash){
@@ -998,9 +999,9 @@ function renderPages(){
   renderNav(lab, areeK);
 }
 const NAVG = [
-  { id: 'esplora', nome: 'Esplora', voci: ['home', 'obiettivi', 'step', 'tipi', 'tutto'], sub: { step: 'Dalla pianificazione alla consegna: step 0–8', home: 'Le aree d\'uso in un colpo d\'occhio', obiettivi: 'Cosa devi fare? Percorsi a fasi', tipi: 'Cos\'è ogni tipo e come si usa', tutto: 'Ogni elemento, con filtri' } },
+  { id: 'esplora', nome: 'Esplora', voci: ['home', 'obiettivi', 'step', 'indice', 'tipi', 'tutto'], sub: { indice: 'Tutti gli elementi in ordine alfabetico', step: 'Dalla pianificazione alla consegna: step 0–8', home: 'Le aree d\'uso in un colpo d\'occhio', obiettivi: 'Cosa devi fare? Percorsi a fasi', tipi: 'Cos\'è ogni tipo e come si usa', tutto: 'Ogni elemento, con filtri' } },
   { id: 'coll', nome: 'Collezioni', voci: ['preferiti', 'gruppi', 'instagram'], sub: { preferiti: 'Gli elementi con ★', gruppi: 'Le tue cartelle di schede', instagram: 'Post e reel salvati' } },
-  { id: 'lavoro', nome: 'Lavoro', voci: ['progetto-brief', 'import', 'revisione', 'pulizia', 'salvati'], sub: { 'progetto-brief': 'Dall\'idea al percorso a step', import: 'Dal caricamento al catalogo', revisione: 'Da scartare e varie: decidi tu', pulizia: 'Doppioni da unire', salvati: 'Link dal telefono' } }
+  { id: 'lavoro', nome: 'Lavoro', voci: ['progetto-brief', 'import', 'salute', 'revisione', 'pulizia', 'salvati'], sub: { salute: 'Cosa manca nel catalogo: copertine, tag, licenze', 'progetto-brief': 'Dall\'idea al percorso a step', import: 'Dal caricamento al catalogo', revisione: 'Da scartare e varie: decidi tu', pulizia: 'Doppioni da unire', salvati: 'Link dal telefono' } }
 ];
 function renderNav(lab, areeK){
   const item = (k, sub) => lab[k] ? `<button role="menuitem" data-page="${k}"${S.page === k ? ' aria-current="page"' : ''}><span>${esc(lab[k][0])}${sub ? `<small>${esc(sub)}</small>` : ''}</span>${lab[k][1] == null ? '' : `<span class="n">${lab[k][1]}</span>`}</button>` : '';
@@ -1033,13 +1034,14 @@ function renderHome(){
   const status = canAdd() ? `<div class="hstat box"><div><b>${nu ? nu + (nu === 1 ? ' cartella nuova o modificata' : ' cartelle nuove o modificate') + ' in inbox' : 'Catalogo aggiornato'}</b><div class="mini">${esc([...(SRV.nuove || []), ...(SRV.modificate || [])].slice(0, 6).join(', '))}${SRV.risInCoda ? ' · ' + SRV.risInCoda + ' risorse da analizzare' : ''}${SRV.backup ? ' · ' + esc(SRV.backup) : ''}</div></div><button class="pill ${nu ? 'black' : ''}" id="bScan2">${nu ? 'Aggiorna ora (salva prima il backup)' : 'Riscansiona'}</button></div>` : '';
   const toolsBy = {}; items.forEach(i => { if (i.duplicatoDi) return; (toolsBy[i.area] = toolsBy[i.area] || {}); i.strumenti.forEach(s => toolsBy[i.area][s] = (toolsBy[i.area][s] || 0) + 1); });
   const acard = a => { const n = c[a.id] || 0, tt = Object.entries(toolsBy[a.id] || {}).sort((x, y) => y[1] - x[1]).slice(0, 4); return `<button class="acard ${n ? '' : 'zero'}" data-page="${a.id}"><span class="mini">${n} elementi</span><b>${esc(a.nome)}</b><span class="d">${esc(a.desc)}</span>${tt.length ? `<span class="tags">${tt.map(([s]) => `<span class="chip tool">${esc(STR[s] || s)}</span>`).join('')}</span>` : ''}</button>`; };
-  const seen = new Set(S.recent.slice(0, 6)); const recentAdd = items.filter(i => !i.duplicatoDi && i.contenuti && i.contenuti.mod && !seen.has(i.id)).sort((a, b) => b.contenuti.mod - a.contenuti.mod).slice(0, 6);
+  const seen = new Set(S.recent.slice(0, 6)); const nuoviVisita = LASTV ? items.filter(i => !i.duplicatoDi && !isIG(i) && i.contenuti && i.contenuti.mod > LASTV).sort((a, b) => b.contenuti.mod - a.contenuti.mod) : []; const recentAdd = items.filter(i => !i.duplicatoDi && i.contenuti && i.contenuti.mod && !seen.has(i.id)).sort((a, b) => b.contenuti.mod - a.contenuti.mod).slice(0, 6);
   const ts = {}; items.forEach(i => { if (!i.duplicatoDi) i.strumenti.forEach(s => ts[s] = (ts[s] || 0) + 1); });
   h.innerHTML = `<div class="hhead"><h1>FRAME.01-LIBRARY</h1><p>${tot} elementi unici (le copie identiche sono nascoste) organizzati per area d'uso, non per nome. Scegli un'area, oppure cerca in alto.</p></div>${status}
   <div class="hsec">Aree d'uso</div><div class="agrid">${AREE.filter(a => areaShown(a, c)).map(acard).join('')}
   <button class="acard" data-page="preferiti"><span class="mini">${S.fav.size} elementi</span><b>★ Preferiti</b><span class="d">Gli elementi che hai segnato, di ogni area.</span></button><button class="acard" data-page="gruppi"><span class="mini">${GRP.length} gruppi</span><b>Gruppi</b><span class="d">Le tue cartelle di reference e schede, per cliente, tema o idea.</span></button></div>
   <div class="hsec">Lavoro</div><div class="agrid"><button class="acard" data-page="progetto-brief"><span class="mini">nuovo</span><b>Brief progetto</b><span class="d">Scrivi l'idea e ricevi un percorso a step con gli elementi, le skill e i plugin giusti.</span></button><button class="acard" data-page="pulizia"><span class="mini">${cleanCount()} da rivedere</span><b>Pulizia</b><span class="d">Doppioni da unire e schede da scartare, senza cancellare nulla.</span></button><button class="acard" data-page="import"><span class="mini">5 passi</span><b>Flusso</b><span class="d">Dal caricamento al catalogo: entra, analizza, smista, verifica.</span></button><button class="acard" data-page="revisione"><span class="mini">${revCount()} da guardare</span><b>Da verificare</b><span class="d">Da scartare e varie: decidi tu, niente si archivia da solo.</span></button></div>
   ${S.recent.length ? `<div class="hsec">Visti di recente</div><div class="grid v-var" id="recentGrid" style="--cw:230px;padding-bottom:8px">${S.recent.slice(0, 6).map(id => card(byId[id])).join('')}</div>` : ''}
+  ${nuoviVisita.length ? `<div class="hsec">Nuovi dall'ultima visita <span class="mini">(${nuoviVisita.length}${LASTV ? ' · dal ' + new Date(LASTV).toLocaleDateString('it-IT') : ''})</span></div><div class="grid v-var" id="newGrid" style="--cw:230px;padding-bottom:8px">${nuoviVisita.slice(0, 6).map(card).join('')}</div>${nuoviVisita.length > 6 ? `<p style="padding:0 12px 8px"><button class="pill" data-nuovi="1">Vedi tutti i ${nuoviVisita.length}</button></p>` : ''}` : ''}
   ${recentAdd.length ? `<div class="hsec">Aggiunti di recente</div><div class="grid v-var" id="addGrid" style="--cw:230px;padding-bottom:8px">${recentAdd.map(card).join('')}</div>` : ''}
   ${Object.keys(ts).length ? `<div class="hsec">Per strumento</div><div class="filters" style="padding:0 12px">${Object.entries(ts).sort((a, b) => b[1] - a[1]).map(([s, n]) => `<button class="pill" data-strumpage="${esc(s)}">${esc(STR[s] || s)}<span class="n">${n}</span></button>`).join('')}</div>` : ''}`;
   observe(h);
@@ -1863,7 +1865,7 @@ function pBrief(){
   <p class="vact"><button class="pill black" data-bgen="1">Genera percorso</button><button class="pill" data-bcopy="1">Copia brief per Claude</button><button class="pill" data-breset="1">Azzera</button></p>
   <details class="vimp"><summary class="mini">Importa il piano di Claude</summary><textarea id="b_imp" placeholder="Incolla qui il JSON che ti ha dato Claude" style="min-height:90px"></textarea><p><button class="pill" data-bimp="1">Importa piano</button></p></details></div>${plan}`;
 }
-function renderSpecialNew(){ const p = S.page; return p === 'pulizia' ? pPulizia() : p === 'revisione' ? pRevisione() : p === 'import' ? pImport() : p === 'salvati' ? pSalvati() : p === 'progetto-brief' ? pBrief() : p === 'gruppi' ? pGruppi() : p === 'step' ? pStep() : null; }
+function renderSpecialNew(){ const p = S.page; return p === 'pulizia' ? pPulizia() : p === 'revisione' ? pRevisione() : p === 'import' ? pImport() : p === 'salvati' ? pSalvati() : p === 'progetto-brief' ? pBrief() : p === 'gruppi' ? pGruppi() : p === 'step' ? pStep() : p === 'indice' ? pIndice() : p === 'salute' ? pSalute() : null; }
 document.addEventListener('input', e => {
   const t = e.target, k = t.dataset && t.dataset.bf; if (!k) return; BRIEF[k] = t.value; store.set('brief', BRIEF);
 });
@@ -1899,7 +1901,7 @@ document.addEventListener('click', e => {
   if (d.pkit && PIANO) { const ids = [...new Set(PIANO.steps.flatMap(s => s.items))].filter(id => byId[id]).slice(0, 200); ids.forEach(id => S.kit.add(id)); store.set('kit', [...S.kit]); toast(ids.length + ' elementi nel kit.'); render(); return; }
 }, true);
 
-const SPECIAL = new Set(['obiettivi', 'step', 'tipi', 'sviluppo', 'pulizia', 'import', 'salvati', 'progetto-brief', 'revisione']);
+const SPECIAL = new Set(['obiettivi', 'step', 'indice', 'salute', 'tipi', 'sviluppo', 'pulizia', 'import', 'salvati', 'progetto-brief', 'revisione']);
 S.ids = null; S.idsLabel = ''; S.goalId = '';
 const GOALS = [
   { id: 'sito-lusso', t: 'Sito web per un brand di lusso', d: 'Hotel, auto, ristorazione: identità forte, motion misurato, tempi di caricamento bassi.', ob: 'sito web per un brand di lusso (hotel, automotive, ristorazione)', fasi: [
@@ -2205,6 +2207,44 @@ function pStep(){
     return `<section class="fase" id="stp-${f.id}"><div class="fh"><h2><span class="stn">Step ${f.n}</span> ${esc(f.nome)}</h2><span class="mini">${tutti.length} elementi</span></div><p class="fd">${esc(f.ob || '')}</p>${top.length ? gridMini(top) : '<p class="mini">Nessun elemento pronto per questo step: apri lo step per vedere cosa c\'è.</p>'}
     <div class="acts"><button class="pill" data-fase="${f.id}"${tutti.length ? '' : ' disabled'}>Vedi tutti (${tutti.length})</button></div></section>`; }).join('')}`;
 }
+/* --- Indice A–Z --- */
+S.idx = store.get('idxtipo', 'skill');
+const normL = t => (t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().charAt(0).toUpperCase();
+function pIndice(){
+  const base = items.filter(i => !i.duplicatoDi && !isIG(i) && !isScart(i));
+  const tipi = Object.keys(C.meta.tipi).filter(t => base.some(i => i.tipo === t));
+  if (S.idx !== 'tutti' && !tipi.includes(S.idx)) S.idx = 'tutti';
+  const rows = base.filter(i => S.idx === 'tutti' || i.tipo === S.idx).sort((a, b) => a.titolo.localeCompare(b.titolo, 'it'));
+  const gr = {}; rows.forEach(i => { let l = normL(i.titolo); if (!/[A-Z]/.test(l)) l = '#'; (gr[l] = gr[l] || []).push(i); });
+  const lett = Object.keys(gr).sort((a, b) => a === '#' ? 1 : b === '#' ? -1 : a.localeCompare(b));
+  const chip = (k, t, n) => `<button class="pill ${S.idx === k ? 'black' : ''}" data-idxtipo="${esc(k)}" aria-pressed="${S.idx === k}">${esc(t)} <span class="n">${n}</span></button>`;
+  return `<div class="hhead"><h1>Indice A–Z</h1><p>Ogni elemento in ordine alfabetico, per ritrovare al volo una skill o un plugin anche quando la libreria è grande.</p></div>
+  <div class="acts idxbar">${chip('tutti', 'Tutti', base.length)}${tipi.map(t => chip(t, tl(t), base.filter(i => i.tipo === t).length)).join('')}</div>
+  <div class="idxlet" role="navigation" aria-label="Lettere">${lett.map(l => `<button data-idxjump="${l}">${l}</button>`).join('')}</div>
+  ${lett.map(l => `<section class="idxsec" id="idx-${l === '#' ? 'n' : l}"><h2>${l}<span class="mini"> ${gr[l].length}</span></h2><div class="idxrows">${gr[l].map(i => `<button class="idxrow" data-open="${esc(i.id)}"><b>${esc(i.titolo)}</b><span class="mini">${esc(tl(i.tipo))} · ${esc(i.fonte)}</span>${i.valutazione ? `<span class="vvoto" title="Voto da 1 a 5">${votoDots(i.valutazione.voto || 3)}</span>` : ''}</button>`).join('')}</div></section>`).join('') || '<p class="mini" style="padding:12px">Nessun elemento.</p>'}`;
+}
+/* --- Salute della libreria --- */
+function saluteData(){
+  const base = items.filter(i => !i.duplicatoDi && !isIG(i) && !isScart(i));
+  const ig = items.filter(i => !i.duplicatoDi && isIG(i) && !isScart(i));
+  const L = (id, t, d, f, set) => { const l = set.filter(f); return { id, t, d, ids: l.map(i => i.id), n: l.length, tot: set.length }; };
+  return [
+    L('s-cop', 'Copertina generata', 'Nessuna immagine reale: la scheda mostra una copertina disegnata.', i => i.disegnata, base),
+    L('s-tag', 'Meno di 3 tag', 'Più tag = più facile da ritrovare con i filtri.', i => (i.tag || []).length < 3, base),
+    L('s-lic', 'Senza licenza nota', 'Da leggere prima di riusarli in un progetto.', i => !i.licenza, base),
+    L('s-brev', 'Descrizione breve (sotto 80 caratteri)', 'Una frase in più sul quando serve.', i => (i.descrizione || '').length < 80, base),
+    L('s-giu', 'Giudizio solo automatico', 'Voto e «quando usarla» calcolati da regole: da rivedere a mano.', i => i.valutazione && i.valutazione.giudizio !== 'scritto' && ['design-system', 'riferimento', 'skill', 'plugin', 'prompt', 'template', 'componente'].includes(i.tipo), base),
+    L('s-inc', 'Completezza 2/5 o meno', 'Schede povere: mancano più cose tra descrizione, tag, area, anteprima e licenza.', i => i.qualita && i.qualita.punti <= 2, base),
+    L('s-igi', 'Post Instagram senza immagine', 'La copertina è scaduta o il post non è leggibile.', i => i.disegnata || !i.thumb, ig),
+    L('s-igp', 'Post Instagram da rileggere', 'Autore o didascalia mancanti.', i => !i.autore, ig)
+  ];
+}
+function pSalute(){
+  const d = saluteData(), base = items.filter(i => !i.duplicatoDi && !isIG(i) && !isScart(i)).length;
+  const col = x => { const p = x.tot ? x.n / x.tot : 0; return p > .5 ? 'var(--warn,#d6a43a)' : p > .2 ? 'var(--mfg)' : 'var(--ok,#3aa86a)'; };
+  return `<div class="hhead"><h1>Salute della libreria</h1><p>Cosa manca nel catalogo (${base} elementi, senza copie, scartati e post Instagram). Apri una riga per vedere le schede e completarle dalla scheda o con Claude. Non cambia niente da solo.</p></div>
+  <div class="saluteg">${d.map(x => `<article class="box salute"><b>${esc(x.t)}</b><div class="sbar"><i style="width:${x.tot ? Math.round(x.n / x.tot * 100) : 0}%;background:${col(x)}"></i></div><div class="mini"><b>${x.n}</b> su ${x.tot}${x.tot ? ' · ' + Math.round(x.n / x.tot * 100) + '%' : ''}</div><p class="mini">${esc(x.d)}</p><div class="acts"><button class="pill" data-salute="${x.id}"${x.n ? '' : ' disabled'}>Vedi le schede</button></div></article>`).join('')}</div>`;
+}
 function pObiettivi(){
   if (S.goalId) {
     const g = GOALS.find(x => x.id === S.goalId); if (!g) { S.goalId = ''; return pObiettivi(); }
@@ -2316,6 +2356,10 @@ document.addEventListener('click', e => {
   if ((x = t.closest('[data-goalai]'))) { const g = GOALS.find(v => v.id === x.dataset.goalai), seen = new Set(), l = [];
     g.fasi.forEach(f => resolve(f.spec).slice(0, 6).forEach(i => { if (!seen.has(i.id)) { seen.add(i.id); l.push(i); } }));
     AI.goal = g.ob; store.set('goal', AI.goal); openAI({ list: l, label: g.t }); return; }
+  if ((x = t.closest('[data-nuovi]'))) { applyIds(items.filter(i => !i.duplicatoDi && !isIG(i) && i.contenuti && i.contenuti.mod > LASTV).map(i => i.id), 'Nuovi dall\'ultima visita'); return; }
+  if ((x = t.closest('[data-idxtipo]'))) { S.idx = x.dataset.idxtipo; store.set('idxtipo', S.idx); render(); return; }
+  if ((x = t.closest('[data-idxjump]'))) { const e = document.getElementById('idx-' + (x.dataset.idxjump === '#' ? 'n' : x.dataset.idxjump)); if (e) e.scrollIntoView({ block: 'start', behavior: 'smooth' }); return; }
+  if ((x = t.closest('[data-salute]'))) { const r = saluteData().find(v => v.id === x.dataset.salute); if (r) applyIds(r.ids, 'Salute · ' + r.t); return; }
   if ((x = t.closest('[data-phaseall]'))) { const { g, f } = phaseOf(x.dataset.phaseall); applyIds(resolve(f.spec).map(i => i.id), g.t + ' · ' + f.t); return; }
   if ((x = t.closest('[data-phaseai]'))) { const { g, f } = phaseOf(x.dataset.phaseai); AI.goal = g.ob + ' — fase: ' + f.t; store.set('goal', AI.goal); openAI({ list: resolve(f.spec).slice(0, 20), label: g.t + ' · ' + f.t }); return; }
   if ((x = t.closest('[data-sfase]'))) { const v = x.dataset.sfase; const same = S.fase === v && !SPECIAL.has(S.page); clearFilters(); setPage('tutto'); S.fase = same ? '' : v; renderTags(); render(); return; }
