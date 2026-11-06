@@ -2228,13 +2228,13 @@ function pIndice(){
 function saluteData(){
   const base = items.filter(i => !i.duplicatoDi && !isIG(i) && !isScart(i));
   const ig = items.filter(i => !i.duplicatoDi && isIG(i) && !isScart(i));
-  const L = (id, t, d, f, set) => { const l = set.filter(f); return { id, t, d, ids: l.map(i => i.id), n: l.length, tot: set.length }; };
+  const L = (id, t, d, f, set) => { const l = set.filter(f); if (id === 's-giu') l.sort((a, b) => ((b.valutazione && b.valutazione.voto) || 0) - ((a.valutazione && a.valutazione.voto) || 0) || (S.fav.has(b.id) ? 1 : 0) - (S.fav.has(a.id) ? 1 : 0)); /* più importanti per prime */ return { id, t, d, ids: l.map(i => i.id), n: l.length, tot: set.length }; };
   return [
     L('s-cop', 'Copertina generata', 'Nessuna immagine reale: la scheda mostra una copertina disegnata.', i => i.disegnata, base),
     L('s-tag', 'Meno di 3 tag', 'Più tag = più facile da ritrovare con i filtri.', i => (i.tag || []).length < 3, base),
     L('s-lic', 'Senza licenza nota', 'Da leggere prima di riusarli in un progetto.', i => !i.licenza, base),
     L('s-brev', 'Descrizione breve (sotto 80 caratteri)', 'Una frase in più sul quando serve.', i => (i.descrizione || '').length < 80, base),
-    L('s-giu', 'Giudizio solo automatico', 'Voto e «quando usarla» calcolati da regole: da rivedere a mano.', i => i.valutazione && i.valutazione.giudizio !== 'scritto' && ['design-system', 'riferimento', 'skill', 'plugin', 'prompt', 'template', 'componente'].includes(i.tipo), base),
+    L('s-giu', 'Giudizio solo automatico', 'Voto e «quando usarla» calcolati da regole: da rivedere a mano, dalle più importanti (voto più alto, preferite).', i => i.valutazione && i.valutazione.giudizio !== 'scritto' && ['design-system', 'riferimento', 'skill', 'plugin', 'prompt', 'template', 'componente'].includes(i.tipo), base),
     L('s-inc', 'Completezza 2/5 o meno', 'Schede povere: mancano più cose tra descrizione, tag, area, anteprima e licenza.', i => i.qualita && i.qualita.punti <= 2, base),
     L('s-igi', 'Post Instagram senza immagine', 'La copertina è scaduta o il post non è leggibile.', i => i.disegnata || !i.thumb, ig),
     L('s-igp', 'Post Instagram da rileggere', 'Autore o didascalia mancanti.', i => !i.autore, ig)
