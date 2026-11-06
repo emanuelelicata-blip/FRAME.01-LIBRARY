@@ -493,7 +493,8 @@ const PSHORT = { instagram: 'Instagram', brief: 'Brief', design: 'Design', web: 
 const items = C.items.map(i => ({ ...i, tag: i.tag || [], strumenti: i.strumenti || [], _hay: [(ARE[i.area] || {}).nome, (i.strumenti || []).map(s => STR[s] || s).join(' '), i.testo, i.titolo, i.nome, i.descrizione, i.fonte, i.categoria, (i.tag || []).map(t => TAGL[t] || t).join(' '), (i.tagExtra || []).join(' '), (i.triggers || []).join(' ')].join(' ').toLowerCase() }));
 const byId = Object.fromEntries(items.map(i => [i.id, i]));
 const LASTV = (() => { let prev = 0; try { prev = +sessionStorage.getItem('f01lib:lastv') || 0; if (!prev) { prev = +localStorage.getItem('f01lib.lastVisit') || 0; sessionStorage.setItem('f01lib:lastv', String(prev)); localStorage.setItem('f01lib.lastVisit', String(Date.now())); } } catch {} return prev; })();
-const S = { stato: '', q: '', tipo: '', tag: new Set(), fonte: '', dup: false, prev: false, incomp: false, sort: 'nome', limit: 96, kit: new Set(store.get('kit', []).filter(id => byId[id])), note: {} };
+const S = { stato: '', q: '', tipo: '', tag: new Set(), fonte: '', dup: false, prev: false, incomp: false, sort: store.get('sort', 'prontezza'), limit: 96, kit: new Set(store.get('kit', []).filter(id => byId[id])), note: {} };
+{ const fs = document.getElementById('fSort'); if (fs) fs.value = S.sort; }
 let cur = null;
 S.prog = ''; S.grp = ''; S.sel = new Set(); S.selMode = false;
 /* ====== 26/10/2026: aree allargate, progetti, scarto rapido, Smista e tab Analisi ====== */
@@ -1033,7 +1034,7 @@ function renderHome(){
   const nu = SRV ? (SRV.nuove || []).length + (SRV.modificate || []).length : 0;
   const status = canAdd() ? `<div class="hstat box"><div><b>${nu ? nu + (nu === 1 ? ' cartella nuova o modificata' : ' cartelle nuove o modificate') + ' in inbox' : 'Catalogo aggiornato'}</b><div class="mini">${esc([...(SRV.nuove || []), ...(SRV.modificate || [])].slice(0, 6).join(', '))}${SRV.risInCoda ? ' · ' + SRV.risInCoda + ' risorse da analizzare' : ''}${SRV.backup ? ' · ' + esc(SRV.backup) : ''}</div></div><button class="pill ${nu ? 'black' : ''}" id="bScan2">${nu ? 'Aggiorna ora (salva prima il backup)' : 'Riscansiona'}</button></div>` : '';
   const toolsBy = {}; items.forEach(i => { if (i.duplicatoDi) return; (toolsBy[i.area] = toolsBy[i.area] || {}); i.strumenti.forEach(s => toolsBy[i.area][s] = (toolsBy[i.area][s] || 0) + 1); });
-  const acard = a => { const n = c[a.id] || 0, tt = Object.entries(toolsBy[a.id] || {}).sort((x, y) => y[1] - x[1]).slice(0, 4); return `<button class="acard ${n ? '' : 'zero'}" data-page="${a.id}"><span class="mini">${n} elementi</span><b>${esc(a.nome)}</b><span class="d">${esc(a.desc)}</span>${tt.length ? `<span class="tags">${tt.map(([s]) => `<span class="chip tool">${esc(STR[s] || s)}</span>`).join('')}</span>` : ''}</button>`; };
+  const acard = a => { const n = c[a.id] || 0, tt = Object.entries(toolsBy[a.id] || {}).sort((x, y) => y[1] - x[1]).slice(0, 4); return `<button class="acard ${n ? '' : 'zero'}" data-page="${a.id}"><span class="mini">${n} ${n === 1 ? 'elemento' : 'elementi'}</span><b>${esc(a.nome)}</b><span class="d">${esc(a.desc)}</span>${tt.length ? `<span class="tags">${tt.map(([s]) => `<span class="chip tool">${esc(STR[s] || s)}</span>`).join('')}</span>` : ''}</button>`; };
   const seen = new Set(S.recent.slice(0, 6)); const nuoviVisita = LASTV ? items.filter(i => !i.duplicatoDi && !isIG(i) && i.contenuti && i.contenuti.mod > LASTV).sort((a, b) => b.contenuti.mod - a.contenuti.mod) : []; const recentAdd = items.filter(i => !i.duplicatoDi && i.contenuti && i.contenuti.mod && !seen.has(i.id)).sort((a, b) => b.contenuti.mod - a.contenuti.mod).slice(0, 6);
   const ts = {}; items.forEach(i => { if (!i.duplicatoDi) i.strumenti.forEach(s => ts[s] = (ts[s] || 0) + 1); });
   h.innerHTML = `<div class="hhead"><h1>FRAME.01-LIBRARY</h1><p>${tot} elementi unici (le copie identiche sono nascoste) organizzati per area d'uso, non per nome. Scegli un'area, oppure cerca in alto.</p></div>${status}
@@ -2426,7 +2427,7 @@ document.addEventListener('change', e => {
   const id = e.target.id;
   if (id === 'nStato' && cur) { if (persistNote(cur.id, { stato: e.target.value }, true)) { if (canEdit()) render(); } else e.target.value = noteOf(byId[cur.id]).stato || ''; }
   else if (id === 'fStato') { S.stato = e.target.value; S.limit = 96; render(); }
-  else if (id === 'fSort') { S.sort = e.target.value; render(); }
+  else if (id === 'fSort') { S.sort = e.target.value; store.set('sort', S.sort); render(); }
   else if (id === 'fGroup') { S.group = e.target.value; store.set('group', S.group); S.limit = 96; render(); }
   else if (id === 'fPrev') { S.prev = e.target.checked; render(); }
   else if (id === 'fFav') { S.favOnly = e.target.checked; S.limit = 96; render(); }

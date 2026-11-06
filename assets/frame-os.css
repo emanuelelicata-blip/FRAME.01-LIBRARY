@@ -670,3 +670,12 @@ html body .ddm[data-ddm="esplora"] button,html body .ddm[data-ddm="esplora"] a{m
 .salute .sbar{height:6px;border-radius:3px;background:var(--glass-border);overflow:hidden}
 .salute .sbar i{display:block;height:100%;border-radius:3px}
 @media(max-width:760px){.idxlet{top:52px}.idxlet button{min-width:36px;height:44px}.idxrows{grid-template-columns:1fr}.saluteg{grid-template-columns:1fr}}
+
+/* Accessibilità (06/11/2026): bersagli da 44px su telefono e testo minimo leggibile */
+@media(max-width:760px){
+  html body .pill,html body .pg,html body button.lnk,html body .chip.btn,html body .qrow button,html body .tools select,html body .tools .seg button{min-height:44px}
+  html body input[type=checkbox],html body input[type=radio]{width:22px;height:22px}
+  html body input[type=date],html body input[type=text],html body input[type=search],html body input[type=email],html body input[type=password],html body textarea,html body select{min-height:44px;font-size:16px}
+  html body .mini,html body .t-label,html body .chip,html body .tcount{font-size:12px}
+}
+:focus-visible{outline:2px solid var(--accent,#7aa2ff);outline-offset:2px}
