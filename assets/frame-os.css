@@ -679,3 +679,19 @@ html body .ddm[data-ddm="esplora"] button,html body .ddm[data-ddm="esplora"] a{m
   html body .mini,html body .t-label,html body .chip,html body .tcount{font-size:12px}
 }
 :focus-visible{outline:2px solid var(--accent,#7aa2ff);outline-offset:2px}
+
+/* Da approfondire (08/11/2026) */
+.lavrow{margin:12px;padding:14px;display:grid;gap:10px}
+.lavhead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.lavt{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-width:0}
+.lavt b{font-size:1rem;overflow-wrap:anywhere}
+.lavst{display:flex;flex-wrap:wrap;gap:6px}
+.lavpg{display:flex;align-items:center;gap:10px}.lavpg .sbar{flex:1}
+.lavchk summary{cursor:pointer;font-weight:600;padding:6px 0}
+.lavlist{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:8px}
+.lavlist label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.lavlist input{margin-top:3px;flex:none}
+.lavlist small{display:block;opacity:.7}
+.lavnote{display:grid;gap:4px}
+.lavnote textarea{width:100%;border:1px solid var(--line,rgba(128,128,128,.35));border-radius:10px;background:transparent;color:inherit;padding:8px 10px;font:inherit;resize:vertical}
+.lavgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:10px}

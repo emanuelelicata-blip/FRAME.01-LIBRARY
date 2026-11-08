@@ -935,7 +935,7 @@ function card(i){
   <div class="body"><div class="row"><span class="badge t-${esc(i.tipo)}">${esc(tl(i.tipo))}</span>${prPill(i)}${stPill(i)}${showA ? `<span class="mini">· ${esc(PSHORT[i.area])}</span>` : ''}${i.copie ? `<span class="mini">+${i.copie.length} copie</span>` : ''}${i.duplicatoDi ? '<span class="mini">copia</span>' : ''}${st ? `<span class="mini">· ${esc(st)}</span>` : ''}</div>
   <h3>${esc(i.titolo)}</h3><p>${esc(i.descrizione)}</p>
   ${tfLinks(i)}<div class="tags">${tools}${i.tag.slice(0, 3).map(t => `<span class="chip">${esc(TAGL[t] || t)}</span>`).join('')}${(i.progetti || []).slice(0, 2).map(p => `<span class="chip prj">${esc(progName(p))}</span>`).join('')}</div></div>
-  <footer class="cf"><span>${i.tipo === 'prompt' ? esc(i.categoria || 'prompt') : esc(i.fonte) + (i.contenuti.file ? ' · ' + i.contenuti.file + ' file' : '')}</span><span class="cfb"><button class="favbtn eyebtn" data-ql="${esc(i.id)}" aria-label="Anteprima rapida" title="Anteprima rapida (Spazio)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="favbtn ${fv ? 'on' : ''}" data-fav="${esc(i.id)}" aria-pressed="${fv}" aria-label="${fv ? 'Togli dai preferiti' : 'Aggiungi ai preferiti'}" title="Preferito">${fv ? '★' : '☆'}</button>${i.tipo === 'prompt' ? `<button class="kitbtn" data-cprompt="${esc(i.id)}">Copia</button>` : ''}${canEdit() ? (st === 'Scartato' ? `<button class="favbtn" data-ripr="${esc(i.id)}" aria-label="Ripristina" title="Ripristina">↺</button>` : `<button class="favbtn" data-scarta="${esc(i.id)}" aria-label="Scarta" title="Scarta (si può ripristinare)">✕</button>`) : ''}<button class="kitbtn ${on ? 'on' : ''}" data-kit="${esc(i.id)}" aria-pressed="${on}">${on ? 'Nel kit ✓' : '+ Kit'}</button></span></footer></article>`;
+  <footer class="cf"><span>${i.tipo === 'prompt' ? esc(i.categoria || 'prompt') : esc(i.fonte) + (i.contenuti.file ? ' · ' + i.contenuti.file + ' file' : '')}</span><span class="cfb"><button class="favbtn eyebtn" data-ql="${esc(i.id)}" aria-label="Anteprima rapida" title="Anteprima rapida (Spazio)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="favbtn ${fv ? 'on' : ''}" data-fav="${esc(i.id)}" aria-pressed="${fv}" aria-label="${fv ? 'Togli dai preferiti' : 'Aggiungi ai preferiti'}" title="Preferito">${fv ? '★' : '☆'}</button><button class="favbtn ${LAV[i.id] ? 'on' : ''}" data-lavadd="${esc(i.id)}" aria-pressed="${!!LAV[i.id]}" aria-label="${LAV[i.id] ? 'Già in Da approfondire' : 'Aggiungi a Da approfondire'}" title="Da approfondire">${LAV[i.id] ? '✎' : '＋'}</button>${i.tipo === 'prompt' ? `<button class="kitbtn" data-cprompt="${esc(i.id)}">Copia</button>` : ''}${canEdit() ? (st === 'Scartato' ? `<button class="favbtn" data-ripr="${esc(i.id)}" aria-label="Ripristina" title="Ripristina">↺</button>` : `<button class="favbtn" data-scarta="${esc(i.id)}" aria-label="Scarta" title="Scarta (si può ripristinare)">✕</button>`) : ''}<button class="kitbtn ${on ? 'on' : ''}" data-kit="${esc(i.id)}" aria-pressed="${on}">${on ? 'Nel kit ✓' : '+ Kit'}</button></span></footer></article>`;
 }
 /* ---------- anteprime (server locale · cifrate online · cartella collegata) ---------- */
 const FSA = 'showDirectoryPicker' in window;
@@ -979,7 +979,7 @@ function observe(root){ root.querySelectorAll('.thumb, .media:has(img[data-pv])'
 
 const canAdd = () => HTTP && !!SRV && !!(typeof SRV === 'object');
 function aCount(){ const c = {}; items.forEach(i => { if (!i.duplicatoDi) c[i.area] = (c[i.area] || 0) + 1; }); return c; }
-function pageList(){ const c = aCount(); return [['home', 'Panoramica', null], ['obiettivi', 'Per obiettivo', null], ['step', 'Per step', null], ['indice', 'Indice A–Z', null], ['tipi', 'Che cosa c\'è', null], ['tutto', 'Tutto', items.filter(i => !i.duplicatoDi && !isIG(i)).length], ...AREE.filter(a => areaShown(a, c)).map(a => [a.id, PSHORT[a.id] || a.nome, c[a.id] || 0]), ['instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length], ['preferiti', '★ Preferiti', S.fav.size], ['gruppi', 'Gruppi', GRP.length], ['progetto-brief', 'Brief progetto', null], ['import', 'Flusso', null], ['salute', 'Salute', null], ['revisione', 'Da verificare', revCount()], ['pulizia', 'Pulizia', cleanCount()], ['salvati', 'Link salvati', null], ['sviluppo', 'Skill e plugin', null]]; }
+function pageList(){ const c = aCount(); return [['home', 'Panoramica', null], ['obiettivi', 'Per obiettivo', null], ['step', 'Per step', null], ['indice', 'Indice A–Z', null], ['tipi', 'Che cosa c\'è', null], ['tutto', 'Tutto', items.filter(i => !i.duplicatoDi && !isIG(i)).length], ...AREE.filter(a => areaShown(a, c)).map(a => [a.id, PSHORT[a.id] || a.nome, c[a.id] || 0]), ['instagram', 'Instagram', items.filter(i => isIG(i) && !i.duplicatoDi).length], ['preferiti', '★ Preferiti', S.fav.size], ['gruppi', 'Gruppi', GRP.length], ['progetto-brief', 'Brief progetto', null], ['import', 'Flusso', null], ['lavorazione', 'Da approfondire', lavCount()], ['salute', 'Salute', null], ['revisione', 'Da verificare', revCount()], ['pulizia', 'Pulizia', cleanCount()], ['salvati', 'Link salvati', null], ['sviluppo', 'Skill e plugin', null]]; }
 const validPage = p => pageList().some(x => x[0] === p);
 function pageHash(){ return S.page === 'home' ? location.pathname + location.search : '#/' + S.page; }
 function setPage(p, fromHash){
@@ -1002,7 +1002,7 @@ function renderPages(){
 const NAVG = [
   { id: 'esplora', nome: 'Esplora', voci: ['home', 'obiettivi', 'step', 'indice', 'tipi', 'tutto'], sub: { indice: 'Tutti gli elementi in ordine alfabetico', step: 'Dalla pianificazione alla consegna: step 0–8', home: 'Le aree d\'uso in un colpo d\'occhio', obiettivi: 'Cosa devi fare? Percorsi a fasi', tipi: 'Cos\'è ogni tipo e come si usa', tutto: 'Ogni elemento, con filtri' } },
   { id: 'coll', nome: 'Collezioni', voci: ['preferiti', 'gruppi', 'instagram'], sub: { preferiti: 'Gli elementi con ★', gruppi: 'Le tue cartelle di schede', instagram: 'Post e reel salvati' } },
-  { id: 'lavoro', nome: 'Lavoro', voci: ['progetto-brief', 'import', 'salute', 'revisione', 'pulizia', 'salvati'], sub: { salute: 'Cosa manca nel catalogo: copertine, tag, licenze', 'progetto-brief': 'Dall\'idea al percorso a step', import: 'Dal caricamento al catalogo', revisione: 'Da scartare e varie: decidi tu', pulizia: 'Doppioni da unire', salvati: 'Link dal telefono' } }
+  { id: 'lavoro', nome: 'Lavoro', voci: ['lavorazione', 'progetto-brief', 'import', 'salute', 'revisione', 'pulizia', 'salvati'], sub: { lavorazione: 'Gli elementi da portare al definitivo', salute: 'Cosa manca nel catalogo: copertine, tag, licenze', 'progetto-brief': 'Dall\'idea al percorso a step', import: 'Dal caricamento al catalogo', revisione: 'Da scartare e varie: decidi tu', pulizia: 'Doppioni da unire', salvati: 'Link dal telefono' } }
 ];
 function renderNav(lab, areeK){
   const item = (k, sub) => lab[k] ? `<button role="menuitem" data-page="${k}"${S.page === k ? ' aria-current="page"' : ''}><span>${esc(lab[k][0])}${sub ? `<small>${esc(sub)}</small>` : ''}</span>${lab[k][1] == null ? '' : `<span class="n">${lab[k][1]}</span>`}</button>` : '';
@@ -1140,7 +1140,7 @@ function drawRender(){
   const canShare = !!navigator.share && (i.link || i.testo), tg = taglineOf(i), inKit = S.kit.has(i.id), fav = S.fav.has(i.id);
   d.innerHTML = `<div class="dh"><button class="pill close" id="dClose" aria-label="Chiudi (Esc)">Chiudi ✕</button><div class="crumb" style="padding-right:96px"><button data-closeitem="1">${esc(pgName)}</button> › <span>${esc(PSHORT[i.area] || tl(i.tipo))}</span></div>
   <div class="dtitle"><span class="badge t-${esc(i.tipo)}">${esc(tl(i.tipo))}</span><h2>${esc(i.titolo)}</h2>${tg ? `<p class="dtag">${esc(tg)}</p>` : ''}</div>
-  <div class="dtools">${canEdit() ? (isScart(i) ? `<button class="pill" data-ripr="${esc(i.id)}">↺ Ripristina</button>` : `<button class="pill" data-scarta="${esc(i.id)}">✕ Scarta</button>`) : ''}<button class="pill ${fav ? 'on' : ''}" data-fav="${esc(i.id)}" aria-pressed="${fav}">${fav ? '★ Preferito' : '☆ Preferito'}</button><button class="pill ${inKit ? 'on' : ''}" data-kit="${esc(i.id)}" aria-pressed="${inKit}">${inKit ? 'Nel kit ✓' : '+ Aggiungi al Kit'}</button>${canShare ? '<button class="pill" data-share="1">Condividi</button>' : ''}${(cur.seq || []).length > 1 ? `<span class="dnav" style="margin:0 0 0 auto"><button data-nav="-1" aria-label="Precedente" ${si <= 0 ? 'disabled' : ''}>‹</button><span class="mini">${si + 1} / ${cur.seq.length}</span><button data-nav="1" aria-label="Successivo" ${si >= cur.seq.length - 1 ? 'disabled' : ''}>›</button></span>` : ''}</div>
+  <div class="dtools">${canEdit() ? (isScart(i) ? `<button class="pill" data-ripr="${esc(i.id)}">↺ Ripristina</button>` : `<button class="pill" data-scarta="${esc(i.id)}">✕ Scarta</button>`) : ''}<button class="pill ${fav ? 'on' : ''}" data-fav="${esc(i.id)}" aria-pressed="${fav}">${fav ? '★ Preferito' : '☆ Preferito'}</button><button class="pill ${LAV[i.id] ? 'on' : ''}" data-lavadd="${esc(i.id)}">${LAV[i.id] ? 'In «Da approfondire» ✓' : '+ Da approfondire'}</button><button class="pill ${inKit ? 'on' : ''}" data-kit="${esc(i.id)}" aria-pressed="${inKit}">${inKit ? 'Nel kit ✓' : '+ Aggiungi al Kit'}</button>${canShare ? '<button class="pill" data-share="1">Condividi</button>' : ''}${(cur.seq || []).length > 1 ? `<span class="dnav" style="margin:0 0 0 auto"><button data-nav="-1" aria-label="Precedente" ${si <= 0 ? 'disabled' : ''}>‹</button><span class="mini">${si + 1} / ${cur.seq.length}</span><button data-nav="1" aria-label="Successivo" ${si >= cur.seq.length - 1 ? 'disabled' : ''}>›</button></span>` : ''}</div>
   <div class="subtabs" role="tablist" aria-label="Sezioni della scheda">${TABS.map(([k, l]) => `<button class="subtab" id="tab-${k}" role="tab" aria-selected="${cur.tab === k}" aria-controls="panel" tabindex="${cur.tab === k ? 0 : -1}" data-tab="${k}">${tabLabel(k, l, i)}</button>`).join('')}</div></div><div class="panel" id="panel" role="tabpanel" aria-labelledby="tab-${cur.tab}">${panel(i)}</div>`;
   if (cur.tab === 'prompt') aiRefresh();
   if (cur.tab === 'pan') { fitPv(); const f = $('#pvf'); if (f && f.dataset.pv) fillFrame(f); }
@@ -1866,7 +1866,7 @@ function pBrief(){
   <p class="vact"><button class="pill black" data-bgen="1">Genera percorso</button><button class="pill" data-bcopy="1">Copia brief per Claude</button><button class="pill" data-breset="1">Azzera</button></p>
   <details class="vimp"><summary class="mini">Importa il piano di Claude</summary><textarea id="b_imp" placeholder="Incolla qui il JSON che ti ha dato Claude" style="min-height:90px"></textarea><p><button class="pill" data-bimp="1">Importa piano</button></p></details></div>${plan}`;
 }
-function renderSpecialNew(){ const p = S.page; return p === 'pulizia' ? pPulizia() : p === 'revisione' ? pRevisione() : p === 'import' ? pImport() : p === 'salvati' ? pSalvati() : p === 'progetto-brief' ? pBrief() : p === 'gruppi' ? pGruppi() : p === 'step' ? pStep() : p === 'indice' ? pIndice() : p === 'salute' ? pSalute() : null; }
+function renderSpecialNew(){ const p = S.page; return p === 'pulizia' ? pPulizia() : p === 'revisione' ? pRevisione() : p === 'import' ? pImport() : p === 'salvati' ? pSalvati() : p === 'progetto-brief' ? pBrief() : p === 'gruppi' ? pGruppi() : p === 'step' ? pStep() : p === 'indice' ? pIndice() : p === 'salute' ? pSalute() : p === 'lavorazione' ? pLavorazione() : null; }
 document.addEventListener('input', e => {
   const t = e.target, k = t.dataset && t.dataset.bf; if (!k) return; BRIEF[k] = t.value; store.set('brief', BRIEF);
 });
@@ -1902,7 +1902,156 @@ document.addEventListener('click', e => {
   if (d.pkit && PIANO) { const ids = [...new Set(PIANO.steps.flatMap(s => s.items))].filter(id => byId[id]).slice(0, 200); ids.forEach(id => S.kit.add(id)); store.set('kit', [...S.kit]); toast(ids.length + ' elementi nel kit.'); render(); return; }
 }, true);
 
-const SPECIAL = new Set(['obiettivi', 'step', 'indice', 'salute', 'tipi', 'sviluppo', 'pulizia', 'import', 'salvati', 'progetto-brief', 'revisione']);
+/* --- Da approfondire: coda di lavorazione + checklist «per renderlo definitivo» per tipo --- */
+const LAV_ST = [['da-guardare', 'Da guardare'], ['in-lavorazione', 'In lavorazione'], ['definitivo', 'Definitivo']];
+const LAV_DEF = {
+  'skill': { fin: 'Una skill definitiva si attiva da sola quando serve, ha istruzioni brevi e un esempio che funziona.', st: [
+    ['uso', 'Scrivi in una riga quando va usata e quando NO', 'La descrizione è ciò che fa attivare la skill: deve dire il caso d\'uso e i limiti.'],
+    ['prova', 'Provala su un caso reale e annota il risultato', 'Un progetto vero di FRAME.01, non un esempio di prova.'],
+    ['snella', 'Taglia le istruzioni inutili', 'Tieni solo ciò che cambia il risultato; il resto in file di riferimento.'],
+    ['esempio', 'Aggiungi un esempio di input e di output', 'Serve per rileggerla fra sei mesi senza ricominciare.'],
+    ['licenza', 'Controlla fonte e licenza', 'Se è di terzi, segna da dove viene e cosa puoi riusare.'],
+    ['copia', 'Salva la versione tua nella cartella «Mie»', 'L\'originale non si tocca: lavori su una copia.']] },
+  'plugin': { fin: 'Un plugin definitivo è installato, provato e con i comandi che userai davvero scritti.', st: [
+    ['cosa', 'Elenca skill e comandi che contiene', 'Così sai cosa attiva prima di installarlo.'],
+    ['sicuro', 'Controlla permessi, fonte e autore', 'Niente chiavi o accessi che non servono.'],
+    ['prova', 'Provalo su un lavoro vero', 'Annota cosa ha fatto bene e cosa no.'],
+    ['sovrap', 'Verifica che non si sovrapponga a un altro plugin', 'Due plugin che fanno la stessa cosa creano confusione.'],
+    ['nota', 'Scrivi come lo usi in una riga', 'Comando o frase che lo attiva.']] },
+  'design-system': { fin: 'Un design system definitivo ha token chiari, componenti documentati e regole su cosa NON fare.', st: [
+    ['token', 'Estrai colori, font e spaziature in token', 'Un solo posto dove cambiarli.'],
+    ['contrasto', 'Controlla contrasto e leggibilità', 'Testo su sfondo almeno 4.5:1.'],
+    ['componenti', 'Elenca i componenti base (pulsanti, form, card, navigazione)', 'Con stati: normale, hover, attivo, disattivo.'],
+    ['regole', 'Scrivi 3 cose da fare e 3 da non fare', 'Evita che il sistema si snaturi nei progetti.'],
+    ['cliente', 'Adattalo al cliente (colori, tono)', 'Per automotive e hospitality: materiali, luce, ritmo.'],
+    ['prova', 'Applicalo a una pagina reale', 'Se regge una pagina, regge il progetto.']] },
+  'template': { fin: 'Un template definitivo è svuotato dei contenuti d\'altri, con i tuoi segnaposto e una nota su come riempirlo.', st: [
+    ['svuota', 'Togli testi, immagini e marchi non tuoi', 'Resta solo la struttura.'],
+    ['segnaposto', 'Metti segnaposto chiari', 'Es. «Titolo cliente», «Immagine hero 16:9».'],
+    ['brand', 'Collega colori e font al brand del cliente', 'Variabili, non valori sparsi.'],
+    ['responsive', 'Controlla desktop, iPad e iPhone', 'Larghezze 1280 / 820 / 390.'],
+    ['guida', 'Scrivi una guida breve all\'uso', 'Quali sezioni si cambiano e quali no.'],
+    ['licenza', 'Controlla la licenza del template', 'Uso commerciale e rivendita.']] },
+  'componente': { fin: 'Un componente definitivo ha proprietà essenziali, anteprima funzionante e un uso annotato.', st: [
+    ['prova', 'Provalo in una pagina di prova', 'Con i tuoi contenuti, non quelli dell\'esempio.'],
+    ['props', 'Tieni solo le proprietà che userai', 'Meno controlli = meno errori.'],
+    ['perf', 'Controlla peso e animazioni', 'Su iPhone deve restare fluido; rispetta «riduci movimento».'],
+    ['stato', 'Verifica stati e casi limite', 'Testo lungo, immagine mancante, schermo piccolo.'],
+    ['nota', 'Annota dove lo usi', 'Progetto e pagina.']] },
+  'riferimento': { fin: 'Un riferimento definitivo dice cosa ti interessa, cosa prenderesti e cosa no.', st: [
+    ['perche', 'Scrivi perché ti piace (una frase)', 'Senza il perché resta solo un\'immagine.'],
+    ['estrai', 'Estrai 3 elementi: colore, ritmo, tipografia o layout', 'Ciò che puoi riusare senza copiare.'],
+    ['tag', 'Metti settore e stile con i tag', 'Così lo ritrovi per cliente.'],
+    ['progetto', 'Collegalo a un progetto o a un brief', 'Un riferimento senza progetto si perde.'],
+    ['fonte', 'Salva la fonte e l\'autore', 'Per citarlo o chiedere il permesso.']] },
+  'prompt': { fin: 'Un prompt definitivo ha ruolo, contesto, variabili e formato di risposta, ed è provato su più casi.', st: [
+    ['ruolo', 'Definisci ruolo e obiettivo in due righe', 'Chi risponde e per ottenere cosa.'],
+    ['var', 'Metti le variabili tra [parentesi]', 'Cliente, settore, tono, lunghezza.'],
+    ['formato', 'Specifica il formato della risposta', 'Elenco, tabella, JSON, lunghezza massima.'],
+    ['prove', 'Provalo su 3 casi diversi', 'Se regge tre casi è riusabile.'],
+    ['limiti', 'Aggiungi cosa NON deve fare', 'Es. non inventare dati, non copiare marchi.'],
+    ['salva', 'Salvalo con nome, versione e quando usarlo', 'Es. «Brief cliente v2».']] },
+  'modello-media': { fin: 'Un modello immagine/video definitivo ha parametri, prompt tipo e costo annotati.', st: [
+    ['quando', 'Scrivi per cosa è il migliore', 'Realismo, stile, velocità, testo nelle immagini.'],
+    ['param', 'Annota le impostazioni che funzionano', 'Proporzioni, seed, riferimenti.'],
+    ['prompt', 'Salva 2 prompt tipo', 'Uno per automotive, uno per hospitality.'],
+    ['costo', 'Segna costo e limiti', 'Crediti, durata massima, risoluzione.'],
+    ['diritti', 'Controlla i diritti d\'uso', 'Uso commerciale per i clienti.']] },
+  'risorsa': { fin: 'Una risorsa definitiva ha uno scopo chiaro, è raggiungibile e ha un\'alternativa gratuita.', st: [
+    ['scopo', 'Scrivi a cosa serve in una riga', 'Quando la apri.'],
+    ['gratis', 'Verifica che sia gratuita o segna il costo', 'Gli strumenti devono restare gratuiti.'],
+    ['alt', 'Segna un\'alternativa', 'Se chiude o diventa a pagamento.'],
+    ['link', 'Controlla che il link funzioni', 'E che non chieda accessi inutili.'],
+    ['tag', 'Metti area e tag', 'Per ritrovarla.']] },
+  'documento': { fin: 'Un documento definitivo ha una sintesi in 5 righe, le decisioni prese e i prossimi passi.', st: [
+    ['sintesi', 'Scrivi una sintesi di 5 righe', 'Cosa dice, per chi, cosa cambia.'],
+    ['decisioni', 'Elenca le decisioni utili', 'Ciò che applicherai ai progetti.'],
+    ['prossimi', 'Scrivi i prossimi passi', 'Azioni con una data.'],
+    ['fonti', 'Segna fonti e data', 'Per sapere quando è invecchiato.']] },
+  'progetto': { fin: 'Un progetto definitivo è pulito, senza materiali di terzi e con un README di due righe.', st: [
+    ['pulizia', 'Togli file inutili e materiali di terzi', 'Gli originali restano al sicuro.'],
+    ['readme', 'Scrivi un README di due righe', 'Cos\'è e come si apre.'],
+    ['anteprima', 'Aggiungi una copertina vera', 'Uno screenshot a 1280 px.'],
+    ['licenza', 'Controlla licenza e diritti', 'Immagini e font inclusi.']] },
+  'html': { fin: 'Un sito HTML definitivo si apre ovunque, senza file mancanti e con l\'anteprima.', st: [
+    ['apre', 'Aprilo da zero su Mac e iPhone', 'Nessun percorso assoluto.'],
+    ['peso', 'Controlla peso e immagini', 'Sotto i 3 MB se possibile.'],
+    ['a11y', 'Verifica contrasto, tastiera, testo alternativo', 'Controlli base di accessibilità.'],
+    ['anteprima', 'Aggiungi la copertina', 'Screenshot a 1280 px.']] },
+  'font': { fin: 'Un font definitivo ha licenza chiara e abbinamenti scelti.', st: [
+    ['licenza', 'Controlla la licenza (web, app, stampa)', 'Quasi sempre diversa per ogni uso.'],
+    ['abbina', 'Scegli un abbinamento e il suo uso', 'Titolo, testo, dati.'],
+    ['prova', 'Provalo in una pagina reale', 'Leggibilità su iPhone.']] },
+  'immagini': { fin: 'Un set di immagini definitivo ha diritti, formato e nomi in ordine.', st: [
+    ['diritti', 'Controlla i diritti', 'Chi le ha create e per quale uso.'],
+    ['formato', 'Esporta nei formati giusti', 'Web: webp/jpg leggero; stampa: alta risoluzione.'],
+    ['nomi', 'Rinomina in modo chiaro', 'cliente_soggetto_numero.'],
+    ['tag', 'Metti settore e stile', 'Per ritrovarle.']] },
+  'instagram': { fin: 'Un post definitivo ha il perché del salvataggio e l\'idea che ne ricavi.', st: [
+    ['perche', 'Scrivi perché lo hai salvato', 'Una frase.'],
+    ['idea', 'Ricava un\'idea per un cliente', 'Formato, tono, immagine.'],
+    ['autore', 'Segna l\'autore', 'Per citarlo.'],
+    ['raccolta', 'Mettilo in un gruppo o progetto', 'Altrimenti si perde.']] }
+};
+LAV_DEF._altro = { fin: 'Un elemento definitivo ha uno scopo chiaro, è provato e collegato a un progetto.', st: [
+  ['scopo', 'Scrivi a cosa serve in una riga', 'Quando lo apri.'], ['prova', 'Provalo su un caso reale', 'Annota il risultato.'], ['progetto', 'Collegalo a un progetto', 'Altrimenti si perde.']] };
+const lavDefOf = i => LAV_DEF[isIG(i) ? 'instagram' : i.tipo] || LAV_DEF._altro;
+function lavLoad(){ const o = store.get('lav', {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
+let LAV = lavLoad();
+function lavSave(){ store.set('lav', LAV); }
+const lavPct = (i, e) => { const d = lavDefOf(i).st; return d.length ? Math.round(((e.fatti || []).filter(k => d.some(s => s[0] === k)).length) / d.length * 100) : 0; };
+function lavAdd(id){ if (!byId[id] || LAV[id]) return; LAV[id] = { stato: 'da-guardare', fatti: [], nota: '', data: new Date().toISOString().slice(0, 10) }; lavSave(); toast('Aggiunto a «Da approfondire».'); }
+function lavDel(id){ delete LAV[id]; lavSave(); }
+function lavCount(){ return Object.keys(LAV).filter(id => byId[id] && LAV[id].stato !== 'definitivo').length; }
+function lavRequest(i){
+  const e = LAV[i.id] || { fatti: [], nota: '' }, df = lavDefOf(i), manca = df.st.filter(s => !(e.fatti || []).includes(s[0]));
+  return ['Aiutami a portare questo elemento della libreria FRAME.01 alla versione definitiva. Rispondi in italiano.', '',
+    'Elemento: ' + i.titolo, 'Tipo: ' + (isIG(i) ? 'Post Instagram' : tl(i.tipo)), 'Fonte: ' + i.fonte, i.link ? 'Link: ' + i.link : '', 'Descrizione: ' + (i.descrizione || '—'),
+    'Tag: ' + ((i.tag || []).join(', ') || '—'), e.nota ? 'Le mie note: ' + e.nota : '', '', 'Cosa vuol dire «definitivo»: ' + df.fin, '',
+    manca.length ? 'Passi ancora da fare:\n' + manca.map((s, n) => (n + 1) + '. ' + s[1] + ' — ' + s[2]).join('\n') : 'Tutti i passi sono segnati come fatti: controlla se manca qualcosa.', '',
+    'Per ogni passo da fare dimmi cosa scrivere o cambiare, concreto e breve. Non cancellare né spostare gli originali: lavora su una copia.'].filter(l => l !== '' || true).join('\n').replace(/\n{3,}/g, '\n\n');
+}
+function lavRow(i){
+  const e = LAV[i.id], df = lavDefOf(i), p = lavPct(i, e), open = !!e._open;
+  return `<article class="box lavrow" data-lavid="${esc(i.id)}"><div class="lavhead"><div class="lavt"><span class="badge t-${esc(i.tipo)}">${esc(isIG(i) ? 'Instagram' : tl(i.tipo))}</span><b>${esc(i.titolo)}</b><span class="mini">${esc(i.fonte)}</span></div>
+  <div class="lavst" role="group" aria-label="Stato di lavorazione">${LAV_ST.map(([k, l]) => `<button class="pill ${e.stato === k ? 'black' : ''}" data-lavst="${esc(i.id)}|${k}" aria-pressed="${e.stato === k}">${l}</button>`).join('')}</div></div>
+  <div class="lavpg"><div class="sbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}" aria-label="Avanzamento verso il definitivo"><i style="width:${p}%"></i></div><span class="mini">${p}% verso il definitivo</span></div>
+  <details class="lavchk"${open ? ' open' : ''} data-lavdet="${esc(i.id)}"><summary>Per renderlo definitivo · ${df.st.filter(s => (e.fatti || []).includes(s[0])).length}/${df.st.length}</summary><p class="mini">${esc(df.fin)}</p>
+  <ul class="lavlist">${df.st.map(s => `<li><label><input type="checkbox" data-lavck="${esc(i.id)}|${s[0]}" ${(e.fatti || []).includes(s[0]) ? 'checked' : ''}> <span><b>${esc(s[1])}</b><small>${esc(s[2])}</small></span></label></li>`).join('')}</ul></details>
+  <label class="lavnote"><span class="mini">Note di lavorazione</span><textarea data-lavnote="${esc(i.id)}" rows="2" placeholder="Cosa vuoi cambiare, dove lo userai…">${esc(e.nota || '')}</textarea></label>
+  <div class="acts"><button class="pill" data-open="${esc(i.id)}">Apri la scheda</button><button class="pill" data-lavreq="${esc(i.id)}">Copia richiesta per Claude</button><button class="pill" data-lavdel="${esc(i.id)}">Togli dalla coda</button></div></article>`;
+}
+S.lavF = store.get('lavf', 'attivi');
+function pLavorazione(){
+  const ids = Object.keys(LAV).filter(id => byId[id]), all = ids.map(id => byId[id]);
+  const cnt = k => k === 'tutti' ? all.length : k === 'attivi' ? all.filter(i => LAV[i.id].stato !== 'definitivo').length : all.filter(i => LAV[i.id].stato === k).length;
+  const F = [['attivi', 'Da fare'], ['da-guardare', 'Da guardare'], ['in-lavorazione', 'In lavorazione'], ['definitivo', 'Definitivi'], ['tutti', 'Tutti']];
+  if (!F.some(f => f[0] === S.lavF)) S.lavF = 'attivi';
+  const rows = all.filter(i => S.lavF === 'tutti' || (S.lavF === 'attivi' ? LAV[i.id].stato !== 'definitivo' : LAV[i.id].stato === S.lavF)).sort((a, b) => (LAV[b.id].stato === 'in-lavorazione') - (LAV[a.id].stato === 'in-lavorazione') || (LAV[a.id].data < LAV[b.id].data ? 1 : -1));
+  const tipi = [...new Set(Object.keys(LAV_DEF).filter(k => k[0] !== '_'))];
+  return `<div class="hhead"><h1>Da approfondire</h1><p>Gli elementi che hai scelto di lavorare: per ciascuno una lista di passi per portarlo alla versione definitiva, secondo il tipo (skill, template, prompt…). Si aggiungono con «+ Da approfondire» sulla scheda. Salvato su questo dispositivo.</p></div>
+  <div class="acts idxbar">${F.map(([k, l]) => `<button class="pill ${S.lavF === k ? 'black' : ''}" data-lavf="${k}" aria-pressed="${S.lavF === k}">${l} <span class="n">${cnt(k)}</span></button>`).join('')}</div>
+  ${rows.length ? rows.map(lavRow).join('') : `<div class="box" style="margin:12px"><b>${all.length ? 'Niente in questo filtro.' : 'La coda è vuota.'}</b><p class="mini">${all.length ? 'Cambia filtro qui sopra.' : 'Apri una scheda e premi «+ Da approfondire»: comparirà qui con i passi per renderla definitiva.'}</p></div>`}
+  <details class="box lavguide" style="margin:12px"><summary><b>Cosa significa «definitivo», per tipo</b></summary><div class="lavgrid">${tipi.map(k => `<div><span class="badge t-${esc(k)}">${esc(k === 'instagram' ? 'Instagram' : tl(k))}</span><p class="mini">${esc(LAV_DEF[k].fin)}</p></div>`).join('')}</div></details>`;
+}
+function lavClick(t){
+  let x;
+  if ((x = t.closest('[data-lavadd]'))) { const id = x.dataset.lavadd; if (LAV[id]) { S.page = 'lavorazione'; if (cur) closeItem(); setPage('lavorazione'); } else { lavAdd(id); render(); if (cur) drawRender(); } return true; }
+  if ((x = t.closest('[data-lavf]'))) { S.lavF = x.dataset.lavf; store.set('lavf', S.lavF); render(); return true; }
+  if ((x = t.closest('[data-lavst]'))) { const [id, st] = x.dataset.lavst.split('|'); if (LAV[id]) { LAV[id].stato = st; lavSave(); render(); } return true; }
+  if ((x = t.closest('[data-lavreq]'))) { const i = byId[x.dataset.lavreq]; if (i) copy(lavRequest(i), 'Richiesta copiata: incollala in Claude.'); return true; }
+  if ((x = t.closest('[data-lavdel]'))) { lavDel(x.dataset.lavdel); render(); return true; }
+  return false;
+}
+document.addEventListener('change', e => {
+  const c = e.target.closest && e.target.closest('[data-lavck]');
+  if (c) { const [id, k] = c.dataset.lavck.split('|'), en = LAV[id]; if (!en) return; en.fatti = en.fatti || []; const on = c.checked; en.fatti = on ? [...new Set([...en.fatti, k])] : en.fatti.filter(v => v !== k);
+    const df = lavDefOf(byId[id]); if (en.fatti.length && en.stato === 'da-guardare') en.stato = 'in-lavorazione'; if (df.st.every(s => en.fatti.includes(s[0]))) en.stato = 'definitivo'; lavSave(); en._open = true; render(); en._open = false; return; }
+  const n = e.target.closest && e.target.closest('[data-lavnote]'); if (n && LAV[n.dataset.lavnote]) { LAV[n.dataset.lavnote].nota = n.value; lavSave(); toast('Nota salvata.'); }
+});
+document.addEventListener('toggle', e => { const d = e.target; if (d && d.dataset && d.dataset.lavdet && LAV[d.dataset.lavdet]) LAV[d.dataset.lavdet]._open = d.open; }, true);
+
+const SPECIAL = new Set(['lavorazione', 'obiettivi', 'step', 'indice', 'salute', 'tipi', 'sviluppo', 'pulizia', 'import', 'salvati', 'progetto-brief', 'revisione']);
 S.ids = null; S.idsLabel = ''; S.goalId = '';
 const GOALS = [
   { id: 'sito-lusso', t: 'Sito web per un brand di lusso', d: 'Hotel, auto, ristorazione: identità forte, motion misurato, tempi di caricamento bassi.', ob: 'sito web per un brand di lusso (hotel, automotive, ristorazione)', fasi: [
@@ -2353,6 +2502,7 @@ function render(){
 }
 document.addEventListener('click', e => {
   const t = e.target; let x;
+  if (lavClick(t)) { e.stopImmediatePropagation(); return; }
   if ((x = t.closest('[data-goal]'))) { S.goalId = x.dataset.goal; render(); scrollTo({ top: 0 }); return; }
   if ((x = t.closest('[data-goalai]'))) { const g = GOALS.find(v => v.id === x.dataset.goalai), seen = new Set(), l = [];
     g.fasi.forEach(f => resolve(f.spec).slice(0, 6).forEach(i => { if (!seen.has(i.id)) { seen.add(i.id); l.push(i); } }));
