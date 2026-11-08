@@ -1997,11 +1997,37 @@ LAV_DEF._altro = { fin: 'Un elemento definitivo ha uno scopo chiaro, è provato 
   ['scopo', 'Scrivi a cosa serve in una riga', 'Quando lo apri.'], ['prova', 'Provalo su un caso reale', 'Annota il risultato.'], ['progetto', 'Collegalo a un progetto', 'Altrimenti si perde.']] };
 const lavDefOf = i => LAV_DEF[isIG(i) ? 'instagram' : i.tipo] || LAV_DEF._altro;
 function lavLoad(){ const o = store.get('lav', {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
-let LAV = lavLoad();
-function lavSave(){ store.set('lav', LAV); }
+let LAV = lavLoad(); let LAVDEL = (() => { const o = store.get('lavdel', {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; })();
+const LAVS = { st: 'locale', t: 0 }; let lavTm;
+function lavSave(id){ if (id) { if (LAV[id]) LAV[id].t = Date.now(); } store.set('lav', LAV); store.set('lavdel', LAVDEL); clearTimeout(lavTm); lavTm = setTimeout(lavSync, 1500); }
+const lavClean = e => { const c = { ...e }; delete c._open; return c; };
+/* Sincronizzazione tra dispositivi: tabella kv (k='lav'), solo con account; vince la modifica più recente per ogni voce */
+async function lavSync(manual){
+  try {
+    const sb = await sbGet(); const { data: s } = await sb.auth.getSession(); if (!s.session) { LAVS.st = 'locale'; if (manual) toast('Accedi con l\'account (Import → Link dal cloud) per sincronizzare.'); lavStatus(); return; }
+    const r = await sb.from('kv').select('v').eq('k', 'lav').maybeSingle(); if (r.error) throw r.error;
+    const rem = (r.data && r.data.v) || {}, ri = rem.items || {}, rd = rem.del || {};
+    const ids = new Set([...Object.keys(LAV), ...Object.keys(ri), ...Object.keys(LAVDEL), ...Object.keys(rd)]);
+    const items = {}, del = {}; let chLocal = false, chRem = false;
+    ids.forEach(id => {
+      const l = LAV[id], re = ri[id], tl_ = (l && l.t) || 0, tr = (re && re.t) || 0, dt = Math.max(LAVDEL[id] || 0, rd[id] || 0);
+      if (dt >= Math.max(tl_, tr) && dt > 0) { del[id] = dt; if (l) chLocal = true; if (re) chRem = true; if (LAVDEL[id] !== dt) chLocal = true; if (rd[id] !== dt) chRem = true; return; }
+      const win = tl_ >= tr ? l : re; if (!win) return; items[id] = lavClean(win);
+      if (tr > tl_) chLocal = true; else if (tl_ > tr) chRem = true;
+      if (dt) { del[id] = dt; }
+    });
+    if (chLocal) { const keep = {}; Object.entries(items).forEach(([id, e]) => { keep[id] = { ...e, _open: LAV[id] && LAV[id]._open }; }); LAV = keep; LAVDEL = del; store.set('lav', LAV); store.set('lavdel', LAVDEL); }
+    if (chRem) { const w = await sb.from('kv').upsert({ user_id: s.session.user.id, k: 'lav', v: { items, del }, updated_at: new Date().toISOString() }, { onConflict: 'user_id,k' }); if (w.error) throw w.error; }
+    LAVS.st = 'sync'; LAVS.t = Date.now(); lavStatus(); if (chLocal) render(); else if (manual) toast('Già sincronizzata.');
+  } catch (e) { LAVS.st = 'errore'; lavStatus(); if (manual) toast('Sincronizzazione non riuscita: ' + (e.message || e)); }
+}
+function lavStatus(){ const el = document.getElementById('lavsync'); if (el) el.innerHTML = lavStatusHtml(); }
+const lavStatusHtml = () => LAVS.st === 'sync' ? 'Sincronizzata con l\'account ✓' : LAVS.st === 'errore' ? 'Sincronizzazione non riuscita: i dati restano su questo dispositivo.' : 'Solo su questo dispositivo: accedi con l\'account per sincronizzarla.';
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') lavSync(); });
+setTimeout(lavSync, 2500);
 const lavPct = (i, e) => { const d = lavDefOf(i).st; return d.length ? Math.round(((e.fatti || []).filter(k => d.some(s => s[0] === k)).length) / d.length * 100) : 0; };
-function lavAdd(id){ if (!byId[id] || LAV[id]) return; LAV[id] = { stato: 'da-guardare', fatti: [], nota: '', data: new Date().toISOString().slice(0, 10) }; lavSave(); toast('Aggiunto a «Da approfondire».'); }
-function lavDel(id){ delete LAV[id]; lavSave(); }
+function lavAdd(id){ if (!byId[id] || LAV[id]) return; delete LAVDEL[id]; LAV[id] = { stato: 'da-guardare', fatti: [], nota: '', data: new Date().toISOString().slice(0, 10) }; lavSave(id); toast('Aggiunto a «Da approfondire».'); }
+function lavDel(id){ delete LAV[id]; LAVDEL[id] = Date.now(); lavSave(); }
 function lavCount(){ return Object.keys(LAV).filter(id => byId[id] && LAV[id].stato !== 'definitivo').length; }
 function lavRequest(i){
   const e = LAV[i.id] || { fatti: [], nota: '' }, df = lavDefOf(i), manca = df.st.filter(s => !(e.fatti || []).includes(s[0]));
@@ -2029,7 +2055,7 @@ function pLavorazione(){
   if (!F.some(f => f[0] === S.lavF)) S.lavF = 'attivi';
   const rows = all.filter(i => S.lavF === 'tutti' || (S.lavF === 'attivi' ? LAV[i.id].stato !== 'definitivo' : LAV[i.id].stato === S.lavF)).sort((a, b) => (LAV[b.id].stato === 'in-lavorazione') - (LAV[a.id].stato === 'in-lavorazione') || (LAV[a.id].data < LAV[b.id].data ? 1 : -1));
   const tipi = [...new Set(Object.keys(LAV_DEF).filter(k => k[0] !== '_'))];
-  return `<div class="hhead"><h1>Da approfondire</h1><p>Gli elementi che hai scelto di lavorare: per ciascuno una lista di passi per portarlo alla versione definitiva, secondo il tipo (skill, template, prompt…). Si aggiungono con «+ Da approfondire» sulla scheda. Salvato su questo dispositivo.</p></div>
+  return `<div class="hhead"><h1>Da approfondire</h1><p>Gli elementi che hai scelto di lavorare: per ciascuno una lista di passi per portarlo alla versione definitiva, secondo il tipo (skill, template, prompt…). Si aggiungono con «+ Da approfondire» sulla scheda.</p><p class="mini" id="lavsync">${lavStatusHtml()} <button class="pill" data-lavsync="1">Sincronizza ora</button></p></div>
   <div class="acts idxbar">${F.map(([k, l]) => `<button class="pill ${S.lavF === k ? 'black' : ''}" data-lavf="${k}" aria-pressed="${S.lavF === k}">${l} <span class="n">${cnt(k)}</span></button>`).join('')}</div>
   ${rows.length ? rows.map(lavRow).join('') : `<div class="box" style="margin:12px"><b>${all.length ? 'Niente in questo filtro.' : 'La coda è vuota.'}</b><p class="mini">${all.length ? 'Cambia filtro qui sopra.' : 'Apri una scheda e premi «+ Da approfondire»: comparirà qui con i passi per renderla definitiva.'}</p></div>`}
   <details class="box lavguide" style="margin:12px"><summary><b>Cosa significa «definitivo», per tipo</b></summary><div class="lavgrid">${tipi.map(k => `<div><span class="badge t-${esc(k)}">${esc(k === 'instagram' ? 'Instagram' : tl(k))}</span><p class="mini">${esc(LAV_DEF[k].fin)}</p></div>`).join('')}</div></details>`;
@@ -2037,8 +2063,9 @@ function pLavorazione(){
 function lavClick(t){
   let x;
   if ((x = t.closest('[data-lavadd]'))) { const id = x.dataset.lavadd; if (LAV[id]) { S.page = 'lavorazione'; if (cur) closeItem(); setPage('lavorazione'); } else { lavAdd(id); render(); if (cur) drawRender(); } return true; }
+  if (t.closest('[data-lavsync]')) { lavSync(true); return true; }
   if ((x = t.closest('[data-lavf]'))) { S.lavF = x.dataset.lavf; store.set('lavf', S.lavF); render(); return true; }
-  if ((x = t.closest('[data-lavst]'))) { const [id, st] = x.dataset.lavst.split('|'); if (LAV[id]) { LAV[id].stato = st; lavSave(); render(); } return true; }
+  if ((x = t.closest('[data-lavst]'))) { const [id, st] = x.dataset.lavst.split('|'); if (LAV[id]) { LAV[id].stato = st; lavSave(id); render(); } return true; }
   if ((x = t.closest('[data-lavreq]'))) { const i = byId[x.dataset.lavreq]; if (i) copy(lavRequest(i), 'Richiesta copiata: incollala in Claude.'); return true; }
   if ((x = t.closest('[data-lavdel]'))) { lavDel(x.dataset.lavdel); render(); return true; }
   return false;
@@ -2046,8 +2073,8 @@ function lavClick(t){
 document.addEventListener('change', e => {
   const c = e.target.closest && e.target.closest('[data-lavck]');
   if (c) { const [id, k] = c.dataset.lavck.split('|'), en = LAV[id]; if (!en) return; en.fatti = en.fatti || []; const on = c.checked; en.fatti = on ? [...new Set([...en.fatti, k])] : en.fatti.filter(v => v !== k);
-    const df = lavDefOf(byId[id]); if (en.fatti.length && en.stato === 'da-guardare') en.stato = 'in-lavorazione'; if (df.st.every(s => en.fatti.includes(s[0]))) en.stato = 'definitivo'; lavSave(); en._open = true; render(); en._open = false; return; }
-  const n = e.target.closest && e.target.closest('[data-lavnote]'); if (n && LAV[n.dataset.lavnote]) { LAV[n.dataset.lavnote].nota = n.value; lavSave(); toast('Nota salvata.'); }
+    const df = lavDefOf(byId[id]); if (en.fatti.length && en.stato === 'da-guardare') en.stato = 'in-lavorazione'; if (df.st.every(s => en.fatti.includes(s[0]))) en.stato = 'definitivo'; lavSave(id); en._open = true; render(); en._open = false; return; }
+  const n = e.target.closest && e.target.closest('[data-lavnote]'); if (n && LAV[n.dataset.lavnote]) { LAV[n.dataset.lavnote].nota = n.value; lavSave(n.dataset.lavnote); toast('Nota salvata.'); }
 });
 document.addEventListener('toggle', e => { const d = e.target; if (d && d.dataset && d.dataset.lavdet && LAV[d.dataset.lavdet]) LAV[d.dataset.lavdet]._open = d.open; }, true);
 
